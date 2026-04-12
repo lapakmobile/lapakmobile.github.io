@@ -12,6 +12,17 @@ export interface Product {
   }[];
   isBestSeller?: boolean;
   isRealTime?: boolean;
+  rating?: number;
+  reviewCount?: number;
+  reviews?: Review[];
+}
+
+export interface Review {
+  id: string;
+  userName: string;
+  rating: number;
+  comment: string;
+  date: string;
 }
 
 export interface Testimonial {

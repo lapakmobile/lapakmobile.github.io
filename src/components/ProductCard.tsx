@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { MessageCircle, Star, Share2, Copy, Facebook, Twitter, Send, X, Zap, ShieldCheck, Clock, AlertCircle, RefreshCw } from 'lucide-react';
+import { MessageCircle, Star, Share2, Copy, Facebook, Twitter, Send, X, Zap, ShieldCheck, Clock, AlertCircle, RefreshCw, MessageSquare, User } from 'lucide-react';
 import { toast } from 'sonner';
-import { Product, Order } from '../types';
+import { Product, Order, Review } from '../types';
 import { WHATSAPP_NUMBER } from '../constants';
 import { priceService } from '../services/priceService';
 
@@ -14,6 +14,22 @@ export default function ProductCard({ product: initialProduct }: ProductCardProp
   const [product, setProduct] = useState<Product>(initialProduct);
   const [isLoadingPrice, setIsLoadingPrice] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [newReview, setNewReview] = useState({ rating: 5, comment: '', userName: '' });
+
+  // Load reviews from localStorage on mount
+  useEffect(() => {
+    const savedReviews = JSON.parse(localStorage.getItem(`reviews_${initialProduct.id}`) || '[]');
+    if (savedReviews.length > 0) {
+      const totalRating = savedReviews.reduce((acc: number, rev: Review) => acc + rev.rating, 0);
+      setProduct(prev => ({
+        ...prev,
+        reviews: savedReviews,
+        rating: totalRating / savedReviews.length,
+        reviewCount: savedReviews.length
+      }));
+    }
+  }, [initialProduct.id]);
 
   useEffect(() => {
     const fetchPrice = async () => {
@@ -53,6 +69,37 @@ export default function ProductCard({ product: initialProduct }: ProductCardProp
     setTimeout(() => {
       window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${text}`, '_blank');
     }, 1000);
+  };
+
+  const handleAddReview = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newReview.userName || !newReview.comment) {
+      toast.error('Mohon isi nama dan komentar Anda.');
+      return;
+    }
+
+    const review: Review = {
+      id: Math.random().toString(36).substr(2, 9),
+      userName: newReview.userName,
+      rating: newReview.rating,
+      comment: newReview.comment,
+      date: new Date().toISOString()
+    };
+
+    const updatedReviews = [review, ...(product.reviews || [])];
+    localStorage.setItem(`reviews_${product.id}`, JSON.stringify(updatedReviews));
+
+    const totalRating = updatedReviews.reduce((acc, rev) => acc + rev.rating, 0);
+    
+    setProduct(prev => ({
+      ...prev,
+      reviews: updatedReviews,
+      rating: totalRating / updatedReviews.length,
+      reviewCount: updatedReviews.length
+    }));
+
+    setNewReview({ rating: 5, comment: '', userName: '' });
+    toast.success('Terima kasih atas ulasan Anda!');
   };
 
   const handleCopyLink = () => {
@@ -139,6 +186,17 @@ export default function ProductCard({ product: initialProduct }: ProductCardProp
         <div className="text-center mb-4">
           <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/60 mb-1 block">{product.category}</span>
           <h3 className="text-xl font-display font-black group-hover:text-primary transition-colors line-clamp-1">{product.name}</h3>
+          <div className="flex items-center justify-center gap-1 mt-1">
+            <div className="flex items-center gap-0.5">
+              {[...Array(5)].map((_, i) => (
+                <Star 
+                  key={i} 
+                  className={`w-3 h-3 ${i < Math.round(product.rating || 5) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-600'}`} 
+                />
+              ))}
+            </div>
+            <span className="text-[10px] font-bold text-gray-500">({product.reviewCount || 0})</span>
+          </div>
         </div>
         
         <div className="bg-white/5 rounded-3xl p-5 mb-6 border border-white/5">
@@ -182,12 +240,133 @@ export default function ProductCard({ product: initialProduct }: ProductCardProp
 
         <button 
           onClick={() => handleOrder(product.packages[0].name)}
-          className="w-full py-4 bg-gradient-to-r from-primary to-secondary text-dark font-black text-xs uppercase tracking-widest rounded-2xl flex items-center justify-center gap-2 transition-all shadow-lg hover:shadow-primary/40 hover:scale-[1.02] active:scale-[0.98]"
+          className="w-full py-4 bg-gradient-to-r from-primary to-secondary text-dark font-black text-xs uppercase tracking-widest rounded-2xl flex items-center justify-center gap-2 transition-all shadow-lg hover:shadow-primary/40 hover:scale-[1.02] active:scale-[0.98] mb-3"
         >
           <MessageCircle className="w-4 h-4" />
           Pesan Sekarang
         </button>
+
+        <button 
+          onClick={() => setIsReviewModalOpen(true)}
+          className="w-full py-3 glass text-gray-400 font-bold text-[10px] uppercase tracking-widest rounded-xl flex items-center justify-center gap-2 hover:bg-white/10 transition-all"
+        >
+          <MessageSquare className="w-3.5 h-3.5" />
+          Lihat Ulasan
+        </button>
       </div>
+
+      {/* Review Modal */}
+      <AnimatePresence>
+        {isReviewModalOpen && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center px-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsReviewModalOpen(false)}
+              className="absolute inset-0 bg-dark/80 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="relative w-full max-w-lg glass rounded-[2.5rem] p-8 border border-white/10 shadow-2xl max-h-[90vh] overflow-y-auto no-scrollbar"
+            >
+              <button 
+                onClick={() => setIsReviewModalOpen(false)}
+                className="absolute top-6 right-6 p-2 hover:bg-white/10 rounded-full transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <div className="mb-8">
+                <h3 className="text-2xl font-display font-bold mb-2">Ulasan {product.name}</h3>
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-0.5">
+                    {[...Array(5)].map((_, i) => (
+                      <Star 
+                        key={i} 
+                        className={`w-4 h-4 ${i < Math.round(product.rating || 5) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-600'}`} 
+                      />
+                    ))}
+                  </div>
+                  <span className="text-sm font-bold text-gray-400">{product.rating?.toFixed(1) || '5.0'} / 5.0 ({product.reviewCount || 0} ulasan)</span>
+                </div>
+              </div>
+
+              {/* Add Review Form */}
+              <form onSubmit={handleAddReview} className="bg-white/5 p-6 rounded-3xl border border-white/10 mb-8">
+                <h4 className="text-sm font-bold mb-4 uppercase tracking-widest text-primary">Tulis Ulasan</h4>
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        type="button"
+                        onClick={() => setNewReview(prev => ({ ...prev, rating: star }))}
+                        className="p-1 hover:scale-110 transition-transform"
+                      >
+                        <Star className={`w-6 h-6 ${star <= newReview.rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-600'}`} />
+                      </button>
+                    ))}
+                  </div>
+                  <input 
+                    type="text"
+                    placeholder="Nama Anda"
+                    value={newReview.userName}
+                    onChange={(e) => setNewReview(prev => ({ ...prev, userName: e.target.value }))}
+                    className="w-full bg-dark/50 border border-white/10 rounded-xl py-3 px-4 text-sm outline-none focus:border-primary transition-all"
+                  />
+                  <textarea 
+                    placeholder="Komentar Anda..."
+                    value={newReview.comment}
+                    onChange={(e) => setNewReview(prev => ({ ...prev, comment: e.target.value }))}
+                    className="w-full bg-dark/50 border border-white/10 rounded-xl py-3 px-4 text-sm outline-none focus:border-primary transition-all min-h-[100px] resize-none"
+                  />
+                  <button 
+                    type="submit"
+                    className="w-full py-3 bg-primary text-dark font-bold text-xs uppercase tracking-widest rounded-xl hover:scale-[1.02] transition-all shadow-lg shadow-primary/20"
+                  >
+                    Kirim Ulasan
+                  </button>
+                </div>
+              </form>
+
+              {/* Reviews List */}
+              <div className="space-y-6">
+                {product.reviews && product.reviews.length > 0 ? (
+                  product.reviews.map((review) => (
+                    <div key={review.id} className="border-b border-white/5 pb-6 last:border-0">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                            <User className="w-4 h-4 text-primary" />
+                          </div>
+                          <span className="font-bold text-sm">{review.userName}</span>
+                        </div>
+                        <span className="text-[10px] text-gray-500">{new Date(review.date).toLocaleDateString('id-ID')}</span>
+                      </div>
+                      <div className="flex items-center gap-0.5 mb-2">
+                        {[...Array(5)].map((_, i) => (
+                          <Star 
+                            key={i} 
+                            className={`w-3 h-3 ${i < review.rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-600'}`} 
+                          />
+                        ))}
+                      </div>
+                      <p className="text-gray-400 text-sm leading-relaxed">{review.comment}</p>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-8 text-gray-500 italic text-sm">
+                    Belum ada ulasan untuk produk ini.
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       {/* Share Modal */}
       <AnimatePresence>
