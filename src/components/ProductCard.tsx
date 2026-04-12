@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { MessageCircle, Star, Share2, Copy, Facebook, Twitter, Send, X, Zap, ShieldCheck, Clock, AlertCircle, RefreshCw, MessageSquare, User } from 'lucide-react';
+import { MessageCircle, Star, Share2, Copy, Facebook, Twitter, Send, X, Zap, ShieldCheck, Clock, AlertCircle, RefreshCw, MessageSquare, User, Heart } from 'lucide-react';
 import { toast } from 'sonner';
 import { Product, Order, Review } from '../types';
 import { WHATSAPP_NUMBER } from '../constants';
@@ -16,8 +16,9 @@ export default function ProductCard({ product: initialProduct }: ProductCardProp
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [newReview, setNewReview] = useState({ rating: 5, comment: '', userName: '' });
+  const [isFavorite, setIsFavorite] = useState(false);
 
-  // Load reviews from localStorage on mount
+  // Load reviews and favorite status from localStorage on mount
   useEffect(() => {
     const savedReviews = JSON.parse(localStorage.getItem(`reviews_${initialProduct.id}`) || '[]');
     if (savedReviews.length > 0) {
@@ -29,7 +30,28 @@ export default function ProductCard({ product: initialProduct }: ProductCardProp
         reviewCount: savedReviews.length
       }));
     }
+
+    const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+    setIsFavorite(favorites.includes(initialProduct.id));
   }, [initialProduct.id]);
+
+  const toggleFavorite = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+    let newFavorites;
+    if (isFavorite) {
+      newFavorites = favorites.filter((id: string) => id !== product.id);
+      toast.info(`${product.name} dihapus dari favorit`);
+    } else {
+      newFavorites = [...favorites, product.id];
+      toast.success(`${product.name} ditambahkan ke favorit`);
+    }
+    localStorage.setItem('favorites', JSON.stringify(newFavorites));
+    setIsFavorite(!isFavorite);
+    
+    // Dispatch custom event to notify App.tsx if needed
+    window.dispatchEvent(new Event('favoritesUpdated'));
+  };
 
   useEffect(() => {
     const fetchPrice = async () => {
@@ -160,6 +182,13 @@ export default function ProductCard({ product: initialProduct }: ProductCardProp
           title="Bagikan Produk"
         >
           <Share2 className="w-5 h-5" />
+        </button>
+        <button 
+          onClick={toggleFavorite}
+          className={`absolute top-8 left-8 z-20 w-10 h-10 glass rounded-full flex items-center justify-center transition-all shadow-lg hover:scale-110 ${isFavorite ? 'text-red-500' : 'text-white hover:text-red-400'}`}
+          title={isFavorite ? 'Hapus dari Favorit' : 'Tambah ke Favorit'}
+        >
+          <Heart className={`w-5 h-5 ${isFavorite ? 'fill-current' : ''}`} />
         </button>
         <div className="relative aspect-square overflow-hidden rounded-[2.2rem] shadow-2xl group-hover:shadow-primary/30 transition-all duration-500 border border-white/10">
           <img 

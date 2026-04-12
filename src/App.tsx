@@ -1,6 +1,6 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Search, Filter, Star, ChevronDown, ChevronUp, CheckCircle2, Zap, Shield, FileText, BookOpen, X } from 'lucide-react';
+import { Search, Filter, Star, ChevronDown, ChevronUp, CheckCircle2, Zap, Shield, FileText, BookOpen, X, Heart } from 'lucide-react';
 import { Toaster } from 'sonner';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
@@ -14,18 +14,36 @@ import { Category } from './types';
 
 export default function App() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeCategory, setActiveCategory] = useState<Category | 'All'>('All');
+  const [activeCategory, setActiveCategory] = useState<Category | 'All' | 'Favorites'>('All');
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
+  const [favorites, setFavorites] = useState<string[]>(() => {
+    if (typeof window !== 'undefined') {
+      return JSON.parse(localStorage.getItem('favorites') || '[]');
+    }
+    return [];
+  });
 
-  const categories: (Category | 'All')[] = ['All', 'Game', 'Digital', 'Streaming', 'Apps', 'Jasa', 'Sosmed'];
+  useEffect(() => {
+    const handleFavoritesUpdate = () => {
+      const updatedFavorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+      setFavorites(updatedFavorites);
+    };
+
+    window.addEventListener('favoritesUpdated', handleFavoritesUpdate);
+    return () => window.removeEventListener('favoritesUpdated', handleFavoritesUpdate);
+  }, []);
+
+  const categories: (Category | 'All' | 'Favorites')[] = ['All', 'Favorites', 'Game', 'Digital', 'Streaming', 'Apps', 'Jasa', 'Sosmed'];
 
   const filteredProducts = useMemo(() => {
     return ALL_PRODUCTS.filter(product => {
       const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesCategory = activeCategory === 'All' || product.category === activeCategory;
+      const matchesCategory = 
+        activeCategory === 'All' || 
+        (activeCategory === 'Favorites' ? favorites.includes(product.id) : product.category === activeCategory);
       return matchesSearch && matchesCategory;
     });
-  }, [searchQuery, activeCategory]);
+  }, [searchQuery, activeCategory, favorites]);
 
   return (
     <div className="min-h-screen">
@@ -63,12 +81,13 @@ export default function App() {
                     <button
                       key={cat}
                       onClick={() => setActiveCategory(cat)}
-                      className={`px-5 py-3 rounded-xl text-sm font-bold whitespace-nowrap transition-all ${
+                      className={`px-5 py-3 rounded-xl text-sm font-bold whitespace-nowrap transition-all flex items-center gap-2 ${
                         activeCategory === cat 
                           ? 'bg-primary text-dark neon-glow' 
                           : 'bg-white/5 text-gray-400 hover:bg-white/10 border border-white/10'
                       }`}
                     >
+                      {cat === 'Favorites' && <Heart className={`w-4 h-4 ${activeCategory === 'Favorites' ? 'fill-current' : ''}`} />}
                       {cat}
                     </button>
                   ))}
