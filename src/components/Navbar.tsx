@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, X, Zap, Search, History } from 'lucide-react';
+import { Menu, X, Zap, Search, History, Sun, Moon } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 export default function Navbar({ onSearch }: { onSearch?: (query: string) => void }) {
@@ -7,6 +7,26 @@ export default function Navbar({ onSearch }: { onSearch?: (query: string) => voi
   const [scrolled, setScrolled] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [localSearch, setLocalSearch] = useState('');
+  const [theme, setTheme] = useState<'dark' | 'light'>(() => {
+    if (typeof window !== 'undefined') {
+      return (localStorage.getItem('theme') as 'dark' | 'light') || 'dark';
+    }
+    return 'dark';
+  });
+
+  useEffect(() => {
+    const root = window.document.documentElement;
+    if (theme === 'light') {
+      root.classList.add('light');
+    } else {
+      root.classList.remove('light');
+    }
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prev => prev === 'dark' ? 'light' : 'dark');
+  };
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -26,8 +46,6 @@ export default function Navbar({ onSearch }: { onSearch?: (query: string) => voi
     { name: 'List Harga', href: '#pricelist' },
     { name: 'Riwayat', href: '#history', icon: History },
     { name: 'Tentang Kami', href: '#about' },
-    { name: 'Artikel', href: '#articles' },
-    { name: 'FAQ', href: '#faq' },
   ];
 
   return (
@@ -90,13 +108,26 @@ export default function Navbar({ onSearch }: { onSearch?: (query: string) => voi
                   >
                     <Search className="w-5 h-5" />
                   </button>
+                  <button 
+                    onClick={toggleTheme}
+                    className="p-2 hover:bg-white/10 rounded-full transition-colors text-primary"
+                    title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+                  >
+                    {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+                  </button>
                 </div>
               )}
             </AnimatePresence>
           </div>
 
           {/* Mobile Toggle */}
-          <div className="md:hidden flex items-center gap-4">
+          <div className="md:hidden flex items-center gap-2">
+            <button 
+              onClick={toggleTheme}
+              className="p-2 hover:bg-white/10 rounded-full transition-colors text-primary"
+            >
+              {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+            </button>
             <button 
               onClick={() => setIsSearchOpen(!isSearchOpen)}
               className="p-2 hover:bg-white/10 rounded-full transition-colors"

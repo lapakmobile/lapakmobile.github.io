@@ -8,18 +8,46 @@
   --color-primary: #00f2ff;
   --color-secondary: #7000ff;
   --color-accent: #ff00c8;
-  --color-dark: #0a0a0c;
-  --color-dark-lighter: #16161e;
+  --color-dark: var(--bg-dark);
+  --color-dark-lighter: var(--bg-dark-lighter);
+}
+
+:root {
+  --bg-dark: #0a0a0c;
+  --bg-dark-lighter: #16161e;
+  --text-main: #ffffff;
+  --text-muted: #9ca3af;
+  --glass-bg: rgba(255, 255, 255, 0.05);
+  --glass-border: rgba(255, 255, 255, 0.1);
+}
+
+.light {
+  --bg-dark: #f8fafc;
+  --bg-dark-lighter: #ffffff;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --glass-bg: rgba(15, 23, 42, 0.05);
+  --glass-border: rgba(15, 23, 42, 0.1);
 }
 
 @layer base {
   body {
-    @apply bg-dark text-white font-sans antialiased selection:bg-primary/30;
+    @apply bg-dark text-[var(--text-main)] font-sans antialiased selection:bg-primary/30 transition-colors duration-300;
+  }
+  
+  .text-gray-400 {
+    color: var(--text-muted);
+  }
+  
+  .text-gray-300 {
+    color: var(--text-muted);
   }
 }
 
 .glass {
-  @apply bg-white/5 backdrop-blur-lg border border-white/10;
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
 }
 
 .neon-glow {
