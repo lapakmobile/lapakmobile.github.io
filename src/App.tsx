@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Search, Filter, Star, ChevronDown, ChevronUp, CheckCircle2, Zap, Shield, FileText, BookOpen, X, Heart } from 'lucide-react';
-import { Toaster } from 'sonner';
+import { Toaster, toast } from 'sonner';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import ProductCard from './components/ProductCard';
@@ -9,12 +9,14 @@ import Footer from './components/Footer';
 import WhatsAppButton from './components/WhatsAppButton';
 import OrderHistory from './components/OrderHistory';
 import PriceList from './components/PriceList';
+import PriceAlertManager from './components/PriceAlertManager';
 import { ALL_PRODUCTS, TESTIMONIALS, FAQS } from './constants';
-import { Category } from './types';
+import { Category, PriceAlert } from './types';
+import { priceService } from './services/priceService';
 
 export default function App() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeCategory, setActiveCategory] = useState<Category | 'All' | 'Favorites'>('All');
+  const [activeCategories, setActiveCategories] = useState<(Category | 'Favorites')[]>([]);
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
   const [favorites, setFavorites] = useState<string[]>(() => {
     if (typeof window !== 'undefined') {
@@ -33,17 +35,86 @@ export default function App() {
     return () => window.removeEventListener('favoritesUpdated', handleFavoritesUpdate);
   }, []);
 
-  const categories: (Category | 'All' | 'Favorites')[] = ['All', 'Favorites', 'Game', 'Digital', 'Streaming', 'Apps', 'Jasa', 'Sosmed'];
+  // Periodic Price Check for Alerts
+  useEffect(() => {
+    const checkPrices = async () => {
+      const alerts: PriceAlert[] = JSON.parse(localStorage.getItem('price_alerts') || '[]');
+      const activeAlerts = alerts.filter(a => a.isActive);
+      
+      if (activeAlerts.length === 0) return;
+
+      let hasChanges = false;
+      const updatedAlerts = [...alerts];
+
+      for (let i = 0; i < updatedAlerts.length; i++) {
+        const alert = updatedAlerts[i];
+        if (!alert.isActive) continue;
+
+        const product = ALL_PRODUCTS.find(p => p.id === alert.productId);
+        if (!product) continue;
+
+        try {
+          const updatedProduct = await priceService.getUpdatedPrices(product);
+          const lowestPriceStr = updatedProduct.packages.reduce((min, p) => {
+            const priceVal = parseInt(p.price.replace(/[^0-9]/g, '')) || 0;
+            const minVal = parseInt(min.replace(/[^0-9]/g, '')) || Infinity;
+            return priceVal < minVal ? p.price : min;
+          }, updatedProduct.packages[0].price);
+
+          const currentPrice = parseInt(lowestPriceStr.replace(/[^0-9]/g, '')) || 0;
+          
+          if (currentPrice !== alert.currentPrice) {
+            updatedAlerts[i].currentPrice = currentPrice;
+            hasChanges = true;
+
+            if (currentPrice <= alert.targetPrice) {
+              updatedAlerts[i].isActive = false;
+              toast.success(`HORE! Harga ${alert.productName} Turun!`, {
+                description: `Harga sekarang Rp ${currentPrice.toLocaleString('id-ID')}, sesuai target Anda!`,
+                duration: 10000,
+              });
+            }
+          }
+        } catch (error) {
+          console.error('Error checking price for alert:', error);
+        }
+      }
+
+      if (hasChanges) {
+        localStorage.setItem('price_alerts', JSON.stringify(updatedAlerts));
+        window.dispatchEvent(new Event('priceAlertsUpdated'));
+      }
+    };
+
+    // Check every 30 seconds
+    const interval = setInterval(checkPrices, 30000);
+    checkPrices(); // Initial check
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const categories: (Category | 'Favorites')[] = ['Favorites', 'Game', 'Digital', 'Streaming', 'Apps', 'Jasa', 'Sosmed'];
+
+  const toggleCategory = (cat: Category | 'Favorites') => {
+    setActiveCategories(prev => 
+      prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat]
+    );
+  };
 
   const filteredProducts = useMemo(() => {
     return ALL_PRODUCTS.filter(product => {
       const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesCategory = 
-        activeCategory === 'All' || 
-        (activeCategory === 'Favorites' ? favorites.includes(product.id) : product.category === activeCategory);
+      
+      if (activeCategories.length === 0) return matchesSearch;
+
+      const matchesCategory = activeCategories.some(cat => {
+        if (cat === 'Favorites') return favorites.includes(product.id);
+        return product.category === cat;
+      });
+
       return matchesSearch && matchesCategory;
     });
-  }, [searchQuery, activeCategory, favorites]);
+  }, [searchQuery, activeCategories, favorites]);
 
   return (
     <div className="min-h-screen">
@@ -77,17 +148,27 @@ export default function App() {
                   />
                 </div>
                 <div className="flex gap-2 overflow-x-auto pb-2 sm:pb-0 no-scrollbar">
+                  <button
+                    onClick={() => setActiveCategories([])}
+                    className={`px-5 py-3 rounded-xl text-sm font-bold whitespace-nowrap transition-all ${
+                      activeCategories.length === 0 
+                        ? 'bg-primary text-dark neon-glow' 
+                        : 'bg-white/5 text-gray-400 hover:bg-white/10 border border-white/10'
+                    }`}
+                  >
+                    All
+                  </button>
                   {categories.map((cat) => (
                     <button
                       key={cat}
-                      onClick={() => setActiveCategory(cat)}
+                      onClick={() => toggleCategory(cat)}
                       className={`px-5 py-3 rounded-xl text-sm font-bold whitespace-nowrap transition-all flex items-center gap-2 ${
-                        activeCategory === cat 
+                        activeCategories.includes(cat) 
                           ? 'bg-primary text-dark neon-glow' 
                           : 'bg-white/5 text-gray-400 hover:bg-white/10 border border-white/10'
                       }`}
                     >
-                      {cat === 'Favorites' && <Heart className={`w-4 h-4 ${activeCategory === 'Favorites' ? 'fill-current' : ''}`} />}
+                      {cat === 'Favorites' && <Heart className={`w-4 h-4 ${activeCategories.includes('Favorites') ? 'fill-current' : ''}`} />}
                       {cat}
                     </button>
                   ))}
@@ -109,7 +190,7 @@ export default function App() {
               <div className="text-center py-20 glass rounded-3xl">
                 <p className="text-gray-400 mb-4">Produk tidak ditemukan.</p>
                 <button 
-                  onClick={() => {setSearchQuery(''); setActiveCategory('All');}}
+                  onClick={() => {setSearchQuery(''); setActiveCategories([]);}}
                   className="text-primary font-bold hover:underline"
                 >
                   Reset Filter
@@ -398,6 +479,7 @@ export default function App() {
 
       <Footer />
       <WhatsAppButton />
+      <PriceAlertManager />
       <Toaster position="top-center" expand={false} richColors theme="dark" />
     </div>
   );

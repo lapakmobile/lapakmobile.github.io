@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { MessageCircle, Star, Share2, Copy, Facebook, Twitter, Send, X, Zap, ShieldCheck, Clock, AlertCircle, RefreshCw, MessageSquare, User, Heart } from 'lucide-react';
+import { MessageCircle, Star, Share2, Copy, Facebook, Twitter, Send, X, Zap, ShieldCheck, Clock, AlertCircle, RefreshCw, MessageSquare, User, Heart, Bell } from 'lucide-react';
 import { toast } from 'sonner';
 import { Product, Order, Review } from '../types';
 import { WHATSAPP_NUMBER } from '../constants';
@@ -17,6 +17,8 @@ export default function ProductCard({ product: initialProduct }: ProductCardProp
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [newReview, setNewReview] = useState({ rating: 5, comment: '', userName: '' });
   const [isFavorite, setIsFavorite] = useState(false);
+  const [isAlertModalOpen, setIsAlertModalOpen] = useState(false);
+  const [targetPrice, setTargetPrice] = useState('');
 
   // Load reviews and favorite status from localStorage on mount
   useEffect(() => {
@@ -34,6 +36,37 @@ export default function ProductCard({ product: initialProduct }: ProductCardProp
     const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
     setIsFavorite(favorites.includes(initialProduct.id));
   }, [initialProduct.id]);
+
+  const handleSetAlert = (e: React.FormEvent) => {
+    e.preventDefault();
+    const price = parseInt(targetPrice.replace(/[^0-9]/g, ''));
+    if (isNaN(price) || price <= 0) {
+      toast.error('Mohon masukkan harga target yang valid.');
+      return;
+    }
+
+    const currentPriceVal = parseInt(lowestPrice.replace(/[^0-9]/g, '')) || 0;
+
+    const newAlert = {
+      id: Math.random().toString(36).substr(2, 9),
+      productId: product.id,
+      productName: product.name,
+      targetPrice: price,
+      currentPrice: currentPriceVal,
+      isActive: true,
+      createdAt: new Date().toISOString()
+    };
+
+    const existingAlerts = JSON.parse(localStorage.getItem('price_alerts') || '[]');
+    localStorage.setItem('price_alerts', JSON.stringify([newAlert, ...existingAlerts]));
+    
+    window.dispatchEvent(new Event('priceAlertsUpdated'));
+    setIsAlertModalOpen(false);
+    setTargetPrice('');
+    toast.success(`Alert harga diset untuk ${product.name}`, {
+      description: `Kami akan memberitahu Anda jika harga turun ke Rp ${price.toLocaleString('id-ID')}`
+    });
+  };
 
   const toggleFavorite = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -189,6 +222,13 @@ export default function ProductCard({ product: initialProduct }: ProductCardProp
           title={isFavorite ? 'Hapus dari Favorit' : 'Tambah ke Favorit'}
         >
           <Heart className={`w-5 h-5 ${isFavorite ? 'fill-current' : ''}`} />
+        </button>
+        <button 
+          onClick={() => setIsAlertModalOpen(true)}
+          className="absolute top-8 right-32 z-20 w-10 h-10 glass rounded-full flex items-center justify-center text-white hover:text-primary hover:scale-110 transition-all shadow-lg"
+          title="Set Alert Harga"
+        >
+          <Bell className="w-5 h-5" />
         </button>
         <div className="relative aspect-square overflow-hidden rounded-[2.2rem] shadow-2xl group-hover:shadow-primary/30 transition-all duration-500 border border-white/10">
           <img 
@@ -392,6 +432,66 @@ export default function ProductCard({ product: initialProduct }: ProductCardProp
                   </div>
                 )}
               </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Share Modal */}
+      <AnimatePresence>
+        {isAlertModalOpen && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center px-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsAlertModalOpen(false)}
+              className="absolute inset-0 bg-dark/80 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="relative w-full max-w-sm glass rounded-[2.5rem] p-8 border border-white/10 shadow-2xl"
+            >
+              <button 
+                onClick={() => setIsAlertModalOpen(false)}
+                className="absolute top-6 right-6 p-2 hover:bg-white/10 rounded-full transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <div className="text-center mb-8">
+                <div className="w-16 h-16 bg-primary/10 rounded-3xl flex items-center justify-center mx-auto mb-4">
+                  <Bell className="text-primary w-8 h-8" />
+                </div>
+                <h3 className="text-2xl font-display font-bold">Alert Harga</h3>
+                <p className="text-gray-400 text-sm mt-2">Dapatkan notifikasi saat harga {product.name} turun.</p>
+              </div>
+
+              <form onSubmit={handleSetAlert} className="space-y-6">
+                <div>
+                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2 block">Harga Target (Rp)</label>
+                  <div className="relative">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-primary font-bold">Rp</span>
+                    <input 
+                      type="text"
+                      placeholder="Contoh: 50000"
+                      value={targetPrice}
+                      onChange={(e) => setTargetPrice(e.target.value.replace(/[^0-9]/g, ''))}
+                      className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-sm outline-none focus:border-primary transition-all"
+                    />
+                  </div>
+                  <p className="text-[10px] text-gray-500 mt-2 italic">Harga saat ini: {lowestPrice}</p>
+                </div>
+
+                <button 
+                  type="submit"
+                  className="w-full py-4 bg-primary text-dark font-bold text-xs uppercase tracking-widest rounded-2xl hover:scale-[1.02] transition-all shadow-lg shadow-primary/20"
+                >
+                  Pasang Alert
+                </button>
+              </form>
             </motion.div>
           </div>
         )}

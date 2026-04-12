@@ -25,6 +25,16 @@ export interface Review {
   date: string;
 }
 
+export interface PriceAlert {
+  id: string;
+  productId: string;
+  productName: string;
+  targetPrice: number;
+  currentPrice: number;
+  isActive: boolean;
+  createdAt: string;
+}
+
 export interface Testimonial {
   id: string;
   name: string;
