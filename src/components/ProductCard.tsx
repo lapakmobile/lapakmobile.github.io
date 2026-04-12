@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { MessageCircle, Star, Share2, Copy, Facebook, Twitter, Send, X, Zap, ShieldCheck, Clock, AlertCircle, RefreshCw, MessageSquare, User, Heart, Bell } from 'lucide-react';
 import { toast } from 'sonner';
+import Skeleton from './ui/Skeleton';
 import { Product, Order, Review } from '../types';
 import { WHATSAPP_NUMBER } from '../constants';
 import { priceService } from '../services/priceService';
@@ -273,16 +274,13 @@ export default function ProductCard({ product: initialProduct }: ProductCardProp
             <div className="text-center">
               <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Mulai dari</p>
               <div className="flex items-center justify-center gap-2">
-                <p className="text-2xl font-black text-primary">
-                  {isLoadingPrice ? (
-                    <span className="flex items-center gap-2 text-gray-500 text-lg animate-pulse">
-                      <RefreshCw className="w-4 h-4 animate-spin" />
-                      Checking...
-                    </span>
-                  ) : (
-                    lowestPrice
-                  )}
-                </p>
+                {isLoadingPrice ? (
+                  <Skeleton width={120} height={32} className="mx-auto" />
+                ) : (
+                  <p className="text-2xl font-black text-primary">
+                    {lowestPrice}
+                  </p>
+                )}
               </div>
               {product.isRealTime && !isLoadingPrice && (
                 <div className="flex items-center justify-center gap-1.5 mt-2 text-[9px] font-bold text-amber-400/80 uppercase tracking-wider bg-amber-400/5 px-3 py-1 rounded-full border border-amber-400/10">

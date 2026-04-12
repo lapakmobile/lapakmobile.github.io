@@ -10,14 +10,26 @@ import WhatsAppButton from './components/WhatsAppButton';
 import OrderHistory from './components/OrderHistory';
 import PriceList from './components/PriceList';
 import PriceAlertManager from './components/PriceAlertManager';
+import ProductCardSkeleton from './components/ProductCardSkeleton';
+import PriceListSkeleton from './components/PriceListSkeleton';
 import { ALL_PRODUCTS, TESTIMONIALS, FAQS } from './constants';
 import { Category, PriceAlert } from './types';
 import { priceService } from './services/priceService';
 
 export default function App() {
+  const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategories, setActiveCategories] = useState<(Category | 'Favorites')[]>([]);
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
+
+  useEffect(() => {
+    // Simulate initial data fetching
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, []);
+
   const [favorites, setFavorites] = useState<string[]>(() => {
     if (typeof window !== 'undefined') {
       return JSON.parse(localStorage.getItem('favorites') || '[]');
@@ -176,7 +188,13 @@ export default function App() {
               </div>
             </div>
 
-            {filteredProducts.length > 0 ? (
+            {isLoading ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {[...Array(8)].map((_, i) => (
+                  <ProductCardSkeleton key={i} />
+                ))}
+              </div>
+            ) : filteredProducts.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 <AnimatePresence mode="popLayout">
                   {filteredProducts.map((product) => (
@@ -202,7 +220,15 @@ export default function App() {
         
         <OrderHistory />
         
-        <PriceList />
+        {isLoading ? (
+          <section className="py-24 bg-dark-lighter">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <PriceListSkeleton />
+            </div>
+          </section>
+        ) : (
+          <PriceList />
+        )}
 
         {/* Payment Methods Section */}
         <section className="py-16 bg-dark border-y border-white/5">
