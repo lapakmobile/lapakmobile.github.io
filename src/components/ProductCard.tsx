@@ -224,13 +224,6 @@ export default function ProductCard({ product: initialProduct }: ProductCardProp
         >
           <Heart className={`w-5 h-5 ${isFavorite ? 'fill-current' : ''}`} />
         </button>
-        <button 
-          onClick={() => setIsAlertModalOpen(true)}
-          className="absolute top-8 right-32 z-20 w-10 h-10 glass rounded-full flex items-center justify-center text-white hover:text-primary hover:scale-110 transition-all shadow-lg"
-          title="Set Alert Harga"
-        >
-          <Bell className="w-5 h-5" />
-        </button>
         <div className="relative aspect-square overflow-hidden rounded-[2.2rem] shadow-2xl group-hover:shadow-primary/30 transition-all duration-500 border border-white/10">
           <img 
             src={product.image} 
@@ -273,13 +266,22 @@ export default function ProductCard({ product: initialProduct }: ProductCardProp
           <div className="flex flex-col items-center gap-4">
             <div className="text-center">
               <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Mulai dari</p>
-              <div className="flex items-center justify-center gap-2">
+              <div className="flex items-center justify-center gap-3">
                 {isLoadingPrice ? (
                   <Skeleton width={120} height={32} className="mx-auto" />
                 ) : (
-                  <p className="text-2xl font-black text-primary">
-                    {lowestPrice}
-                  </p>
+                  <>
+                    <p className="text-2xl font-black text-primary">
+                      {lowestPrice}
+                    </p>
+                    <button 
+                      onClick={() => setIsAlertModalOpen(true)}
+                      className="w-8 h-8 glass rounded-full flex items-center justify-center text-gray-400 hover:text-primary hover:scale-110 transition-all border border-white/10"
+                      title="Set Alert Harga"
+                    >
+                      <Bell className="w-4 h-4" />
+                    </button>
+                  </>
                 )}
               </div>
               {product.isRealTime && !isLoadingPrice && (
