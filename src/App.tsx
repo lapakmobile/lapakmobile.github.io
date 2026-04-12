@@ -15,11 +15,41 @@ import PriceListSkeleton from './components/PriceListSkeleton';
 import { ALL_PRODUCTS, TESTIMONIALS, FAQS } from './constants';
 import { Category, PriceAlert } from './types';
 import { priceService } from './services/priceService';
+import { merchantService } from './services/merchantService';
 
 export default function App() {
   const [isLoading, setIsLoading] = useState(true);
+  const [isMerchantModalOpen, setIsMerchantModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategories, setActiveCategories] = useState<(Category | 'Favorites')[]>([]);
+
+  // JSON-LD Structured Data for SEO
+  const jsonLd = useMemo(() => {
+    return {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "LapakMobile",
+      "url": window.location.origin,
+      "logo": `${window.location.origin}/logo.png`,
+      "description": "Platform Top Up Game dan Layanan Digital Terpercaya di Indonesia.",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": `${window.location.origin}/?q={search_term_string}`,
+        "query-input": "required name=search_term_string"
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.type = 'application/ld+json';
+    script.text = JSON.stringify(jsonLd);
+    document.head.appendChild(script);
+    return () => {
+      document.head.removeChild(script);
+    };
+  }, [jsonLd]);
+
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
 
   useEffect(() => {
@@ -577,6 +607,87 @@ export default function App() {
       <Footer />
       <WhatsAppButton />
       <PriceAlertManager />
+
+      {/* Merchant Center Integration Button (Hidden/Admin) */}
+      <button 
+        onClick={() => setIsMerchantModalOpen(true)}
+        className="fixed bottom-6 left-6 z-40 w-10 h-10 bg-dark/50 hover:bg-dark glass rounded-full flex items-center justify-center text-gray-500 hover:text-primary transition-all border border-white/5 opacity-20 hover:opacity-100"
+        title="Google Merchant Center Integration"
+      >
+        <Shield className="w-4 h-4" />
+      </button>
+
+      {/* Merchant Center Modal */}
+      <AnimatePresence>
+        {isMerchantModalOpen && (
+          <div className="fixed inset-0 z-[150] flex items-center justify-center px-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsMerchantModalOpen(false)}
+              className="absolute inset-0 bg-dark/90 backdrop-blur-md"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="relative w-full max-w-2xl glass rounded-[2.5rem] p-10 border border-white/10 shadow-2xl overflow-hidden"
+            >
+              <button 
+                onClick={() => setIsMerchantModalOpen(false)}
+                className="absolute top-8 right-8 p-2 hover:bg-white/10 rounded-full transition-colors"
+              >
+                <X className="w-6 h-6" />
+              </button>
+
+              <div className="mb-10">
+                <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mb-6">
+                  <Shield className="text-primary w-8 h-8" />
+                </div>
+                <h3 className="text-3xl font-display font-black mb-2">Google Merchant Center</h3>
+                <p className="text-gray-400">Integrasikan produk LapakMobile ke Google Shopping dan Search.</p>
+              </div>
+
+              <div className="space-y-8">
+                <div className="bg-white/5 rounded-2xl p-6 border border-white/5">
+                  <h4 className="font-bold mb-4 flex items-center gap-2">
+                    <div className="w-2 h-2 bg-primary rounded-full" />
+                    Metode 1: XML Product Feed
+                  </h4>
+                  <p className="text-sm text-gray-400 mb-6 leading-relaxed">
+                    Download file XML produk Anda dan upload ke Google Merchant Center sebagai "Scheduled Fetch" atau "Upload". File ini berisi semua data produk, harga, dan gambar.
+                  </p>
+                  <button 
+                    onClick={() => merchantService.downloadFeed()}
+                    className="flex items-center gap-3 px-6 py-3 bg-primary text-dark font-bold rounded-xl hover:scale-105 transition-all neon-glow"
+                  >
+                    <FileText className="w-5 h-5" />
+                    Download XML Feed
+                  </button>
+                </div>
+
+                <div className="bg-white/5 rounded-2xl p-6 border border-white/5">
+                  <h4 className="font-bold mb-4 flex items-center gap-2">
+                    <div className="w-2 h-2 bg-secondary rounded-full" />
+                    Metode 2: JSON-LD (Auto-Discovery)
+                  </h4>
+                  <p className="text-sm text-gray-400 leading-relaxed">
+                    Kami telah menyuntikkan <span className="text-secondary font-mono">JSON-LD Structured Data</span> ke dalam kode situs Anda. Google akan secara otomatis mendeteksi produk Anda saat melakukan crawling pada halaman ini.
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-10 pt-8 border-t border-white/5">
+                <p className="text-xs text-gray-500 text-center">
+                  Butuh bantuan lebih lanjut? Hubungi tim teknis LapakMobile.
+                </p>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
       <Toaster position="top-center" expand={false} richColors theme="dark" />
     </div>
   );
