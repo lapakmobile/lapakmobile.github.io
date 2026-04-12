@@ -185,7 +185,7 @@ export default function ProductCard({ product: initialProduct }: ProductCardProp
         </button>
         <button 
           onClick={toggleFavorite}
-          className={`absolute top-8 left-8 z-20 w-10 h-10 glass rounded-full flex items-center justify-center transition-all shadow-lg hover:scale-110 ${isFavorite ? 'text-red-500' : 'text-white hover:text-red-400'}`}
+          className={`absolute top-8 right-20 z-20 w-10 h-10 glass rounded-full flex items-center justify-center transition-all shadow-lg hover:scale-110 ${isFavorite ? 'text-red-500' : 'text-white hover:text-red-400'}`}
           title={isFavorite ? 'Hapus dari Favorit' : 'Tambah ke Favorit'}
         >
           <Heart className={`w-5 h-5 ${isFavorite ? 'fill-current' : ''}`} />
