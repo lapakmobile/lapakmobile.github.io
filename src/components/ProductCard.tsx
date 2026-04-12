@@ -40,6 +40,34 @@ export default function ProductCard({ product: initialProduct, index = 0 }: Prod
     setIsFavorite(favorites.includes(initialProduct.id));
   }, [initialProduct.id]);
 
+  // Track recently viewed
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            // Wait 1.5 seconds before marking as viewed to ensure user is actually looking
+            const timer = setTimeout(() => {
+              const recentlyViewed = JSON.parse(localStorage.getItem('recently_viewed') || '[]');
+              const updated = [product.id, ...recentlyViewed.filter((id: string) => id !== product.id)].slice(0, 10);
+              localStorage.setItem('recently_viewed', JSON.stringify(updated));
+              window.dispatchEvent(new Event('recentlyViewedUpdated'));
+            }, 1500);
+            return () => clearTimeout(timer);
+          }
+        });
+      },
+      { threshold: 0.5 } // 50% of the card must be visible
+    );
+
+    const element = document.getElementById(`product-${product.id}`);
+    if (element) observer.observe(element);
+
+    return () => {
+      if (element) observer.unobserve(element);
+    };
+  }, [product.id]);
+
   const handleSetAlert = (e: React.FormEvent) => {
     e.preventDefault();
     const price = parseInt(targetPrice.replace(/[^0-9]/g, ''));
@@ -205,6 +233,7 @@ export default function ProductCard({ product: initialProduct, index = 0 }: Prod
 
   return (
     <motion.div
+      id={`product-${product.id}`}
       layout
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
