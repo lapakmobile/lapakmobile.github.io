@@ -461,7 +461,7 @@ export default function App() {
               >
                 <div className="aspect-square rounded-3xl overflow-hidden glass p-4">
                   <img 
-                    src="https://picsum.photos/seed/office/800/800" 
+                    src="https://vip-reseller.co.id/library/assets/images/product/honor-of-kings.webp" 
                     alt="LapakMobile Office" 
                     className="w-full h-full object-cover rounded-2xl grayscale hover:grayscale-0 transition-all duration-700"
                     referrerPolicy="no-referrer"
