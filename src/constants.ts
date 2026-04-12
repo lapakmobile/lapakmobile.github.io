@@ -653,9 +653,12 @@ export const DIGITAL_PRODUCTS: Product[] = [
 export const ALL_PRODUCTS = [...GAMES, ...DIGITAL_PRODUCTS];
 
 export const TESTIMONIALS: Testimonial[] = [
-  { id: '1', name: 'Andi', text: 'Proses cepet banget, gak sampe 5 menit diamond udah masuk!', rating: 5 },
-  { id: '2', name: 'Budi', text: 'Langganan di sini terus, harganya paling murah dibanding yang lain.', rating: 5 },
-  { id: '3', name: 'Citra', text: 'Admin ramah, fast respon pas tanya-tanya paket streaming.', rating: 4 },
+  { id: '1', name: 'Andi Saputra', text: 'Proses cepet banget, gak sampe 5 menit diamond udah masuk! Recommended banget buat para gamer.', rating: 5, avatar: 'https://picsum.photos/seed/user1/100/100' },
+  { id: '2', name: 'Budi Hermawan', text: 'Langganan di sini terus, harganya paling murah dibanding yang lain. Pelayanan mantap!', rating: 5, avatar: 'https://picsum.photos/seed/user2/100/100' },
+  { id: '3', name: 'Citra Lestari', text: 'Admin ramah, fast respon pas tanya-tanya paket streaming. Netflix-nya lancar jaya.', rating: 5, avatar: 'https://picsum.photos/seed/user3/100/100' },
+  { id: '4', name: 'Dedi Kurniawan', text: 'Top up ML di sini paling aman. Gak perlu khawatir akun kenapa-napa. Sukses terus LapakMobile!', rating: 5, avatar: 'https://picsum.photos/seed/user4/100/100' },
+  { id: '5', name: 'Eka Putri', text: 'Baru pertama kali coba beli Canva Pro di sini, langsung aktif. Makasih ya admin!', rating: 5, avatar: 'https://picsum.photos/seed/user5/100/100' },
+  { id: '6', name: 'Fajar Ramadhan', text: 'Harga bersaing, proses kilat. Gak nyesel langganan di sini. Top up HOK juga murah.', rating: 5, avatar: 'https://picsum.photos/seed/user6/100/100' },
 ];
 
 export const FAQS: FAQItem[] = [
