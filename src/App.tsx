@@ -231,32 +231,70 @@ export default function App() {
         )}
 
         {/* Payment Methods Section */}
-        <section className="py-16 bg-dark border-y border-white/5">
+        <section className="py-16 bg-dark border-y border-white/5 overflow-hidden">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col items-center">
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-gray-500 mb-10">Metode Pembayaran Terlengkap</p>
-              <div className="flex flex-wrap justify-center items-center gap-8 md:gap-12 transition-all duration-500">
-                {[
-                  { name: 'QRIS', url: 'https://upload.wikimedia.org/wikipedia/commons/a/a2/Logo_QRIS.svg' },
-                  { name: 'DANA', url: 'https://upload.wikimedia.org/wikipedia/commons/7/72/Logo_dana_blue.svg' },
-                  { name: 'OVO', url: 'https://upload.wikimedia.org/wikipedia/commons/e/eb/Logo_ovo_purple.svg' },
-                  { name: 'ShopeePay', url: 'https://upload.wikimedia.org/wikipedia/commons/f/fe/ShopeePay.svg' },
-                  { name: 'GoPay', url: 'https://upload.wikimedia.org/wikipedia/commons/8/8e/Gopay_logo.svg' },
-                  { name: 'LinkAja', url: 'https://upload.wikimedia.org/wikipedia/commons/8/85/LinkAja.svg' },
-                  { name: 'Transfer Bank', url: 'https://picsum.photos/seed/bank/100/40' }
-                ].map((method) => (
-                  <div key={method.name} className="flex flex-col items-center gap-2 group">
-                    <div className="h-10 w-24 flex items-center justify-center p-2 glass rounded-lg group-hover:border-primary/50 transition-all">
-                      <img 
-                        src={method.url} 
-                        alt={method.name} 
-                        className="max-h-full max-w-full object-contain filter brightness-0 invert opacity-70 group-hover:opacity-100 transition-opacity"
-                        referrerPolicy="no-referrer"
-                      />
+              
+              <div className="relative w-full">
+                {/* Gradient Overlays for smooth fading */}
+                <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-dark to-transparent z-10" />
+                <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-dark to-transparent z-10" />
+                
+                <motion.div 
+                  className="flex items-center gap-12 whitespace-nowrap"
+                  animate={{
+                    x: [0, -1920],
+                  }}
+                  transition={{
+                    x: {
+                      repeat: Infinity,
+                      repeatType: "loop",
+                      duration: 30,
+                      ease: "linear",
+                    },
+                  }}
+                >
+                  {[
+                    { name: 'QRIS', url: 'https://upload.wikimedia.org/wikipedia/commons/a/a2/Logo_QRIS.svg' },
+                    { name: 'DANA', url: 'https://upload.wikimedia.org/wikipedia/commons/7/72/Logo_dana_blue.svg' },
+                    { name: 'OVO', url: 'https://upload.wikimedia.org/wikipedia/commons/e/eb/Logo_ovo_purple.svg' },
+                    { name: 'ShopeePay', url: 'https://upload.wikimedia.org/wikipedia/commons/f/fe/ShopeePay.svg' },
+                    { name: 'GoPay', url: 'https://upload.wikimedia.org/wikipedia/commons/8/8e/Gopay_logo.svg' },
+                    { name: 'LinkAja', url: 'https://upload.wikimedia.org/wikipedia/commons/8/85/LinkAja.svg' },
+                    { name: 'BCA', url: 'https://upload.wikimedia.org/wikipedia/commons/5/5c/Bank_Central_Asia.svg' },
+                    { name: 'Mandiri', url: 'https://upload.wikimedia.org/wikipedia/commons/a/ad/Bank_Mandiri_logo_2016.svg' },
+                    { name: 'BNI', url: 'https://upload.wikimedia.org/wikipedia/commons/0/01/Logo_BNI.svg' },
+                    { name: 'BRI', url: 'https://upload.wikimedia.org/wikipedia/commons/2/2e/BRI_Logo.svg' },
+                    { name: 'Alfamart', url: 'https://upload.wikimedia.org/wikipedia/commons/8/86/Alfamart_logo.svg' },
+                    { name: 'Indomaret', url: 'https://upload.wikimedia.org/wikipedia/commons/9/9d/Logo_Indomaret.svg' },
+                    // Duplicate for seamless loop
+                    { name: 'QRIS', url: 'https://upload.wikimedia.org/wikipedia/commons/a/a2/Logo_QRIS.svg' },
+                    { name: 'DANA', url: 'https://upload.wikimedia.org/wikipedia/commons/7/72/Logo_dana_blue.svg' },
+                    { name: 'OVO', url: 'https://upload.wikimedia.org/wikipedia/commons/e/eb/Logo_ovo_purple.svg' },
+                    { name: 'ShopeePay', url: 'https://upload.wikimedia.org/wikipedia/commons/f/fe/ShopeePay.svg' },
+                    { name: 'GoPay', url: 'https://upload.wikimedia.org/wikipedia/commons/8/8e/Gopay_logo.svg' },
+                    { name: 'LinkAja', url: 'https://upload.wikimedia.org/wikipedia/commons/8/85/LinkAja.svg' },
+                    { name: 'BCA', url: 'https://upload.wikimedia.org/wikipedia/commons/5/5c/Bank_Central_Asia.svg' },
+                    { name: 'Mandiri', url: 'https://upload.wikimedia.org/wikipedia/commons/a/ad/Bank_Mandiri_logo_2016.svg' },
+                    { name: 'BNI', url: 'https://upload.wikimedia.org/wikipedia/commons/0/01/Logo_BNI.svg' },
+                    { name: 'BRI', url: 'https://upload.wikimedia.org/wikipedia/commons/2/2e/BRI_Logo.svg' },
+                    { name: 'Alfamart', url: 'https://upload.wikimedia.org/wikipedia/commons/8/86/Alfamart_logo.svg' },
+                    { name: 'Indomaret', url: 'https://upload.wikimedia.org/wikipedia/commons/9/9d/Logo_Indomaret.svg' },
+                  ].map((method, idx) => (
+                    <div key={`${method.name}-${idx}`} className="flex flex-col items-center gap-2 group shrink-0">
+                      <div className="h-12 w-28 flex items-center justify-center p-3 glass rounded-xl group-hover:border-primary/50 transition-all">
+                        <img 
+                          src={method.url} 
+                          alt={method.name} 
+                          className="max-h-full max-w-full object-contain filter brightness-0 invert opacity-60 group-hover:opacity-100 transition-opacity"
+                          referrerPolicy="no-referrer"
+                        />
+                      </div>
+                      <span className="text-[10px] font-bold text-gray-500 group-hover:text-primary transition-colors uppercase tracking-widest">{method.name}</span>
                     </div>
-                    <span className="text-[10px] font-bold text-gray-500 group-hover:text-primary transition-colors">{method.name}</span>
-                  </div>
-                ))}
+                  ))}
+                </motion.div>
               </div>
             </div>
           </div>
