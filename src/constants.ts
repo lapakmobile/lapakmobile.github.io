@@ -627,7 +627,7 @@ export const DIGITAL_PRODUCTS: Product[] = [
     id: 'sewa-grup-fb',
     name: 'Sewa Grup Facebook',
     category: 'Jasa',
-    image: 'https://commons.wikimedia.org/wiki/Category:Facebook_f_logos#/media/File:Facebook_(27408547908).jpg',
+    image: '/grup-facebook.png',
     packages: [
       { name: 'Paid Promote (1 Post)', price: 'Rp 25.000' },
       { name: 'Sewa Mingguan (Affiliate)', price: 'Rp 100.000' },
@@ -639,7 +639,7 @@ export const DIGITAL_PRODUCTS: Product[] = [
     id: 'rekber-fb',
     name: 'Jasa Rekber Facebook',
     category: 'Jasa',
-    image: 'https://commons.wikimedia.org/wiki/Category:Facebook_f_logos#/media/File:Facebook_(27408547908).jpg',
+    image: '/rekber_rekening_bersama.jpg',
     isBestSeller: true,
     packages: [
       { name: 'Transaksi s/d 100rb', price: 'Fee Rp 5.000' },
