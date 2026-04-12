@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { MessageCircle, Star, Share2, Copy, Facebook, Twitter, Send, X, Zap, ShieldCheck, Clock, AlertCircle, RefreshCw, MessageSquare, User, Heart, Bell } from 'lucide-react';
 import { toast } from 'sonner';
 import Skeleton from './ui/Skeleton';
+import LazyImage from './ui/LazyImage';
 import { Product, Order, Review } from '../types';
 import { WHATSAPP_NUMBER } from '../constants';
 import { priceService } from '../services/priceService';
@@ -225,11 +226,11 @@ export default function ProductCard({ product: initialProduct }: ProductCardProp
           <Heart className={`w-5 h-5 ${isFavorite ? 'fill-current' : ''}`} />
         </button>
         <div className="relative aspect-square overflow-hidden rounded-[2.2rem] shadow-2xl group-hover:shadow-primary/30 transition-all duration-500 border border-white/10">
-          <img 
+          <LazyImage 
             src={product.image} 
             alt={product.name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-            referrerPolicy="no-referrer"
+            className="w-full h-full"
+            skeletonClassName="rounded-[2.2rem]"
           />
           {product.isBestSeller && (
             <div className="absolute top-4 left-4 bg-gradient-to-r from-accent to-secondary text-white text-[9px] font-black uppercase tracking-[0.15em] px-3 py-1.5 rounded-full flex items-center gap-1.5 neon-glow z-10 shadow-lg">

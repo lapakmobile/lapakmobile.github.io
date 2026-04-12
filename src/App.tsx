@@ -12,6 +12,7 @@ import PriceList from './components/PriceList';
 import PriceAlertManager from './components/PriceAlertManager';
 import ProductCardSkeleton from './components/ProductCardSkeleton';
 import PriceListSkeleton from './components/PriceListSkeleton';
+import LazyImage from './components/ui/LazyImage';
 import { ALL_PRODUCTS, TESTIMONIALS, FAQS } from './constants';
 import { Category, PriceAlert } from './types';
 import { priceService } from './services/priceService';
@@ -314,11 +315,10 @@ export default function App() {
                   ].map((method, idx) => (
                     <div key={`${method.name}-${idx}`} className="flex flex-col items-center gap-2 group shrink-0">
                       <div className="h-12 w-28 flex items-center justify-center p-3 glass rounded-xl group-hover:border-primary/50 transition-all">
-                        <img 
+                        <LazyImage 
                           src={method.url} 
                           alt={method.name} 
-                          className="max-h-full max-w-full object-contain filter brightness-0 invert opacity-60 group-hover:opacity-100 transition-opacity"
-                          referrerPolicy="no-referrer"
+                          className="max-h-full max-w-full filter brightness-0 invert opacity-60 group-hover:opacity-100 transition-opacity"
                         />
                       </div>
                       <span className="text-[10px] font-bold text-gray-500 group-hover:text-primary transition-colors uppercase tracking-widest">{method.name}</span>
@@ -367,9 +367,9 @@ export default function App() {
                     </div>
                     <p className="text-gray-300 italic mb-8 whitespace-normal line-clamp-3">"{t.text}"</p>
                     <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-2xl overflow-hidden border-2 border-primary/20 group-hover:border-primary transition-colors">
+                      <div className="w-12 h-12 rounded-2xl overflow-hidden border-2 border-primary/20 group-hover:border-primary transition-colors shrink-0">
                         {t.avatar ? (
-                          <img src={t.avatar} alt={t.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                          <LazyImage src={t.avatar} alt={t.name} className="w-full h-full" />
                         ) : (
                           <div className="w-full h-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center font-bold text-primary">
                             {t.name[0]}

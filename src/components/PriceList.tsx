@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Search, ChevronRight, Zap, Info } from 'lucide-react';
+import LazyImage from './ui/LazyImage';
 import { ALL_PRODUCTS } from '../constants';
 import { Product } from '../types';
 
@@ -49,12 +50,13 @@ export default function PriceList() {
                       : 'hover:bg-white/5 text-gray-400'
                   }`}
                 >
-                  <img 
-                    src={product.image} 
-                    alt={product.name} 
-                    className="w-10 h-10 rounded-xl object-cover grayscale group-hover:grayscale-0"
-                    referrerPolicy="no-referrer"
-                  />
+                  <div className="w-10 h-10 rounded-xl overflow-hidden shrink-0">
+                    <LazyImage 
+                      src={product.image} 
+                      alt={product.name} 
+                      className="w-full h-full grayscale group-hover:grayscale-0"
+                    />
+                  </div>
                   <span className="text-sm font-bold truncate">{product.name}</span>
                   <ChevronRight className={`ml-auto w-4 h-4 transition-transform ${selectedProduct?.id === product.id ? 'rotate-90' : ''}`} />
                 </button>
@@ -74,8 +76,8 @@ export default function PriceList() {
                   className="glass rounded-[2.5rem] p-8 border border-white/5 h-full"
                 >
                   <div className="flex items-center gap-6 mb-8 pb-8 border-b border-white/5">
-                    <div className="w-20 h-20 rounded-3xl overflow-hidden shadow-2xl border border-white/10">
-                      <img src={selectedProduct.image} alt={selectedProduct.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                    <div className="w-20 h-20 rounded-3xl overflow-hidden shadow-2xl border border-white/10 shrink-0">
+                      <LazyImage src={selectedProduct.image} alt={selectedProduct.name} className="w-full h-full" />
                     </div>
                     <div>
                       <div className="text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-1">{selectedProduct.category}</div>
