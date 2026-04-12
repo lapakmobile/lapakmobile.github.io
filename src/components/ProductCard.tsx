@@ -10,9 +10,10 @@ import { priceService } from '../services/priceService';
 
 interface ProductCardProps {
   product: Product;
+  index?: number;
 }
 
-export default function ProductCard({ product: initialProduct }: ProductCardProps) {
+export default function ProductCard({ product: initialProduct, index = 0 }: ProductCardProps) {
   const [product, setProduct] = useState<Product>(initialProduct);
   const [isLoadingPrice, setIsLoadingPrice] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
@@ -231,6 +232,8 @@ export default function ProductCard({ product: initialProduct }: ProductCardProp
             alt={product.name}
             className="w-full h-full"
             skeletonClassName="rounded-[2.2rem]"
+            width={400}
+            priority={index < 4 ? 'high' : 'auto'}
           />
           {product.isBestSeller && (
             <div className="absolute top-4 left-4 bg-gradient-to-r from-accent to-secondary text-white text-[9px] font-black uppercase tracking-[0.15em] px-3 py-1.5 rounded-full flex items-center gap-1.5 neon-glow z-10 shadow-lg">

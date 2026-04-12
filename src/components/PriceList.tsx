@@ -55,6 +55,7 @@ export default function PriceList() {
                       src={product.image} 
                       alt={product.name} 
                       className="w-full h-full grayscale group-hover:grayscale-0"
+                      width={80}
                     />
                   </div>
                   <span className="text-sm font-bold truncate">{product.name}</span>
@@ -77,7 +78,7 @@ export default function PriceList() {
                 >
                   <div className="flex items-center gap-6 mb-8 pb-8 border-b border-white/5">
                     <div className="w-20 h-20 rounded-3xl overflow-hidden shadow-2xl border border-white/10 shrink-0">
-                      <LazyImage src={selectedProduct.image} alt={selectedProduct.name} className="w-full h-full" />
+                      <LazyImage src={selectedProduct.image} alt={selectedProduct.name} className="w-full h-full" width={160} />
                     </div>
                     <div>
                       <div className="text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-1">{selectedProduct.category}</div>

@@ -228,9 +228,9 @@ export default function App() {
             ) : filteredProducts.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 <AnimatePresence mode="popLayout">
-                  {filteredProducts.map((product) => (
+                  {filteredProducts.map((product, index) => (
                     <div key={product.id}>
-                      <ProductCard product={product} />
+                      <ProductCard product={product} index={index} />
                     </div>
                   ))}
                 </AnimatePresence>
@@ -319,6 +319,7 @@ export default function App() {
                           src={method.url} 
                           alt={method.name} 
                           className="max-h-full max-w-full filter brightness-0 invert opacity-60 group-hover:opacity-100 transition-opacity"
+                          width={120}
                         />
                       </div>
                       <span className="text-[10px] font-bold text-gray-500 group-hover:text-primary transition-colors uppercase tracking-widest">{method.name}</span>
@@ -369,7 +370,7 @@ export default function App() {
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 rounded-2xl overflow-hidden border-2 border-primary/20 group-hover:border-primary transition-colors shrink-0">
                         {t.avatar ? (
-                          <LazyImage src={t.avatar} alt={t.name} className="w-full h-full" />
+                          <LazyImage src={t.avatar} alt={t.name} className="w-full h-full" width={100} />
                         ) : (
                           <div className="w-full h-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center font-bold text-primary">
                             {t.name[0]}

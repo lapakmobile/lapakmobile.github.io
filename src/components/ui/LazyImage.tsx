@@ -1,16 +1,29 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Skeleton from './Skeleton';
+import { optimizeImageUrl } from '../../lib/imageOptimizer';
 
 interface LazyImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   src: string;
   alt: string;
   className?: string;
   skeletonClassName?: string;
+  width?: number;
+  priority?: 'high' | 'low' | 'auto';
 }
 
-export default function LazyImage({ src, alt, className = '', skeletonClassName = '', ...props }: LazyImageProps) {
+export default function LazyImage({ 
+  src, 
+  alt, 
+  className = '', 
+  skeletonClassName = '', 
+  width,
+  priority = 'auto',
+  ...props 
+}: LazyImageProps) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [error, setError] = useState(false);
+
+  const optimizedSrc = optimizeImageUrl(src, width);
 
   return (
     <div className={`relative overflow-hidden ${className}`}>
@@ -19,9 +32,11 @@ export default function LazyImage({ src, alt, className = '', skeletonClassName 
       )}
       
       <img
-        src={src}
+        src={optimizedSrc}
         alt={alt}
-        loading="lazy"
+        loading={priority === 'high' ? 'eager' : 'lazy'}
+        fetchPriority={priority}
+        decoding="async"
         onLoad={() => setIsLoaded(true)}
         onError={() => setError(true)}
         className={`w-full h-full object-cover transition-opacity duration-500 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
