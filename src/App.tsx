@@ -595,7 +595,7 @@ export default function App() {
                 Jangan ragu untuk menghubungi kami jika ada pertanyaan. Tim kami siap membantu Anda 24/7.
               </p>
               <a 
-                href={`https://wa.me/${ALL_PRODUCTS[0].id}`} // Dummy link for demo
+                href={`http://wa.me/6281290006080?text=Halo%20Admin%20LapakMobile,%20saya%20ingin%20tanya%20seputar%20produk`} // Dummy link for demo
                 className="inline-flex items-center gap-3 px-10 py-5 bg-primary text-dark font-bold rounded-2xl hover:scale-105 transition-all neon-glow"
               >
                 Hubungi Admin Sekarang
