@@ -1,16 +1,35 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { MessageCircle, Star, Share2, Copy, Facebook, Twitter, Send, X, Zap, ShieldCheck, Clock } from 'lucide-react';
+import { MessageCircle, Star, Share2, Copy, Facebook, Twitter, Send, X, Zap, ShieldCheck, Clock, AlertCircle, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 import { Product, Order } from '../types';
 import { WHATSAPP_NUMBER } from '../constants';
+import { priceService } from '../services/priceService';
 
 interface ProductCardProps {
   product: Product;
 }
 
-export default function ProductCard({ product }: ProductCardProps) {
+export default function ProductCard({ product: initialProduct }: ProductCardProps) {
+  const [product, setProduct] = useState<Product>(initialProduct);
+  const [isLoadingPrice, setIsLoadingPrice] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+
+  useEffect(() => {
+    const fetchPrice = async () => {
+      setIsLoadingPrice(true);
+      try {
+        const updated = await priceService.getUpdatedPrices(initialProduct);
+        setProduct(updated);
+      } catch (error) {
+        console.error('Failed to fetch real-time price:', error);
+      } finally {
+        setIsLoadingPrice(false);
+      }
+    };
+
+    fetchPrice();
+  }, [initialProduct]);
 
   const handleOrder = (packageName: string) => {
     // Simulate saving order to history
@@ -126,7 +145,24 @@ export default function ProductCard({ product }: ProductCardProps) {
           <div className="flex flex-col items-center gap-4">
             <div className="text-center">
               <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Mulai dari</p>
-              <p className="text-2xl font-black text-primary">{lowestPrice}</p>
+              <div className="flex items-center justify-center gap-2">
+                <p className="text-2xl font-black text-primary">
+                  {isLoadingPrice ? (
+                    <span className="flex items-center gap-2 text-gray-500 text-lg animate-pulse">
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                      Checking...
+                    </span>
+                  ) : (
+                    lowestPrice
+                  )}
+                </p>
+              </div>
+              {product.isRealTime && !isLoadingPrice && (
+                <div className="flex items-center justify-center gap-1.5 mt-2 text-[9px] font-bold text-amber-400/80 uppercase tracking-wider bg-amber-400/5 px-3 py-1 rounded-full border border-amber-400/10">
+                  <AlertCircle className="w-3 h-3" />
+                  Harga dapat berubah
+                </div>
+              )}
             </div>
             
             <div className="w-full h-px bg-white/5" />

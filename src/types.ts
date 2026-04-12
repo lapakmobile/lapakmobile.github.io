@@ -8,8 +8,10 @@ export interface Product {
   packages: {
     name: string;
     price: string;
+    isRealTime?: boolean;
   }[];
   isBestSeller?: boolean;
+  isRealTime?: boolean;
 }
 
 export interface Testimonial {
