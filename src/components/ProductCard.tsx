@@ -4,7 +4,7 @@ import { MessageCircle, Star, Share2, Copy, Facebook, Twitter, Send, X, Zap, Shi
 import { toast } from 'sonner';
 import Skeleton from './ui/Skeleton';
 import LazyImage from './ui/LazyImage';
-import { Product, Order, Review } from '../types';
+import { Product, Order, Review, PriceAlert } from '../types';
 import { WHATSAPP_NUMBER } from '../constants';
 import { priceService } from '../services/priceService';
 
@@ -22,6 +22,7 @@ export default function ProductCard({ product: initialProduct, index = 0 }: Prod
   const [isFavorite, setIsFavorite] = useState(false);
   const [isAlertModalOpen, setIsAlertModalOpen] = useState(false);
   const [targetPrice, setTargetPrice] = useState('');
+  const [userEmail, setUserEmail] = useState('');
 
   // Load reviews and favorite status from localStorage on mount
   useEffect(() => {
@@ -84,6 +85,7 @@ export default function ProductCard({ product: initialProduct, index = 0 }: Prod
       productName: product.name,
       targetPrice: price,
       currentPrice: currentPriceVal,
+      userEmail: userEmail,
       isActive: true,
       createdAt: new Date().toISOString()
     };
@@ -117,12 +119,78 @@ export default function ProductCard({ product: initialProduct, index = 0 }: Prod
     window.dispatchEvent(new Event('favoritesUpdated'));
   };
 
+  const shareLinks = [
+    {
+      name: 'WhatsApp',
+      icon: Send,
+      color: 'bg-[#25D366]',
+      href: `https://wa.me/?text=${encodeURIComponent(`Cek ${product.name} di LapakMobile! ${window.location.origin}/#product-${product.id}`)}`,
+    },
+    {
+      name: 'Facebook',
+      icon: Facebook,
+      color: 'bg-[#1877F2]',
+      href: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(`${window.location.origin}/#product-${product.id}`)}`,
+    },
+    {
+      name: 'Twitter',
+      icon: Twitter,
+      color: 'bg-[#1DA1F2]',
+      href: `https://twitter.com/intent/tweet?text=${encodeURIComponent(`Cek ${product.name} di LapakMobile!`)}&url=${encodeURIComponent(`${window.location.origin}/#product-${product.id}`)}`,
+    },
+  ];
+
+  const lowestPrice = product.packages.length > 0 
+    ? product.packages.reduce((min, p) => {
+        const priceVal = parseInt(p.price.replace(/[^0-9]/g, '')) || 0;
+        const minVal = parseInt(min.replace(/[^0-9]/g, '')) || Infinity;
+        return priceVal < minVal ? p.price : min;
+      }, product.packages[0].price)
+    : 'N/A';
+
   useEffect(() => {
     const fetchPrice = async () => {
       setIsLoadingPrice(true);
       try {
         const updated = await priceService.getUpdatedPrices(initialProduct);
         setProduct(updated);
+
+        // Check for price alerts
+        const currentPriceVal = parseInt(lowestPrice.replace(/[^0-9]/g, '')) || 0;
+        const alerts = JSON.parse(localStorage.getItem('price_alerts') || '[]');
+        let alertsUpdated = false;
+
+        const updatedAlerts = alerts.map((alert: PriceAlert) => {
+          if (alert.productId === product.id && alert.isActive && currentPriceVal <= alert.targetPrice) {
+            // Trigger Toast
+            toast.success(`⚡ Harga ${product.name} Turun!`, {
+              description: `Harga sekarang Rp ${currentPriceVal.toLocaleString('id-ID')}, mencapai target Rp ${alert.targetPrice.toLocaleString('id-ID')}`
+            });
+
+            // Trigger Email Notification via Backend
+            if (alert.userEmail) {
+              fetch('/api/send-price-alert', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  email: alert.userEmail,
+                  productName: product.name,
+                  targetPrice: alert.targetPrice,
+                  currentPrice: currentPriceVal
+                })
+              }).catch(err => console.error('Failed to send email alert:', err));
+            }
+
+            alertsUpdated = true;
+            return { ...alert, isActive: false, currentPrice: currentPriceVal };
+          }
+          return alert;
+        });
+
+        if (alertsUpdated) {
+          localStorage.setItem('price_alerts', JSON.stringify(updatedAlerts));
+          window.dispatchEvent(new Event('priceAlertsUpdated'));
+        }
       } catch (error) {
         console.error('Failed to fetch real-time price:', error);
       } finally {
@@ -131,7 +199,7 @@ export default function ProductCard({ product: initialProduct, index = 0 }: Prod
     };
 
     fetchPrice();
-  }, [initialProduct]);
+  }, [initialProduct, lowestPrice]);
 
   const handleOrder = (packageName: string) => {
     // Simulate saving order to history
@@ -195,35 +263,6 @@ export default function ProductCard({ product: initialProduct, index = 0 }: Prod
       description: 'Anda sekarang dapat membagikannya ke teman-teman.',
     });
   };
-
-  const shareLinks = [
-    {
-      name: 'WhatsApp',
-      icon: Send,
-      color: 'bg-[#25D366]',
-      href: `https://wa.me/?text=${encodeURIComponent(`Cek ${product.name} di LapakMobile! ${window.location.origin}/#product-${product.id}`)}`,
-    },
-    {
-      name: 'Facebook',
-      icon: Facebook,
-      color: 'bg-[#1877F2]',
-      href: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(`${window.location.origin}/#product-${product.id}`)}`,
-    },
-    {
-      name: 'Twitter',
-      icon: Twitter,
-      color: 'bg-[#1DA1F2]',
-      href: `https://twitter.com/intent/tweet?text=${encodeURIComponent(`Cek ${product.name} di LapakMobile!`)}&url=${encodeURIComponent(`${window.location.origin}/#product-${product.id}`)}`,
-    },
-  ];
-
-  const lowestPrice = product.packages.length > 0 
-    ? product.packages.reduce((min, p) => {
-        const priceVal = parseInt(p.price.replace(/[^0-9]/g, '')) || 0;
-        const minVal = parseInt(min.replace(/[^0-9]/g, '')) || Infinity;
-        return priceVal < minVal ? p.price : min;
-      }, product.packages[0].price)
-    : 'N/A';
 
   const features = [
     { icon: Zap, text: 'Proses Instan', color: 'text-yellow-400' },
@@ -516,6 +555,19 @@ export default function ProductCard({ product: initialProduct, index = 0 }: Prod
                     />
                   </div>
                   <p className="text-[10px] text-gray-500 mt-2 italic">Harga saat ini: {lowestPrice}</p>
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2 block">Email Notifikasi</label>
+                  <input 
+                    type="email"
+                    placeholder="nama@email.com"
+                    value={userEmail}
+                    onChange={(e) => setUserEmail(e.target.value)}
+                    required
+                    className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-sm outline-none focus:border-primary transition-all"
+                  />
+                  <p className="text-[10px] text-gray-500 mt-2 italic">Kami akan mengirimkan email saat harga tercapai.</p>
                 </div>
 
                 <button 

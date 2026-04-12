@@ -566,15 +566,16 @@ export default function App() {
                     <span className="font-bold">{faq.question}</span>
                     {expandedFaq === i ? <ChevronUp className="text-primary" /> : <ChevronDown className="text-gray-500" />}
                   </button>
-                  <AnimatePresence>
+                  <AnimatePresence initial={false}>
                     {expandedFaq === i && (
                       <motion.div
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: 'auto', opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.4, ease: [0.04, 0.62, 0.23, 0.98] }}
                         className="overflow-hidden"
                       >
-                        <div className="p-6 pt-0 text-gray-400 text-sm leading-relaxed border-t border-white/5">
+                        <div className="p-6 pt-2 text-gray-400 text-sm leading-relaxed border-t border-white/5 bg-white/[0.02]">
                           {faq.answer}
                         </div>
                       </motion.div>
