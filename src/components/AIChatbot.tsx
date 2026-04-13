@@ -95,10 +95,10 @@ export default function AIChatbot() {
 
   return (
     <>
-      {/* Floating Toggle Button - Hidden on Mobile */}
+      {/* Floating Toggle Button - Hidden (Controlled by ActionCenter) */}
       <button
         onClick={() => setIsOpen(true)}
-        className="hidden md:flex fixed bottom-6 left-6 z-50 w-14 h-14 bg-primary text-dark rounded-full items-center justify-center shadow-2xl hover:scale-110 transition-all neon-glow group"
+        className="hidden fixed bottom-6 left-6 z-50 w-14 h-14 bg-primary text-dark rounded-full items-center justify-center shadow-2xl hover:scale-110 transition-all neon-glow group"
       >
         <MessageSquare className="w-7 h-7 group-hover:rotate-12 transition-transform" />
         <span className="absolute -top-1 -right-1 w-5 h-5 bg-white text-dark text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-primary animate-bounce">

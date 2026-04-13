@@ -40,7 +40,7 @@ export default function PriceAlertManager() {
     <>
       <button 
         onClick={() => setIsOpen(true)}
-        className="hidden md:flex fixed bottom-24 right-6 z-40 w-14 h-14 bg-dark-lighter glass rounded-full items-center justify-center text-primary shadow-2xl hover:scale-110 transition-all border border-white/10"
+        className="hidden fixed bottom-24 right-6 z-40 w-14 h-14 bg-dark-lighter glass rounded-full items-center justify-center text-primary shadow-2xl hover:scale-110 transition-all border border-white/10"
       >
         <div className="relative">
           <Bell className="w-6 h-6" />

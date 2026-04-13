@@ -8,8 +8,8 @@ export default function WhatsAppButton() {
   };
 
   return (
-    <div className="hidden md:block fixed bottom-6 right-6 z-50">
-      {/* Floating Button (Desktop Only) */}
+    <div className="hidden fixed bottom-6 right-6 z-50">
+      {/* Floating Button - Hidden (Controlled by ActionCenter) */}
       <motion.button
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
