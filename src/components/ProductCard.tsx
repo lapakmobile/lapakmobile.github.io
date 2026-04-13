@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, memo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { MessageCircle, Star, Share2, Copy, Facebook, Twitter, Send, X, Zap, ShieldCheck, Clock, AlertCircle, RefreshCw, MessageSquare, User, Heart, Bell } from 'lucide-react';
 import { toast } from 'sonner';
@@ -13,7 +13,7 @@ interface ProductCardProps {
   index?: number;
 }
 
-export default function ProductCard({ product: initialProduct, index = 0 }: ProductCardProps) {
+const ProductCard = memo(function ProductCard({ product: initialProduct, index = 0 }: ProductCardProps) {
   const [product, setProduct] = useState<Product>(initialProduct);
   const [isLoadingPrice, setIsLoadingPrice] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
@@ -260,8 +260,9 @@ export default function ProductCard({ product: initialProduct, index = 0 }: Prod
       layout
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
+      whileHover={{ y: -8, transition: { duration: 0.3 } }}
       transition={{ duration: 0.3 }}
-      className="glass rounded-[2.5rem] overflow-hidden group hover:border-primary/50 transition-all flex flex-col h-full border border-white/5"
+      className="glass rounded-[2.5rem] overflow-hidden group hover:border-primary/50 transition-all flex flex-col h-full border border-white/5 hover:shadow-[0_20px_50px_rgba(0,242,255,0.15)]"
     >
       <div className="p-5 pb-0 relative">
         <button 
@@ -282,7 +283,7 @@ export default function ProductCard({ product: initialProduct, index = 0 }: Prod
           <LazyImage 
             src={product.image} 
             alt={product.name}
-            className="w-full h-full"
+            className="w-full h-full group-hover:scale-110 transition-transform duration-700 ease-out"
             skeletonClassName="rounded-[2.2rem]"
             width={400}
             priority={index < 4 ? 'high' : 'auto'}
@@ -302,10 +303,10 @@ export default function ProductCard({ product: initialProduct, index = 0 }: Prod
       </div>
 
       <div className="p-6 flex flex-col flex-grow">
-        <div className="text-center mb-4">
-          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/60 mb-1 block">{product.category}</span>
-          <h3 className="text-xl font-display font-black group-hover:text-primary transition-colors line-clamp-1">{product.name}</h3>
-          <div className="flex items-center justify-center gap-1 mt-1">
+        <div className="text-center mb-6">
+          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/60 mb-1.5 block">{product.category}</span>
+          <h3 className="text-xl font-display font-black group-hover:text-primary transition-colors line-clamp-1 px-2">{product.name}</h3>
+          <div className="flex items-center justify-center gap-1.5 mt-2">
             <div className="flex items-center gap-0.5">
               {[...Array(5)].map((_, i) => (
                 <Star 
@@ -314,49 +315,49 @@ export default function ProductCard({ product: initialProduct, index = 0 }: Prod
                 />
               ))}
             </div>
-            <span className="text-[10px] font-bold text-gray-500">({product.reviewCount || 0})</span>
+            <span className="text-[10px] font-bold text-gray-500">({product.reviewCount || 0} ulasan)</span>
           </div>
         </div>
         
-        <div className="bg-white/5 rounded-3xl p-5 mb-6 border border-white/5">
-          <div className="flex flex-col items-center gap-4">
+        <div className="bg-white/5 rounded-[2rem] p-6 mb-6 border border-white/5 flex-grow">
+          <div className="flex flex-col items-center gap-5 h-full">
             <div className="text-center">
-              <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Mulai dari</p>
+              <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">Mulai dari</p>
               <div className="flex items-center justify-center gap-3">
                 {isLoadingPrice ? (
                   <Skeleton width={120} height={32} className="mx-auto" />
                 ) : (
                   <>
-                    <p className="text-2xl font-black text-primary">
+                    <p className="text-3xl font-black text-primary tracking-tight">
                       {lowestPrice}
                     </p>
                     <button 
                       onClick={() => setIsAlertModalOpen(true)}
-                      className="w-6 h-6 md:w-8 md:h-8 glass rounded-full flex items-center justify-center text-gray-400 hover:text-primary hover:scale-110 transition-all border border-white/10"
+                      className="w-8 h-8 md:w-9 md:h-9 glass rounded-full flex items-center justify-center text-gray-400 hover:text-primary hover:scale-110 transition-all border border-white/10 shadow-lg"
                       title="Set Alert Harga"
                     >
-                      <Bell className="w-3 h-3 md:w-4 md:h-4" />
+                      <Bell className="w-3.5 h-3.5 md:w-4 md:h-4" />
                     </button>
                   </>
                 )}
               </div>
               {product.isRealTime && !isLoadingPrice && (
-                <div className="flex items-center justify-center gap-1.5 mt-2 text-[9px] font-bold text-amber-400/80 uppercase tracking-wider bg-amber-400/5 px-3 py-1 rounded-full border border-amber-400/10">
+                <div className="flex items-center justify-center gap-1.5 mt-3 text-[9px] font-bold text-amber-400/80 uppercase tracking-wider bg-amber-400/10 px-3 py-1.5 rounded-full border border-amber-400/20">
                   <AlertCircle className="w-3 h-3" />
-                  Harga dapat berubah
+                  Harga Real-time
                 </div>
               )}
             </div>
             
-            <div className="w-full h-px bg-white/5" />
+            <div className="w-full h-px bg-white/10" />
             
-            <div className="grid grid-cols-1 gap-3 w-full">
+            <div className="grid grid-cols-1 gap-4 w-full">
               {features.map((feature, i) => (
-                <div key={i} className="flex items-center gap-3 px-2">
-                  <div className={`w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center ${feature.color}`}>
-                    <feature.icon className="w-4 h-4" />
+                <div key={i} className="flex items-center gap-3.5 px-2 group/feat">
+                  <div className={`w-9 h-9 rounded-xl bg-white/5 flex items-center justify-center ${feature.color} group-hover/feat:scale-110 transition-transform`}>
+                    <feature.icon className="w-4.5 h-4.5" />
                   </div>
-                  <span className="text-[11px] font-bold text-gray-400">{feature.text}</span>
+                  <span className="text-[11px] font-bold text-gray-400 group-hover/feat:text-gray-200 transition-colors">{feature.text}</span>
                 </div>
               ))}
             </div>
@@ -622,4 +623,6 @@ export default function ProductCard({ product: initialProduct, index = 0 }: Prod
       </AnimatePresence>
     </motion.div>
   );
-}
+});
+
+export default ProductCard;

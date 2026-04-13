@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, lazy, Suspense } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Search, Filter, Star, ChevronDown, ChevronUp, CheckCircle2, Zap, Shield, FileText, BookOpen, X, Heart } from 'lucide-react';
 import { Toaster, toast } from 'sonner';
@@ -6,13 +6,15 @@ import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import ProductCard from './components/ProductCard';
 import Footer from './components/Footer';
-import WhatsAppButton from './components/WhatsAppButton';
-import OrderHistory from './components/OrderHistory';
-import PriceList from './components/PriceList';
-import PriceAlertManager from './components/PriceAlertManager';
-import RecentlyViewed from './components/RecentlyViewed';
-import AIChatbot from './components/AIChatbot';
-import ActionCenter from './components/ActionCenter';
+
+// Lazy load non-critical components
+const OrderHistory = lazy(() => import('./components/OrderHistory'));
+const PriceList = lazy(() => import('./components/PriceList'));
+const PriceAlertManager = lazy(() => import('./components/PriceAlertManager'));
+const RecentlyViewed = lazy(() => import('./components/RecentlyViewed'));
+const AIChatbot = lazy(() => import('./components/AIChatbot'));
+const ActionCenter = lazy(() => import('./components/ActionCenter'));
+
 import ProductCardSkeleton from './components/ProductCardSkeleton';
 import PriceListSkeleton from './components/PriceListSkeleton';
 import LazyImage from './components/ui/LazyImage';
@@ -57,10 +59,10 @@ export default function App() {
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
 
   useEffect(() => {
-    // Simulate initial data fetching
+    // Faster initial load simulation
     const timer = setTimeout(() => {
       setIsLoading(false);
-    }, 1500);
+    }, 800);
     return () => clearTimeout(timer);
   }, []);
 
@@ -252,7 +254,9 @@ export default function App() {
           </div>
         </section>
         
-        <OrderHistory />
+        <Suspense fallback={<div className="h-96 animate-pulse bg-white/5 rounded-3xl" />}>
+          <OrderHistory />
+        </Suspense>
         
         {isLoading ? (
           <section className="py-24 bg-dark-lighter">
@@ -261,7 +265,9 @@ export default function App() {
             </div>
           </section>
         ) : (
-          <PriceList />
+          <Suspense fallback={<PriceListSkeleton />}>
+            <PriceList />
+          </Suspense>
         )}
 
         {/* Payment Methods Section */}
@@ -615,9 +621,7 @@ export default function App() {
       </main>
 
       <Footer />
-      <WhatsAppButton />
-      <PriceAlertManager />
-      <RecentlyViewed />
+      
 
       {/* Merchant Center Integration Button (Hidden/Admin) */}
       <button 
@@ -700,8 +704,13 @@ export default function App() {
       </AnimatePresence>
 
       <Toaster position="top-center" expand={false} richColors theme="dark" />
-      <AIChatbot />
-      <ActionCenter />
+      
+      <Suspense fallback={null}>
+        <AIChatbot />
+        <ActionCenter />
+        <PriceAlertManager />
+        <RecentlyViewed />
+      </Suspense>
     </div>
   );
 }

@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, memo } from 'react';
 import { Menu, X, Zap, Search, History, Sun, Moon, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
-export default function Navbar({ onSearch }: { onSearch?: (query: string) => void }) {
+const Navbar = memo(function Navbar({ onSearch }: { onSearch?: (query: string) => void }) {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -203,4 +203,6 @@ export default function Navbar({ onSearch }: { onSearch?: (query: string) => voi
       </AnimatePresence>
     </nav>
   );
-}
+});
+
+export default Navbar;
