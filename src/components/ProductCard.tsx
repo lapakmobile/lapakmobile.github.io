@@ -1,6 +1,6 @@
 import React, { useState, useEffect, memo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { MessageCircle, Star, Share2, Copy, Facebook, Twitter, Send, X, Zap, ShieldCheck, Clock, AlertCircle, RefreshCw, MessageSquare, User, Heart, Bell } from 'lucide-react';
+import { MessageCircle, Star, Share2, Copy, Facebook, Twitter, Send, X, Zap, ShieldCheck, Clock, AlertCircle, RefreshCw, MessageSquare, User, Heart, Bell, Minus, Plus, Tag } from 'lucide-react';
 import { toast } from 'sonner';
 import Skeleton from './ui/Skeleton';
 import LazyImage from './ui/LazyImage';
@@ -22,6 +22,18 @@ const ProductCard = memo(function ProductCard({ product: initialProduct, index =
   const [isFavorite, setIsFavorite] = useState(false);
   const [isAlertModalOpen, setIsAlertModalOpen] = useState(false);
   const [targetPrice, setTargetPrice] = useState('');
+  const [quantity, setQuantity] = useState(1);
+
+  // Bulk discount tiers
+  const bulkTiers = [
+    { min: 3, discount: 5, label: 'Grosir 3+' },
+    { min: 5, discount: 10, label: 'Grosir 5+' },
+    { min: 10, discount: 15, label: 'Grosir 10+' },
+  ];
+
+  const currentDiscount = bulkTiers
+    .filter(tier => quantity >= tier.min)
+    .reduce((max, tier) => Math.max(max, tier.discount), 0);
 
   // Load reviews and favorite status from localStorage on mount
   useEffect(() => {
@@ -146,6 +158,13 @@ const ProductCard = memo(function ProductCard({ product: initialProduct, index =
       }, product.packages[0].price)
     : 'N/A';
 
+  const getDiscountedPrice = (priceStr: string) => {
+    const priceVal = parseInt(priceStr.replace(/[^0-9]/g, '')) || 0;
+    if (currentDiscount === 0) return priceStr;
+    const discounted = Math.floor(priceVal * (1 - currentDiscount / 100));
+    return `Rp ${discounted.toLocaleString('id-ID')}`;
+  };
+
   useEffect(() => {
     const fetchPrice = async () => {
       setIsLoadingPrice(true);
@@ -186,13 +205,17 @@ const ProductCard = memo(function ProductCard({ product: initialProduct, index =
   }, [initialProduct, lowestPrice]);
 
   const handleOrder = (packageName: string) => {
+    const pkg = product.packages.find(p => p.name === packageName);
+    const basePrice = pkg?.price || 'N/A';
+    const finalPrice = getDiscountedPrice(basePrice);
+
     // Simulate saving order to history
     const newOrder: Order = {
       id: `ORD-${Math.random().toString(36).substr(2, 9).toUpperCase()}`,
       productId: product.id,
       productName: product.name,
-      packageName: packageName,
-      price: product.packages.find(p => p.name === packageName)?.price || 'N/A',
+      packageName: `${quantity}x ${packageName}`,
+      price: finalPrice,
       date: new Date().toISOString(),
       status: 'Processing'
     };
@@ -201,9 +224,9 @@ const ProductCard = memo(function ProductCard({ product: initialProduct, index =
     localStorage.setItem('order_history', JSON.stringify([newOrder, ...existingOrders]));
 
     toast.success(`Memulai pesanan ${product.name}...`, {
-      description: `Mengarahkan ke WhatsApp untuk paket ${packageName}`,
+      description: `Mengarahkan ke WhatsApp untuk ${quantity}x paket ${packageName}`,
     });
-    const text = encodeURIComponent(`Saya ingin order ${product.name} - ${packageName}`);
+    const text = encodeURIComponent(`Halo Admin LapakMobile, saya ingin order:\n\nProduk: ${product.name}\nPaket: ${packageName}\nJumlah: ${quantity}\nTotal Harga: ${finalPrice}\n\nMohon instruksi pembayarannya.`);
     setTimeout(() => {
       window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${text}`, '_blank');
     }, 1000);
@@ -321,16 +344,23 @@ const ProductCard = memo(function ProductCard({ product: initialProduct, index =
         
         <div className="bg-white/5 rounded-[2rem] p-6 mb-6 border border-white/5 flex-grow">
           <div className="flex flex-col items-center gap-5 h-full">
-            <div className="text-center">
+            <div className="text-center w-full">
               <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">Mulai dari</p>
               <div className="flex items-center justify-center gap-3">
                 {isLoadingPrice ? (
                   <Skeleton width={120} height={32} className="mx-auto" />
                 ) : (
                   <>
-                    <p className="text-3xl font-black text-primary tracking-tight">
-                      {lowestPrice}
-                    </p>
+                    <div className="flex flex-col items-center">
+                      {currentDiscount > 0 && (
+                        <span className="text-[10px] font-bold text-accent line-through opacity-50">
+                          {lowestPrice}
+                        </span>
+                      )}
+                      <p className="text-3xl font-black text-primary tracking-tight">
+                        {getDiscountedPrice(lowestPrice)}
+                      </p>
+                    </div>
                     <button 
                       onClick={() => setIsAlertModalOpen(true)}
                       className="w-8 h-8 md:w-9 md:h-9 glass rounded-full flex items-center justify-center text-gray-400 hover:text-primary hover:scale-110 transition-all border border-white/10 shadow-lg"
@@ -341,8 +371,48 @@ const ProductCard = memo(function ProductCard({ product: initialProduct, index =
                   </>
                 )}
               </div>
+
+              {/* Quantity Selector */}
+              <div className="mt-6 flex flex-col items-center gap-3">
+                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Jumlah Pembelian</p>
+                <div className="flex items-center gap-4 bg-white/5 p-1.5 rounded-2xl border border-white/10">
+                  <button 
+                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                    className="w-8 h-8 rounded-xl flex items-center justify-center hover:bg-white/10 transition-colors text-gray-400"
+                  >
+                    <Minus className="w-4 h-4" />
+                  </button>
+                  <span className="w-8 text-center font-black text-primary">{quantity}</span>
+                  <button 
+                    onClick={() => setQuantity(quantity + 1)}
+                    className="w-8 h-8 rounded-xl flex items-center justify-center hover:bg-white/10 transition-colors text-gray-400"
+                  >
+                    <Plus className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Bulk Tiers Display */}
+              <div className="mt-4 flex flex-wrap justify-center gap-2">
+                {bulkTiers.map((tier) => (
+                  <div 
+                    key={tier.min}
+                    className={`px-3 py-1.5 rounded-xl border text-[9px] font-black uppercase tracking-wider transition-all ${
+                      quantity >= tier.min 
+                        ? 'bg-primary/20 border-primary text-primary shadow-[0_0_10px_rgba(0,242,255,0.2)]' 
+                        : 'bg-white/5 border-white/10 text-gray-500'
+                    }`}
+                  >
+                    <div className="flex items-center gap-1">
+                      <Tag className="w-2.5 h-2.5" />
+                      {tier.label}: -{tier.discount}%
+                    </div>
+                  </div>
+                ))}
+              </div>
+
               {product.isRealTime && !isLoadingPrice && (
-                <div className="flex items-center justify-center gap-1.5 mt-3 text-[9px] font-bold text-amber-400/80 uppercase tracking-wider bg-amber-400/10 px-3 py-1.5 rounded-full border border-amber-400/20">
+                <div className="flex items-center justify-center gap-1.5 mt-4 text-[9px] font-bold text-amber-400/80 uppercase tracking-wider bg-amber-400/10 px-3 py-1.5 rounded-full border border-amber-400/20">
                   <AlertCircle className="w-3 h-3" />
                   Harga Real-time
                 </div>
