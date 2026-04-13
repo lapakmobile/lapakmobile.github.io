@@ -667,14 +667,26 @@ export default function App() {
                 <div className="bg-white/5 rounded-2xl p-6 border border-white/5">
                   <h4 className="font-bold mb-4 flex items-center gap-2">
                     <div className="w-2 h-2 bg-primary rounded-full" />
-                    Metode 1: XML Product Feed
+                    Metode 1: XML Product Feed (Rekomendasi)
                   </h4>
-                  <p className="text-sm text-gray-400 mb-6 leading-relaxed">
-                    Download file XML produk Anda dan upload ke Google Merchant Center sebagai "Scheduled Fetch" atau "Upload". File ini berisi semua data produk, harga, dan gambar.
+                  <p className="text-sm text-gray-400 mb-4 leading-relaxed">
+                    Gunakan URL di bawah ini untuk "Scheduled Fetch" di Google Merchant Center. Google akan mengambil data produk secara otomatis setiap hari.
                   </p>
+                  <div className="flex items-center gap-2 bg-dark/50 p-3 rounded-xl border border-white/5 mb-6">
+                    <code className="text-[10px] text-primary flex-1 truncate">{merchantService.getXmlFeedUrl()}</code>
+                    <button 
+                      onClick={() => {
+                        navigator.clipboard.writeText(merchantService.getXmlFeedUrl());
+                        toast.success('URL XML disalin!');
+                      }}
+                      className="p-2 hover:bg-white/10 rounded-lg transition-colors text-gray-400 hover:text-white"
+                    >
+                      <FileText className="w-4 h-4" />
+                    </button>
+                  </div>
                   <button 
                     onClick={() => merchantService.downloadFeed()}
-                    className="flex items-center gap-3 px-6 py-3 bg-primary text-dark font-bold rounded-xl hover:scale-105 transition-all neon-glow"
+                    className="flex items-center gap-3 px-6 py-3 bg-primary/10 text-primary border border-primary/20 font-bold rounded-xl hover:bg-primary hover:text-dark transition-all"
                   >
                     <FileText className="w-5 h-5" />
                     Download XML Feed
@@ -684,11 +696,23 @@ export default function App() {
                 <div className="bg-white/5 rounded-2xl p-6 border border-white/5">
                   <h4 className="font-bold mb-4 flex items-center gap-2">
                     <div className="w-2 h-2 bg-secondary rounded-full" />
-                    Metode 2: JSON-LD (Auto-Discovery)
+                    Metode 2: Content API (JSON)
                   </h4>
-                  <p className="text-sm text-gray-400 leading-relaxed">
-                    Kami telah menyuntikkan <span className="text-secondary font-mono">JSON-LD Structured Data</span> ke dalam kode situs Anda. Google akan secara otomatis mendeteksi produk Anda saat melakukan crawling pada halaman ini.
+                  <p className="text-sm text-gray-400 mb-4 leading-relaxed">
+                    Jika Anda ingin membangun integrasi kustom menggunakan Content API, gunakan endpoint JSON ini:
                   </p>
+                  <div className="flex items-center gap-2 bg-dark/50 p-3 rounded-xl border border-white/5">
+                    <code className="text-[10px] text-secondary flex-1 truncate">{merchantService.getJsonApiUrl()}</code>
+                    <button 
+                      onClick={() => {
+                        navigator.clipboard.writeText(merchantService.getJsonApiUrl());
+                        toast.success('URL JSON disalin!');
+                      }}
+                      className="p-2 hover:bg-white/10 rounded-lg transition-colors text-gray-400 hover:text-white"
+                    >
+                      <FileText className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
               </div>
 
