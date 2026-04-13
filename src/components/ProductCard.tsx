@@ -22,7 +22,6 @@ export default function ProductCard({ product: initialProduct, index = 0 }: Prod
   const [isFavorite, setIsFavorite] = useState(false);
   const [isAlertModalOpen, setIsAlertModalOpen] = useState(false);
   const [targetPrice, setTargetPrice] = useState('');
-  const [userEmail, setUserEmail] = useState('');
 
   // Load reviews and favorite status from localStorage on mount
   useEffect(() => {
@@ -85,7 +84,6 @@ export default function ProductCard({ product: initialProduct, index = 0 }: Prod
       productName: product.name,
       targetPrice: price,
       currentPrice: currentPriceVal,
-      userEmail: userEmail,
       isActive: true,
       createdAt: new Date().toISOString()
     };
@@ -166,20 +164,6 @@ export default function ProductCard({ product: initialProduct, index = 0 }: Prod
             toast.success(`⚡ Harga ${product.name} Turun!`, {
               description: `Harga sekarang Rp ${currentPriceVal.toLocaleString('id-ID')}, mencapai target Rp ${alert.targetPrice.toLocaleString('id-ID')}`
             });
-
-            // Trigger Email Notification via Backend
-            if (alert.userEmail) {
-              fetch('/api/send-price-alert', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  email: alert.userEmail,
-                  productName: product.name,
-                  targetPrice: alert.targetPrice,
-                  currentPrice: currentPriceVal
-                })
-              }).catch(err => console.error('Failed to send email alert:', err));
-            }
 
             alertsUpdated = true;
             return { ...alert, isActive: false, currentPrice: currentPriceVal };
@@ -555,19 +539,6 @@ export default function ProductCard({ product: initialProduct, index = 0 }: Prod
                     />
                   </div>
                   <p className="text-[10px] text-gray-500 mt-2 italic">Harga saat ini: {lowestPrice}</p>
-                </div>
-
-                <div>
-                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2 block">Email Notifikasi</label>
-                  <input 
-                    type="email"
-                    placeholder="nama@email.com"
-                    value={userEmail}
-                    onChange={(e) => setUserEmail(e.target.value)}
-                    required
-                    className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-sm outline-none focus:border-primary transition-all"
-                  />
-                  <p className="text-[10px] text-gray-500 mt-2 italic">Kami akan mengirimkan email saat harga tercapai.</p>
                 </div>
 
                 <button 

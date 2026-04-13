@@ -31,7 +31,6 @@ export interface PriceAlert {
   productName: string;
   targetPrice: number;
   currentPrice: number;
-  userEmail?: string;
   isActive: boolean;
   createdAt: string;
 }

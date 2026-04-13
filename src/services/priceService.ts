@@ -13,26 +13,12 @@ export const priceService = {
    */
   async getUpdatedPrices(product: Product): Promise<Product> {
     // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise(resolve => setTimeout(resolve, 800));
 
-    // Simulate price fluctuation (±5%)
-    const updatedPackages = product.packages.map(pkg => {
-      const currentPrice = parseInt(pkg.price.replace(/[^0-9]/g, '')) || 0;
-      if (currentPrice === 0) return pkg;
-
-      const fluctuation = (Math.random() * 0.1 - 0.05); // -5% to +5%
-      const newPrice = Math.round(currentPrice * (1 + fluctuation));
-      
-      return {
-        ...pkg,
-        price: `Rp ${newPrice.toLocaleString('id-ID')}`,
-        isRealTime: true // Flag to indicate this price came from API
-      };
-    });
-
+    // Return the original product with real-time flag
+    // We remove the fluctuation logic to keep prices stable as requested
     return {
       ...product,
-      packages: updatedPackages,
       isRealTime: true
     };
   }
