@@ -12,6 +12,7 @@ import PriceList from './components/PriceList';
 import PriceAlertManager from './components/PriceAlertManager';
 import RecentlyViewed from './components/RecentlyViewed';
 import AIChatbot from './components/AIChatbot';
+import MobileActionCenter from './components/MobileActionCenter';
 import ProductCardSkeleton from './components/ProductCardSkeleton';
 import PriceListSkeleton from './components/PriceListSkeleton';
 import LazyImage from './components/ui/LazyImage';
@@ -700,6 +701,7 @@ export default function App() {
 
       <Toaster position="top-center" expand={false} richColors theme="dark" />
       <AIChatbot />
+      <MobileActionCenter />
     </div>
   );
 }

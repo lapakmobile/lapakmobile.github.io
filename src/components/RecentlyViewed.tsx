@@ -15,9 +15,15 @@ export default function RecentlyViewed() {
       setRecentlyViewedIds(saved);
     };
 
+    const handleOpen = () => setIsOpen(true);
+    window.addEventListener('openRecentlyViewed', handleOpen);
+
     loadRecentlyViewed();
     window.addEventListener('recentlyViewedUpdated', loadRecentlyViewed);
-    return () => window.removeEventListener('recentlyViewedUpdated', loadRecentlyViewed);
+    return () => {
+      window.removeEventListener('recentlyViewedUpdated', loadRecentlyViewed);
+      window.removeEventListener('openRecentlyViewed', handleOpen);
+    };
   }, []);
 
   const recentlyViewedProducts = recentlyViewedIds
@@ -28,10 +34,10 @@ export default function RecentlyViewed() {
 
   return (
     <>
-      {/* Floating Toggle Button */}
+      {/* Floating Toggle Button - Hidden on Mobile */}
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-24 left-6 z-40 w-12 h-12 bg-dark/80 glass rounded-full flex items-center justify-center text-primary hover:scale-110 transition-all border border-white/10 shadow-2xl group"
+        className="hidden md:flex fixed bottom-24 left-6 z-40 w-12 h-12 bg-dark/80 glass rounded-full items-center justify-center text-primary hover:scale-110 transition-all border border-white/10 shadow-2xl group"
         title="Terakhir Dilihat"
       >
         <History className="w-6 h-6 group-hover:rotate-12 transition-transform" />

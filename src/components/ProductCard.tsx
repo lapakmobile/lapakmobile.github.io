@@ -266,17 +266,17 @@ export default function ProductCard({ product: initialProduct, index = 0 }: Prod
       <div className="p-5 pb-0 relative">
         <button 
           onClick={() => setIsShareModalOpen(true)}
-          className="absolute top-8 right-8 z-20 w-10 h-10 glass rounded-full flex items-center justify-center text-white hover:text-primary hover:scale-110 transition-all shadow-lg"
+          className="absolute top-4 right-4 md:top-8 md:right-8 z-20 w-8 h-8 md:w-10 md:h-10 glass rounded-full flex items-center justify-center text-white hover:text-primary hover:scale-110 transition-all shadow-lg"
           title="Bagikan Produk"
         >
-          <Share2 className="w-5 h-5" />
+          <Share2 className="w-4 h-4 md:w-5 md:h-5" />
         </button>
         <button 
           onClick={toggleFavorite}
-          className={`absolute top-8 right-20 z-20 w-10 h-10 glass rounded-full flex items-center justify-center transition-all shadow-lg hover:scale-110 ${isFavorite ? 'text-red-500' : 'text-white hover:text-red-400'}`}
+          className={`absolute top-4 right-14 md:top-8 md:right-20 z-20 w-8 h-8 md:w-10 md:h-10 glass rounded-full flex items-center justify-center transition-all shadow-lg hover:scale-110 ${isFavorite ? 'text-red-500' : 'text-white hover:text-red-400'}`}
           title={isFavorite ? 'Hapus dari Favorit' : 'Tambah ke Favorit'}
         >
-          <Heart className={`w-5 h-5 ${isFavorite ? 'fill-current' : ''}`} />
+          <Heart className={`w-4 h-4 md:w-5 md:h-5 ${isFavorite ? 'fill-current' : ''}`} />
         </button>
         <div className="relative aspect-square overflow-hidden rounded-[2.2rem] shadow-2xl group-hover:shadow-primary/30 transition-all duration-500 border border-white/10">
           <LazyImage 
@@ -288,8 +288,8 @@ export default function ProductCard({ product: initialProduct, index = 0 }: Prod
             priority={index < 4 ? 'high' : 'auto'}
           />
           {product.isBestSeller && (
-            <div className="absolute top-4 left-4 bg-gradient-to-r from-accent to-secondary text-white text-[9px] font-black uppercase tracking-[0.15em] px-3 py-1.5 rounded-full flex items-center gap-1.5 neon-glow z-10 shadow-lg">
-              <Star className="w-3 h-3 fill-current" />
+            <div className="absolute top-2 left-2 md:top-4 md:left-4 bg-gradient-to-r from-accent to-secondary text-white text-[7px] md:text-[9px] font-black uppercase tracking-[0.15em] px-2 py-1 md:px-3 md:py-1.5 rounded-full flex items-center gap-1 md:gap-1.5 neon-glow z-10 shadow-lg">
+              <Star className="w-2 h-2 md:w-3 md:h-3 fill-current" />
               Best Seller
             </div>
           )}
@@ -332,10 +332,10 @@ export default function ProductCard({ product: initialProduct, index = 0 }: Prod
                     </p>
                     <button 
                       onClick={() => setIsAlertModalOpen(true)}
-                      className="w-8 h-8 glass rounded-full flex items-center justify-center text-gray-400 hover:text-primary hover:scale-110 transition-all border border-white/10"
+                      className="w-6 h-6 md:w-8 md:h-8 glass rounded-full flex items-center justify-center text-gray-400 hover:text-primary hover:scale-110 transition-all border border-white/10"
                       title="Set Alert Harga"
                     >
-                      <Bell className="w-4 h-4" />
+                      <Bell className="w-3 h-3 md:w-4 md:h-4" />
                     </button>
                   </>
                 )}

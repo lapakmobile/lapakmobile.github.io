@@ -17,8 +17,14 @@ export default function PriceAlertManager() {
       setAlerts(updated);
     };
 
+    const handleOpen = () => setIsOpen(true);
+    window.addEventListener('openPriceAlerts', handleOpen);
+
     window.addEventListener('priceAlertsUpdated', handleUpdate);
-    return () => window.removeEventListener('priceAlertsUpdated', handleUpdate);
+    return () => {
+      window.removeEventListener('priceAlertsUpdated', handleUpdate);
+      window.removeEventListener('openPriceAlerts', handleOpen);
+    };
   }, []);
 
   const removeAlert = (id: string) => {
@@ -34,7 +40,7 @@ export default function PriceAlertManager() {
     <>
       <button 
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-24 right-6 z-40 w-14 h-14 bg-dark-lighter glass rounded-full flex items-center justify-center text-primary shadow-2xl hover:scale-110 transition-all border border-white/10"
+        className="hidden md:flex fixed bottom-24 right-6 z-40 w-14 h-14 bg-dark-lighter glass rounded-full items-center justify-center text-primary shadow-2xl hover:scale-110 transition-all border border-white/10"
       >
         <div className="relative">
           <Bell className="w-6 h-6" />
