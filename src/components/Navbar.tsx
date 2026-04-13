@@ -43,7 +43,6 @@ export default function Navbar({ onSearch }: { onSearch?: (query: string) => voi
   const navLinks = [
     { name: 'Home', href: '#' },
     { name: 'Produk', href: '#products' },
-    { name: 'List Harga', href: '#pricelist' },
     { name: 'Riwayat', href: '#history', icon: History },
     { name: 'Chat AI', href: '#', onClick: () => window.dispatchEvent(new Event('openAIChatbot')), icon: Sparkles },
     { name: 'Tentang Kami', href: '#about' },
