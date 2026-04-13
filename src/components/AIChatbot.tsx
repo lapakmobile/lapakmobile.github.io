@@ -27,6 +27,12 @@ export default function AIChatbot() {
     scrollToBottom();
   }, [messages]);
 
+  useEffect(() => {
+    const handleOpen = () => setIsOpen(true);
+    window.addEventListener('openAIChatbot', handleOpen);
+    return () => window.removeEventListener('openAIChatbot', handleOpen);
+  }, []);
+
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || isLoading) return;

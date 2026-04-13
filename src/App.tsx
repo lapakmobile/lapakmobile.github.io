@@ -398,11 +398,11 @@ export default function App() {
               rel="noopener noreferrer"
               className="inline-flex items-center gap-3 px-8 py-4 glass rounded-2xl text-sm font-bold hover:bg-white/10 transition-all border border-white/10 group"
             >
-              <img 
+              <LazyImage 
                 src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_Business_Profile_icon.svg" 
                 alt="Google Business" 
                 className="w-5 h-5 group-hover:scale-110 transition-transform"
-                referrerPolicy="no-referrer"
+                responsive={false}
               />
               <span>Lihat Semua Review di Google Business</span>
             </a>
@@ -462,11 +462,11 @@ export default function App() {
                 className="relative"
               >
                 <div className="aspect-square rounded-3xl overflow-hidden glass p-4">
-                  <img 
+                  <LazyImage 
                     src="https://vip-reseller.co.id/library/assets/images/product/honor-of-kings.webp" 
                     alt="LapakMobile Office" 
                     className="w-full h-full object-cover rounded-2xl grayscale hover:grayscale-0 transition-all duration-700"
-                    referrerPolicy="no-referrer"
+                    width={800}
                   />
                 </div>
                 <div className="absolute -bottom-6 -right-6 glass p-8 rounded-2xl neon-glow hidden md:block">
@@ -505,7 +505,12 @@ export default function App() {
               ].map((article, i) => (
                 <div key={i} className="glass rounded-2xl overflow-hidden group cursor-pointer hover:border-primary/30 transition-all">
                   <div className="aspect-video bg-gray-800 relative">
-                    <img src={`https://picsum.photos/seed/article${i}/600/400`} alt={article.title} className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity" referrerPolicy="no-referrer" />
+                    <LazyImage 
+                      src={`https://picsum.photos/seed/article${i}/600/400`} 
+                      alt={article.title} 
+                      className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity" 
+                      width={600}
+                    />
                   </div>
                   <div className="p-6">
                     <div className="text-xs text-primary font-bold mb-2 uppercase tracking-widest">{article.date}</div>

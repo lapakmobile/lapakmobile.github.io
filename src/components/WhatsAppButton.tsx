@@ -8,28 +8,22 @@ export default function WhatsAppButton() {
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
-      {/* Mobile Sticky CTA */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 p-4 glass border-t border-white/10 z-50">
-        <button 
-          onClick={handleClick}
-          className="w-full py-4 bg-primary text-dark font-bold rounded-xl flex items-center justify-center gap-2 neon-glow shadow-lg"
-        >
-          <MessageCircle className="w-6 h-6" />
-          Chat Admin WhatsApp
-        </button>
-      </div>
-
+    <div className="fixed bottom-6 right-6 z-50">
       {/* Floating Button (Desktop & Mobile) */}
       <motion.button
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
         onClick={handleClick}
-        className="hidden md:flex w-16 h-16 bg-[#25D366] text-white rounded-full items-center justify-center shadow-2xl neon-glow-purple group relative"
+        className="w-14 h-14 md:w-16 md:h-16 bg-[#25D366] text-white rounded-full flex items-center justify-center shadow-2xl neon-glow-purple group relative"
       >
-        <MessageCircle className="w-8 h-8" />
-        <span className="absolute right-20 bg-white text-dark text-xs font-bold px-3 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-xl">
+        <MessageCircle className="w-7 h-7 md:w-8 md:h-8" />
+        <span className="absolute right-20 bg-white text-dark text-xs font-bold px-3 py-2 rounded-lg opacity-0 md:group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-xl pointer-events-none">
           Butuh Bantuan? Chat Kami!
+        </span>
+        
+        {/* Notification Badge */}
+        <span className="absolute -top-1 -left-1 w-5 h-5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-white animate-pulse">
+          1
         </span>
       </motion.button>
     </div>

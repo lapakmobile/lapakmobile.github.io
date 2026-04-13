@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import Skeleton from './Skeleton';
-import { optimizeImageUrl } from '../../lib/imageOptimizer';
+import { optimizeImageUrl, generateSrcSet } from '../../lib/imageOptimizer';
 
 interface LazyImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   src: string;
@@ -9,6 +9,7 @@ interface LazyImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   skeletonClassName?: string;
   width?: number;
   priority?: 'high' | 'low' | 'auto';
+  responsive?: boolean;
 }
 
 export default function LazyImage({ 
@@ -18,12 +19,14 @@ export default function LazyImage({
   skeletonClassName = '', 
   width,
   priority = 'auto',
+  responsive = true,
   ...props 
 }: LazyImageProps) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [error, setError] = useState(false);
 
   const optimizedSrc = optimizeImageUrl(src, width);
+  const srcSet = responsive ? generateSrcSet(src) : undefined;
 
   return (
     <div className={`relative overflow-hidden ${className}`}>
@@ -33,6 +36,8 @@ export default function LazyImage({
       
       <img
         src={optimizedSrc}
+        srcSet={srcSet}
+        sizes={responsive ? "(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" : undefined}
         alt={alt}
         loading={priority === 'high' ? 'eager' : 'lazy'}
         fetchPriority={priority}

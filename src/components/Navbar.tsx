@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, X, Zap, Search, History, Sun, Moon } from 'lucide-react';
+import { Menu, X, Zap, Search, History, Sun, Moon, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 export default function Navbar({ onSearch }: { onSearch?: (query: string) => void }) {
@@ -45,6 +45,7 @@ export default function Navbar({ onSearch }: { onSearch?: (query: string) => voi
     { name: 'Produk', href: '#products' },
     { name: 'List Harga', href: '#pricelist' },
     { name: 'Riwayat', href: '#history', icon: History },
+    { name: 'Chat AI', href: '#', onClick: () => window.dispatchEvent(new Event('openAIChatbot')), icon: Sparkles },
     { name: 'Tentang Kami', href: '#about' },
   ];
 
@@ -182,10 +183,19 @@ export default function Navbar({ onSearch }: { onSearch?: (query: string) => voi
                 <a
                   key={link.name}
                   href={link.href}
-                  onClick={() => setIsOpen(false)}
+                  onClick={(e) => {
+                    if (link.onClick) {
+                      e.preventDefault();
+                      link.onClick();
+                    }
+                    setIsOpen(false);
+                  }}
                   className="block px-3 py-4 text-base font-medium text-gray-300 hover:text-primary hover:bg-white/5 rounded-md transition-all"
                 >
-                  {link.name}
+                  <div className="flex items-center gap-3">
+                    {link.icon && <link.icon className="w-5 h-5 text-primary" />}
+                    {link.name}
+                  </div>
                 </a>
               ))}
             </div>
