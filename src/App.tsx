@@ -6,6 +6,7 @@ import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import ProductCard from './components/ProductCard';
 import Footer from './components/Footer';
+import BackToTop from './components/BackToTop';
 
 // Lazy load non-critical components
 const OrderHistory = lazy(() => import('./components/OrderHistory'));
@@ -620,6 +621,7 @@ export default function App() {
       </main>
 
       <Footer />
+      <BackToTop />
       
 
       {/* Merchant Center Integration Button (Hidden/Admin) */}
