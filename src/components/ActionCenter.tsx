@@ -36,14 +36,6 @@ export default function ActionCenter() {
       badge: 1
     },
     {
-      id: 'ai',
-      icon: Sparkles,
-      label: 'Asisten AI',
-      color: 'bg-primary',
-      onClick: () => window.dispatchEvent(new Event('openAIChatbot')),
-      badge: 'AI'
-    },
-    {
       id: 'history',
       icon: History,
       label: 'Terakhir Dilihat',

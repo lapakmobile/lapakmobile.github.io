@@ -44,7 +44,6 @@ const Navbar = memo(function Navbar({ onSearch }: { onSearch?: (query: string) =
     { name: 'Home', href: '#' },
     { name: 'Produk', href: '#products' },
     { name: 'Riwayat', href: '#history', icon: History },
-    { name: 'Chat AI', href: '#', onClick: () => window.dispatchEvent(new Event('openAIChatbot')), icon: Sparkles },
     { name: 'Tentang Kami', href: '#about' },
   ];
 
@@ -182,13 +181,7 @@ const Navbar = memo(function Navbar({ onSearch }: { onSearch?: (query: string) =
                 <a
                   key={link.name}
                   href={link.href}
-                  onClick={(e) => {
-                    if (link.onClick) {
-                      e.preventDefault();
-                      link.onClick();
-                    }
-                    setIsOpen(false);
-                  }}
+                  onClick={() => setIsOpen(false)}
                   className="block px-3 py-4 text-base font-medium text-gray-300 hover:text-primary hover:bg-white/5 rounded-md transition-all"
                 >
                   <div className="flex items-center gap-3">

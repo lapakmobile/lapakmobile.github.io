@@ -12,7 +12,6 @@ const OrderHistory = lazy(() => import('./components/OrderHistory'));
 const PriceList = lazy(() => import('./components/PriceList'));
 const PriceAlertManager = lazy(() => import('./components/PriceAlertManager'));
 const RecentlyViewed = lazy(() => import('./components/RecentlyViewed'));
-const AIChatbot = lazy(() => import('./components/AIChatbot'));
 const ActionCenter = lazy(() => import('./components/ActionCenter'));
 
 import ProductCardSkeleton from './components/ProductCardSkeleton';
@@ -706,7 +705,6 @@ export default function App() {
       <Toaster position="top-center" expand={false} richColors theme="dark" />
       
       <Suspense fallback={null}>
-        <AIChatbot />
         <ActionCenter />
         <PriceAlertManager />
         <RecentlyViewed />
