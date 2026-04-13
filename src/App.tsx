@@ -34,7 +34,7 @@ export default function App() {
       "@type": "Organization",
       "name": "LapakMobile",
       "url": window.location.origin,
-      "logo": `${window.location.origin}/logo.png`,
+      "logo": `${window.location.origin}/favicon.svg`,
       "description": "Platform Top Up Game dan Layanan Digital Terpercaya di Indonesia.",
       "potentialAction": {
         "@type": "SearchAction",
