@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { MessageSquare, Send, X, Bot, User, Sparkles, Loader2 } from 'lucide-react';
-import { GoogleGenAI } from "@google/genai";
 import Markdown from 'react-markdown';
 import { ALL_PRODUCTS, WHATSAPP_NUMBER } from '../constants';
 
@@ -17,7 +16,15 @@ export default function AIChatbot() {
     { role: 'model', text: 'Halo! Saya asisten AI LapakMobile. Ada yang bisa saya bantu hari ini? Anda bisa tanya tentang harga diamond, paket streaming, atau cara order.' }
   ]);
   const [isLoading, setIsLoading] = useState(false);
+  const [streamingMessage, setStreamingMessage] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const suggestedQuestions = [
+    "Harga Diamond ML?",
+    "Paket Streaming Murah?",
+    "Cara Order?",
+    "Apakah Aman?"
+  ];
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -25,7 +32,7 @@ export default function AIChatbot() {
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, streamingMessage]);
 
   useEffect(() => {
     const handleOpen = () => setIsOpen(true);
@@ -33,18 +40,70 @@ export default function AIChatbot() {
     return () => window.removeEventListener('openAIChatbot', handleOpen);
   }, []);
 
-  const handleSend = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!input.trim() || isLoading) return;
+  const getLocalResponse = (query: string): string | null => {
+    const q = query.toLowerCase();
+    
+    if (q.includes('cara order') || q.includes('cara pesan') || q.includes('gimana order') || q.includes('tutorial')) {
+      return `**Cara Order di LapakMobile:**\n\n1. Pilih produk di halaman utama.\n2. Klik tombol **"Pesan Sekarang"**.\n3. Anda akan diarahkan ke WhatsApp Admin (${WHATSAPP_NUMBER}).\n4. Lakukan pembayaran & produk diproses instan (1-5 menit)! ⚡`;
+    }
 
-    const userMessage = input.trim();
+    if (q.includes('ml') || q.includes('mobile legends') || q.includes('diamond') || q.includes('starlight')) {
+      const ml = ALL_PRODUCTS.find(p => p.name.toLowerCase().includes('mobile legends'));
+      if (ml) {
+        return `**Harga Diamond Mobile Legends:**\n\n${ml.packages.map(pkg => `- **${pkg.name}**: ${pkg.price}`).join('\n')}\n\nKlik produk ML di home untuk pesan! 🎮`;
+      }
+    }
+
+    if (q.includes('streaming') || q.includes('netflix') || q.includes('youtube') || q.includes('premium') || q.includes('disney') || q.includes('hbogo')) {
+      const streaming = ALL_PRODUCTS.filter(p => p.category.toLowerCase().includes('streaming'));
+      if (streaming.length > 0) {
+        return `**Paket Streaming Populer:**\n\n${streaming.map(p => `- **${p.name}**: Mulai ${p.packages[0].price}`).join('\n')}\n\nCek kategori Streaming untuk detailnya! 📺`;
+      }
+    }
+
+    if (q.includes('aman') || q.includes('legal') || q.includes('percaya') || q.includes('penipu') || q.includes('bukti')) {
+      return `Tenang kak! LapakMobile **100% Aman & Legal**. Kami sudah melayani ribuan transaksi dengan proses otomatis 24 jam. Testimoni bisa cek di ulasan produk ya! ✅`;
+    }
+
+    if (q.includes('harga') || q.includes('list') || q.includes('daftar')) {
+      return `Kami menyediakan berbagai produk digital dengan harga termurah! Silakan ketik nama game atau layanan yang kakak cari (contoh: "Harga ML" atau "Harga Netflix"). 💰`;
+    }
+
+    if (q.includes('admin') || q.includes('wa') || q.includes('whatsapp') || q.includes('hubungi')) {
+      return `Kakak bisa hubungi Admin WhatsApp kami di **${WHATSAPP_NUMBER}** untuk bantuan lebih lanjut. Admin kami siap membantu 24 jam! 📱`;
+    }
+
+    // Smart Product Search Fallback
+    const matchedProduct = ALL_PRODUCTS.find(p => q.includes(p.name.toLowerCase()));
+    if (matchedProduct) {
+      return `**Harga ${matchedProduct.name}:**\n\n${matchedProduct.packages.map(pkg => `- **${pkg.name}**: ${pkg.price}`).join('\n')}\n\nKlik produk di home untuk pesan sekarang! 🚀`;
+    }
+
+    return null;
+  };
+
+  const handleSend = async (e: React.FormEvent | string) => {
+    if (typeof e !== 'string') e.preventDefault();
+    const userMessage = typeof e === 'string' ? e : input.trim();
+    
+    if (!userMessage || isLoading) return;
+
     setInput('');
     setMessages(prev => [...prev, { role: 'user', text: userMessage }]);
     setIsLoading(true);
+    setStreamingMessage('');
+
+    // Try local response first for speed
+    const localResponse = getLocalResponse(userMessage);
+    if (localResponse) {
+      setTimeout(() => {
+        setMessages(prev => [...prev, { role: 'model', text: localResponse }]);
+        setIsLoading(false);
+      }, 500);
+      return;
+    }
 
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-      
       // Prepare context about products
       const productContext = ALL_PRODUCTS.map(p => 
         `- **${p.name}** (${p.category}): Paket tersedia: ${p.packages.map(pkg => `${pkg.name} (${pkg.price})`).join(', ')}`
@@ -81,25 +140,54 @@ export default function AIChatbot() {
         - Berikan jawaban yang ringkas dan mudah dibaca.
       `;
 
-      const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: [...messages, { role: 'user', text: userMessage }].map(m => ({
-          role: m.role,
-          parts: [{ text: m.text }]
-        })),
-        config: {
-          systemInstruction: systemInstruction,
-          temperature: 0.7,
-          topP: 0.95,
-          topK: 40,
-        },
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: [...messages, { role: 'user', text: userMessage }],
+          systemInstruction
+        })
       });
 
-      const aiText = response.text || "Maaf, saya sedang mengalami gangguan teknis. Silakan hubungi admin via WhatsApp.";
-      setMessages(prev => [...prev, { role: 'model', text: aiText }]);
+      if (!response.ok) throw new Error('Failed to fetch from API');
+
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
+      let fullResponse = '';
+
+      if (reader) {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          
+          const chunk = decoder.decode(value);
+          const lines = chunk.split('\n');
+          
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              const data = line.slice(6);
+              if (data === '[DONE]') break;
+              try {
+                const { content } = JSON.parse(data);
+                fullResponse += content;
+                setStreamingMessage(fullResponse);
+              } catch (e) {
+                console.error('Error parsing SSE:', e);
+              }
+            }
+          }
+        }
+      }
+
+      setMessages(prev => [...prev, { role: 'model', text: fullResponse }]);
+      setStreamingMessage('');
     } catch (error) {
       console.error("Chatbot Error:", error);
-      setMessages(prev => [...prev, { role: 'model', text: "Maaf, saya tidak bisa merespon saat ini. Silakan hubungi admin langsung ya!" }]);
+      
+      // Smart Fallback if AI fails
+      const fallbackMsg = `Maaf kak, sistem AI kami sedang sibuk. 🙏\n\n**Tapi jangan khawatir!** Kakak bisa langsung tanya ke **Admin WhatsApp** (${WHATSAPP_NUMBER}) untuk respon super cepat, atau cek daftar harga langsung di menu **Produk**.`;
+      
+      setMessages(prev => [...prev, { role: 'model', text: fallbackMsg }]);
     } finally {
       setIsLoading(false);
     }
@@ -178,7 +266,24 @@ export default function AIChatbot() {
                   </div>
                 </motion.div>
               ))}
-              {isLoading && (
+
+              {/* Streaming Message */}
+              {streamingMessage && (
+                <div className="flex justify-start">
+                  <div className="flex gap-3 max-w-[85%]">
+                    <div className="w-8 h-8 rounded-lg bg-primary/20 text-primary flex items-center justify-center shrink-0">
+                      <Sparkles className="w-4 h-4" />
+                    </div>
+                    <div className="p-4 rounded-2xl bg-white/5 text-gray-200 text-sm border border-white/5 rounded-tl-none">
+                      <div className="markdown-body prose prose-invert prose-sm max-w-none">
+                        <Markdown>{streamingMessage}</Markdown>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {isLoading && !streamingMessage && (
                 <div className="flex justify-start">
                   <div className="flex gap-3 max-w-[85%]">
                     <div className="w-8 h-8 rounded-lg bg-primary/20 text-primary flex items-center justify-center">
@@ -188,6 +293,21 @@ export default function AIChatbot() {
                       Sedang berpikir...
                     </div>
                   </div>
+                </div>
+              )}
+
+              {/* Suggested Questions */}
+              {!isLoading && messages.length === 1 && (
+                <div className="flex flex-wrap gap-2 mt-4">
+                  {suggestedQuestions.map((q, i) => (
+                    <button
+                      key={i}
+                      onClick={() => handleSend(q)}
+                      className="px-4 py-2 bg-white/5 border border-white/10 rounded-full text-[11px] font-bold text-gray-400 hover:bg-primary hover:text-dark hover:border-primary transition-all"
+                    >
+                      {q}
+                    </button>
+                  ))}
                 </div>
               )}
               <div ref={messagesEndRef} />
@@ -212,7 +332,7 @@ export default function AIChatbot() {
                 </button>
               </div>
               <p className="text-[9px] text-gray-600 text-center mt-3 uppercase tracking-widest font-bold">
-                Powered by Gemini AI
+                Powered by ChatGPT
               </p>
             </form>
           </motion.div>
