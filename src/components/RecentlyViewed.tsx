@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { History, X, ChevronRight, Zap } from 'lucide-react';
+import { History, X, ChevronRight, Zap, Trash2 } from 'lucide-react';
 import { ALL_PRODUCTS } from '../constants';
 import { Product } from '../types';
 import LazyImage from './ui/LazyImage';
+import { toast } from 'sonner';
 
 export default function RecentlyViewed() {
   const [recentlyViewedIds, setRecentlyViewedIds] = useState<string[]>([]);
@@ -25,6 +26,15 @@ export default function RecentlyViewed() {
       window.removeEventListener('openRecentlyViewed', handleOpen);
     };
   }, []);
+
+  const clearRecentlyViewed = () => {
+    if (window.confirm('Hapus semua riwayat produk yang dilihat?')) {
+      localStorage.removeItem('recently_viewed');
+      setRecentlyViewedIds([]);
+      window.dispatchEvent(new Event('recentlyViewedUpdated'));
+      toast.success('Riwayat dilihat telah dihapus');
+    }
+  };
 
   const recentlyViewedProducts = recentlyViewedIds
     .map(id => ALL_PRODUCTS.find(p => p.id === id))
@@ -112,7 +122,14 @@ export default function RecentlyViewed() {
                 ))}
               </div>
 
-              <div className="p-6 border-t border-white/5 bg-dark/30">
+              <div className="p-6 border-t border-white/5 bg-dark/30 space-y-4">
+                <button 
+                  onClick={clearRecentlyViewed}
+                  className="w-full py-3 flex items-center justify-center gap-2 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white rounded-xl transition-all font-bold text-xs border border-red-500/20"
+                >
+                  <Trash2 className="w-3 h-3" />
+                  Hapus Semua Riwayat
+                </button>
                 <p className="text-[10px] text-gray-500 text-center leading-relaxed">
                   Produk yang Anda lihat akan muncul di sini untuk memudahkan Anda kembali berbelanja.
                 </p>

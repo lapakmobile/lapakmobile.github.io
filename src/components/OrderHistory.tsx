@@ -9,8 +9,14 @@ export default function OrderHistory() {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
   useEffect(() => {
-    const savedOrders = JSON.parse(localStorage.getItem('order_history') || '[]');
-    setOrders(savedOrders);
+    const loadOrders = () => {
+      const savedOrders = JSON.parse(localStorage.getItem('order_history') || '[]');
+      setOrders(savedOrders);
+    };
+
+    loadOrders();
+    window.addEventListener('orderHistoryUpdated', loadOrders);
+    return () => window.removeEventListener('orderHistoryUpdated', loadOrders);
   }, []);
 
   const clearHistory = () => {
@@ -18,6 +24,16 @@ export default function OrderHistory() {
       localStorage.removeItem('order_history');
       setOrders([]);
       toast.success('Riwayat pesanan dikosongkan');
+    }
+  };
+
+  const deleteOrder = (e: React.MouseEvent, orderId: string) => {
+    e.stopPropagation(); // Avoid opening the modal
+    if (window.confirm('Hapus pesanan ini dari riwayat?')) {
+      const updatedOrders = orders.filter(o => o.id !== orderId);
+      localStorage.setItem('order_history', JSON.stringify(updatedOrders));
+      setOrders(updatedOrders);
+      toast.success('Pesanan dihapus dari riwayat');
     }
   };
 
@@ -83,9 +99,18 @@ export default function OrderHistory() {
                   </div>
 
                   <div className="flex flex-col sm:items-end justify-between gap-4">
-                    <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${getStatusColor(order.status)}`}>
-                      {getStatusIcon(order.status)}
-                      {order.status}
+                    <div className="flex items-center gap-2">
+                      <button 
+                        onClick={(e) => deleteOrder(e, order.id)}
+                        className="p-2 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                        title="Hapus dari riwayat"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                      <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${getStatusColor(order.status)}`}>
+                        {getStatusIcon(order.status)}
+                        {order.status}
+                      </div>
                     </div>
                     <div className="text-right">
                       <div className="text-xl font-black text-white mb-1">{order.price}</div>

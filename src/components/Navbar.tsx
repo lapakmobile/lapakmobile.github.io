@@ -1,9 +1,11 @@
 import React, { useState, useEffect, memo } from 'react';
-import { Menu, X, Search, Gamepad2 } from 'lucide-react';
+import { Menu, X, Search, Gamepad2, Trash2, History } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { toast } from 'sonner';
 
 const Navbar = memo(function Navbar({ onSearch, onHomeClick }: { onSearch?: (query: string) => void, onHomeClick?: () => void }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [localSearch, setLocalSearch] = useState('');
 
@@ -17,6 +19,24 @@ const Navbar = memo(function Navbar({ onSearch, onHomeClick }: { onSearch?: (que
     const query = e.target.value;
     setLocalSearch(query);
     if (onSearch) onSearch(query);
+  };
+
+  const clearOrderHistory = () => {
+    if (window.confirm('Hapus semua riwayat pesanan?')) {
+      localStorage.removeItem('order_history');
+      window.dispatchEvent(new Event('orderHistoryUpdated'));
+      toast.success('Riwayat pesanan dikosongkan');
+      setMenuOpen(false);
+    }
+  };
+
+  const clearViewHistory = () => {
+    if (window.confirm('Hapus semua riwayat produk yang dilihat?')) {
+      localStorage.removeItem('recently_viewed');
+      window.dispatchEvent(new Event('recentlyViewedUpdated'));
+      toast.success('Riwayat lihat dikosongkan');
+      setMenuOpen(false);
+    }
   };
 
   const navLinks = [
@@ -73,9 +93,53 @@ const Navbar = memo(function Navbar({ onSearch, onHomeClick }: { onSearch?: (que
             </div>
 
             {/* Menu Button */}
-            <button className="p-2.5 bg-white/5 rounded-lg border border-white/10 hover:bg-white/10 transition-colors">
-              <Menu className="w-6 h-6 text-white" />
-            </button>
+            <div className="relative">
+              <button 
+                onClick={() => setMenuOpen(!menuOpen)}
+                className={`p-2.5 rounded-lg border border-white/10 transition-all ${menuOpen ? 'bg-primary text-dark border-primary' : 'bg-white/5 text-white hover:bg-white/10'}`}
+              >
+                <Menu className="w-6 h-6" />
+              </button>
+
+              <AnimatePresence>
+                {menuOpen && (
+                  <>
+                    <div 
+                      className="fixed inset-0 z-[-1]" 
+                      onClick={() => setMenuOpen(false)}
+                    />
+                    <motion.div
+                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                      className="absolute right-0 mt-3 w-64 bg-dark-lighter border border-white/10 rounded-2xl shadow-2xl p-2 z-[60] overflow-hidden"
+                    >
+                      <div className="px-3 py-2 text-[10px] font-black text-gray-500 uppercase tracking-widest border-b border-white/5 mb-1">
+                        Menu Kontrol
+                      </div>
+                      <button
+                        onClick={clearOrderHistory}
+                        className="w-full flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-red-500/10 text-red-400 text-sm font-bold transition-all group"
+                      >
+                        <div className="w-8 h-8 rounded-lg bg-red-500/10 flex items-center justify-center group-hover:bg-red-500 group-hover:text-white transition-colors">
+                          <Trash2 className="w-4 h-4" />
+                        </div>
+                        <span>Hapus Riwayat Pesanan</span>
+                      </button>
+                      <button
+                        onClick={clearViewHistory}
+                        className="w-full flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-primary/10 text-gray-200 hover:text-primary text-sm font-bold transition-all group"
+                      >
+                        <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center group-hover:bg-primary group-hover:text-dark transition-colors">
+                          <History className="w-4 h-4" />
+                        </div>
+                        <span>Hapus Riwayat Produk</span>
+                      </button>
+                    </motion.div>
+                  </>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
 
           {/* Mobile Toggle */}
