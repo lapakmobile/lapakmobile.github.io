@@ -56,4 +56,6 @@ export interface Order {
   price: string;
   date: string;
   status: 'Pending' | 'Success' | 'Processing';
+  paymentMethod?: string;
+  transactionId?: string;
 }

@@ -80,7 +80,9 @@ const ProductCard = memo(function ProductCard({ product: initialProduct, index =
       packageName: `${quantity}x ${packageName}`,
       price: finalPrice,
       date: new Date().toISOString(),
-      status: 'Processing'
+      status: 'Processing',
+      paymentMethod: 'WhatsApp Gateway',
+      transactionId: `TXN-${Math.random().toString(36).substr(2, 12).toUpperCase()}`
     };
 
     const existingOrders = JSON.parse(localStorage.getItem('order_history') || '[]');

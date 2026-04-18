@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Search, Filter, Star, ChevronDown, ChevronUp, CheckCircle2, Zap, Shield, FileText, X, Heart, ShoppingCart, ReceiptText, CreditCard, Clock, ThumbsUp, Percent, MessageCircle } from 'lucide-react';
 import { Toaster, toast } from 'sonner';
 import Navbar from './components/Navbar';
+import BannerSlider from './components/BannerSlider';
 import Hero from './components/Hero';
 import ProductCard from './components/ProductCard';
 import Footer from './components/Footer';
@@ -154,6 +155,8 @@ export default function App() {
       <Navbar onSearch={setSearchQuery} />
       
       <main className="pt-24 min-h-screen">
+        <BannerSlider />
+        
         {/* Voucher Section */}
         <section id="voucher" className="py-12">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
