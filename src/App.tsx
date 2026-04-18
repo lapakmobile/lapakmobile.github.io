@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, lazy, Suspense } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Search, Filter, Star, ChevronDown, ChevronUp, CheckCircle2, Zap, Shield, FileText, X, Heart, ShoppingCart, ReceiptText } from 'lucide-react';
+import { Search, Filter, Star, ChevronDown, ChevronUp, CheckCircle2, Zap, Shield, FileText, X, Heart, ShoppingCart, ReceiptText, CreditCard, Clock, ThumbsUp, Percent, MessageCircle } from 'lucide-react';
 import { Toaster, toast } from 'sonner';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
@@ -372,69 +372,71 @@ export default function App() {
         </section>
 
         {/* About Us Section */}
-        <section id="about" className="py-24 bg-dark-lighter relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
+        <section id="about" className="py-24 bg-dark relative overflow-hidden">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-start">
               <motion.div
                 initial={{ opacity: 0, x: -30 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.6 }}
+                className="max-w-xl"
               >
-                <h2 className="text-primary font-bold tracking-widest uppercase text-sm mb-4">Tentang LapakMobile</h2>
-                <h3 className="text-4xl md:text-5xl font-display font-extrabold mb-8 leading-tight">
-                  Solusi Terpercaya untuk Kebutuhan Digital Anda
-                </h3>
-                <div className="space-y-6 text-gray-400 leading-relaxed">
-                  <p>
-                    LapakMobile hadir sebagai platform terintegrasi yang memudahkan para gamer dan pengguna layanan digital di Indonesia untuk mendapatkan produk favorit mereka dengan harga yang kompetitif dan proses yang instan.
-                  </p>
-                  <p>
-                    Berawal dari komunitas gaming, kami memahami pentingnya keamanan dan kecepatan dalam setiap transaksi. Itulah mengapa kami membangun sistem yang bekerja 24/7 untuk memastikan pesanan Anda diproses secepat kilat.
-                  </p>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4">
-                    <div className="flex items-start gap-4">
-                      <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                        <CheckCircle2 className="text-primary w-6 h-6" />
-                      </div>
-                      <div>
-                        <h4 className="font-bold text-white mb-1">100% Aman</h4>
-                        <p className="text-xs">Transaksi legal dan terjamin keamanannya.</p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-4">
-                      <div className="w-12 h-12 rounded-xl bg-secondary/10 flex items-center justify-center shrink-0">
-                        <Zap className="text-secondary w-6 h-6" />
-                      </div>
-                      <div>
-                        <h4 className="font-bold text-white mb-1">Proses Instan</h4>
-                        <p className="text-xs">Pesanan masuk otomatis dalam hitungan menit.</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                <h2 className="text-3xl md:text-4xl font-display font-black text-white mb-8 leading-tight">
+                  LapakMobile: Website top-up game paling terpercaya di Indonesia
+                </h2>
+                <p className="text-gray-400 leading-relaxed text-lg">
+                  Setiap harinya, ribuan gamers di Indonesia menggunakan LapakMobile untuk melakukan top up game dengan lancar, tanpa perlu daftar atau login, dan diamonds/token game akan dikirimkan secara instan ke akun game anda.
+                </p>
               </motion.div>
               
               <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
+                initial={{ opacity: 0, x: 30 }}
+                whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.6 }}
-                className="relative"
+                className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10"
               >
-                <div className="aspect-square rounded-3xl overflow-hidden glass p-4">
-                  <LazyImage 
-                    src="https://vip-reseller.co.id/library/assets/images/product/honor-of-kings.webp" 
-                    alt="LapakMobile Office" 
-                    className="w-full h-full object-cover rounded-2xl grayscale hover:grayscale-0 transition-all duration-700"
-                    width={800}
-                  />
-                </div>
-                <div className="absolute -bottom-6 -right-6 glass p-8 rounded-2xl neon-glow hidden md:block">
-                  <div className="text-4xl font-display font-extrabold text-primary mb-1">24/7</div>
-                  <div className="text-xs font-bold text-gray-400 uppercase tracking-widest">Support System</div>
-                </div>
+                {[
+                  {
+                    icon: Shield,
+                    title: 'Jujur & Terpercaya',
+                    desc: 'Setiap hari ada ribuan transaksi top-up game atau pembelian voucher yang dilakukan oleh pelanggan kami.'
+                  },
+                  {
+                    icon: CreditCard,
+                    title: 'Metode Pembayaran Lengkap',
+                    desc: 'Kami menawarkan begitu banyak pilihan channel pembayaran, mulai dari bank transfer, GoPay, OVO, LinkAja, dan lainnya.'
+                  },
+                  {
+                    icon: Clock,
+                    title: 'Pengiriman Instan',
+                    desc: 'Hanya butuh beberapa detik saja untuk menyelesaikan transaksi anda. Semua proses kami berjalan secara otomatis.'
+                  },
+                  {
+                    icon: ThumbsUp,
+                    title: 'Pasti Lebih Murah',
+                    desc: 'Top-up game favoritmu dengan harga yang pastinya lebih murah dibandingkan website top-up lainnya.'
+                  },
+                  {
+                    icon: Percent,
+                    title: 'Promosi-promosi Menarik',
+                    desc: 'Dapatkan promo harga terbaik yang bisa anda dapatkan setiap minggunya, ikuti terus kami di sosial media.'
+                  },
+                  {
+                    icon: MessageCircle,
+                    title: 'Layanan Pelanggan via WhatsApp',
+                    desc: 'Customer Support kami siap membantu anda setiap hari, 7 hari dalam seminggu dan 30 hari dalam sebulan.'
+                  }
+                ].map((feature, i) => (
+                  <div key={i} className="space-y-3">
+                    <feature.icon className="text-white w-6 h-6" />
+                    <h4 className="text-lg font-bold text-white tracking-tight">{feature.title}</h4>
+                    <p className="text-gray-400 text-sm leading-relaxed">
+                      {feature.desc}
+                    </p>
+                  </div>
+                ))}
               </motion.div>
             </div>
           </div>
