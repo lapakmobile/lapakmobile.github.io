@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, lazy, Suspense } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Search, Filter, Star, ChevronDown, ChevronUp, CheckCircle2, Zap, Shield, FileText, BookOpen, X, Heart } from 'lucide-react';
+import { Search, Filter, Star, ChevronDown, ChevronUp, CheckCircle2, Zap, Shield, FileText, X, Heart, ShoppingCart, ReceiptText } from 'lucide-react';
 import { Toaster, toast } from 'sonner';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
@@ -21,11 +21,9 @@ import LazyImage from './components/ui/LazyImage';
 import { ALL_PRODUCTS, TESTIMONIALS, FAQS } from './constants';
 import { Category, PriceAlert } from './types';
 import { priceService } from './services/priceService';
-import { merchantService } from './services/merchantService';
 
 export default function App() {
   const [isLoading, setIsLoading] = useState(true);
-  const [isMerchantModalOpen, setIsMerchantModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategories, setActiveCategories] = useState<(Category | 'Favorites')[]>([]);
 
@@ -57,6 +55,8 @@ export default function App() {
   }, [jsonLd]);
 
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
+  const [voucherLimit, setVoucherLimit] = useState(10);
+  const [ppobLimit, setPpobLimit] = useState(5);
 
   useEffect(() => {
     // Faster initial load simulation
@@ -141,119 +141,74 @@ export default function App() {
     return () => clearInterval(interval);
   }, []);
 
-  const categories: (Category | 'Favorites')[] = ['Favorites', 'Game', 'Digital', 'Streaming', 'Apps', 'Jasa', 'Sosmed'];
+  const voucherProducts = useMemo(() => {
+    return ALL_PRODUCTS.filter(p => (p.category === 'Game' || p.category === 'Streaming' || p.category === 'Sosmed') && p.name.toLowerCase().includes(searchQuery.toLowerCase()));
+  }, [searchQuery]);
 
-  const toggleCategory = (cat: Category | 'Favorites') => {
-    setActiveCategories(prev => 
-      prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat]
-    );
-  };
-
-  const filteredProducts = useMemo(() => {
-    return ALL_PRODUCTS.filter(product => {
-      const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
-      
-      if (activeCategories.length === 0) return matchesSearch;
-
-      const matchesCategory = activeCategories.some(cat => {
-        if (cat === 'Favorites') return favorites.includes(product.id);
-        return product.category === cat;
-      });
-
-      return matchesSearch && matchesCategory;
-    });
-  }, [searchQuery, activeCategories, favorites]);
+  const ppobProducts = useMemo(() => {
+    return ALL_PRODUCTS.filter(p => (p.category === 'Digital' || p.category === 'Apps' || p.category === 'Jasa') && p.name.toLowerCase().includes(searchQuery.toLowerCase()));
+  }, [searchQuery]);
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-dark">
       <Navbar onSearch={setSearchQuery} />
       
-      <main>
-        <Hero />
-
-        {/* Products Section */}
-        <section id="products" className="py-24 bg-dark relative">
+      <main className="pt-24 min-h-screen">
+        {/* Voucher Section */}
+        <section id="voucher" className="py-12">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
-              <h2 className="text-4xl md:text-5xl font-display font-black mb-4 relative inline-block">
-                Top Up Game
-                <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-24 h-1.5 bg-primary rounded-full neon-glow" />
-              </h2>
-              <p className="text-gray-400 mt-6 max-w-2xl mx-auto">Pilih game atau layanan digital favoritmu dengan harga termurah dan proses instan.</p>
+            <div className="flex items-center gap-3 mb-10">
+              <ShoppingCart className="text-white w-8 h-8" />
+              <h2 className="text-3xl font-display font-black text-white">Voucher</h2>
             </div>
 
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-12">
-              
-              <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
-                <div className="relative flex-grow sm:w-64">
-                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 w-5 h-5" />
-                  <input 
-                    type="text" 
-                    placeholder="Cari game..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-12 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
-                  />
-                </div>
-                <div className="flex gap-2 overflow-x-auto pb-2 sm:pb-0 no-scrollbar">
-                  <button
-                    onClick={() => setActiveCategories([])}
-                    className={`px-5 py-3 rounded-xl text-sm font-bold whitespace-nowrap transition-all ${
-                      activeCategories.length === 0 
-                        ? 'bg-primary text-dark neon-glow' 
-                        : 'bg-white/5 text-gray-400 hover:bg-white/10 border border-white/10'
-                    }`}
-                  >
-                    All
-                  </button>
-                  {categories.map((cat) => (
-                    <button
-                      key={cat}
-                      onClick={() => toggleCategory(cat)}
-                      className={`px-5 py-3 rounded-xl text-sm font-bold whitespace-nowrap transition-all flex items-center gap-2 ${
-                        activeCategories.includes(cat) 
-                          ? 'bg-primary text-dark neon-glow' 
-                          : 'bg-white/5 text-gray-400 hover:bg-white/10 border border-white/10'
-                      }`}
-                    >
-                      {cat === 'Favorites' && <Heart className={`w-4 h-4 ${activeCategories.includes('Favorites') ? 'fill-current' : ''}`} />}
-                      {cat}
-                    </button>
-                  ))}
-                </div>
-              </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+              {voucherProducts.slice(0, voucherLimit).map((product, index) => (
+                <ProductCard key={product.id} product={product} index={index} />
+              ))}
             </div>
 
-            {isLoading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {[...Array(8)].map((_, i) => (
-                  <ProductCardSkeleton key={i} />
-                ))}
-              </div>
-            ) : filteredProducts.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                <AnimatePresence mode="popLayout">
-                  {filteredProducts.map((product, index) => (
-                    <div key={product.id}>
-                      <ProductCard product={product} index={index} />
-                    </div>
-                  ))}
-                </AnimatePresence>
-              </div>
-            ) : (
-              <div className="text-center py-20 glass rounded-3xl">
-                <p className="text-gray-400 mb-4">Produk tidak ditemukan.</p>
+            {voucherLimit < voucherProducts.length && (
+              <div className="flex justify-center mt-12">
                 <button 
-                  onClick={() => {setSearchQuery(''); setActiveCategories([]);}}
-                  className="text-primary font-bold hover:underline"
+                  onClick={() => setVoucherLimit(prev => prev + 10)}
+                  className="bg-primary text-dark font-black px-8 py-3 rounded-xl flex items-center gap-2 hover:scale-105 transition-all shadow-lg shadow-primary/20"
                 >
-                  Reset Filter
+                  Tampilkan Lainnya <ChevronDown className="w-5 h-5" />
                 </button>
               </div>
             )}
           </div>
         </section>
-        
+
+        {/* PPOB Section */}
+        <section id="ppob" className="py-12 bg-dark-lighter/30">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center gap-3 mb-10">
+              <ReceiptText className="text-white w-8 h-8" />
+              <h2 className="text-3xl font-display font-black text-white">PPOB</h2>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+              {ppobProducts.slice(0, ppobLimit).map((product, index) => (
+                <ProductCard key={product.id} product={product} index={index} />
+              ))}
+            </div>
+
+            {ppobLimit < ppobProducts.length && (
+              <div className="flex justify-center mt-12">
+                <button 
+                  onClick={() => setPpobLimit(prev => prev + 10)}
+                  className="bg-primary text-dark font-black px-8 py-3 rounded-xl flex items-center gap-2 hover:scale-105 transition-all shadow-lg shadow-primary/20"
+                >
+                  Tampilkan Lainnya <ChevronDown className="w-5 h-5" />
+                </button>
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* Other sections below */}
         <Suspense fallback={<div className="h-96 animate-pulse bg-white/5 rounded-3xl" />}>
           <OrderHistory />
         </Suspense>
@@ -623,111 +578,6 @@ export default function App() {
       <Footer />
       <BackToTop />
       
-
-      {/* Merchant Center Integration Button (Hidden/Admin) */}
-      <button 
-        onClick={() => setIsMerchantModalOpen(true)}
-        className="fixed bottom-6 left-6 z-40 w-10 h-10 bg-dark/50 hover:bg-dark glass rounded-full flex items-center justify-center text-gray-500 hover:text-primary transition-all border border-white/5 opacity-20 hover:opacity-100"
-        title="Google Merchant Center Integration"
-      >
-        <Shield className="w-4 h-4" />
-      </button>
-
-      {/* Merchant Center Modal */}
-      <AnimatePresence>
-        {isMerchantModalOpen && (
-          <div className="fixed inset-0 z-[150] flex items-center justify-center px-4">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setIsMerchantModalOpen(false)}
-              className="absolute inset-0 bg-dark/90 backdrop-blur-md"
-            />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative w-full max-w-2xl glass rounded-[2.5rem] p-10 border border-white/10 shadow-2xl overflow-hidden"
-            >
-              <button 
-                onClick={() => setIsMerchantModalOpen(false)}
-                className="absolute top-8 right-8 p-2 hover:bg-white/10 rounded-full transition-colors"
-              >
-                <X className="w-6 h-6" />
-              </button>
-
-              <div className="mb-10">
-                <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mb-6">
-                  <Shield className="text-primary w-8 h-8" />
-                </div>
-                <h3 className="text-3xl font-display font-black mb-2">Google Merchant Center</h3>
-                <p className="text-gray-400">Integrasikan produk LapakMobile ke Google Shopping dan Search.</p>
-              </div>
-
-              <div className="space-y-8">
-                <div className="bg-white/5 rounded-2xl p-6 border border-white/5">
-                  <h4 className="font-bold mb-4 flex items-center gap-2">
-                    <div className="w-2 h-2 bg-primary rounded-full" />
-                    Metode 1: XML Product Feed (Rekomendasi)
-                  </h4>
-                  <p className="text-sm text-gray-400 mb-4 leading-relaxed">
-                    Gunakan URL di bawah ini untuk "Scheduled Fetch" di Google Merchant Center. Google akan mengambil data produk secara otomatis setiap hari.
-                  </p>
-                  <div className="flex items-center gap-2 bg-dark/50 p-3 rounded-xl border border-white/5 mb-6">
-                    <code className="text-[10px] text-primary flex-1 truncate">{merchantService.getXmlFeedUrl()}</code>
-                    <button 
-                      onClick={() => {
-                        navigator.clipboard.writeText(merchantService.getXmlFeedUrl());
-                        toast.success('URL XML disalin!');
-                      }}
-                      className="p-2 hover:bg-white/10 rounded-lg transition-colors text-gray-400 hover:text-white"
-                    >
-                      <FileText className="w-4 h-4" />
-                    </button>
-                  </div>
-                  <button 
-                    onClick={() => merchantService.downloadFeed()}
-                    className="flex items-center gap-3 px-6 py-3 bg-primary/10 text-primary border border-primary/20 font-bold rounded-xl hover:bg-primary hover:text-dark transition-all"
-                  >
-                    <FileText className="w-5 h-5" />
-                    Download XML Feed
-                  </button>
-                </div>
-
-                <div className="bg-white/5 rounded-2xl p-6 border border-white/5">
-                  <h4 className="font-bold mb-4 flex items-center gap-2">
-                    <div className="w-2 h-2 bg-secondary rounded-full" />
-                    Metode 2: Content API (JSON)
-                  </h4>
-                  <p className="text-sm text-gray-400 mb-4 leading-relaxed">
-                    Jika Anda ingin membangun integrasi kustom menggunakan Content API, gunakan endpoint JSON ini:
-                  </p>
-                  <div className="flex items-center gap-2 bg-dark/50 p-3 rounded-xl border border-white/5">
-                    <code className="text-[10px] text-secondary flex-1 truncate">{merchantService.getJsonApiUrl()}</code>
-                    <button 
-                      onClick={() => {
-                        navigator.clipboard.writeText(merchantService.getJsonApiUrl());
-                        toast.success('URL JSON disalin!');
-                      }}
-                      className="p-2 hover:bg-white/10 rounded-lg transition-colors text-gray-400 hover:text-white"
-                    >
-                      <FileText className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-10 pt-8 border-t border-white/5">
-                <p className="text-xs text-gray-500 text-center">
-                  Butuh bantuan lebih lanjut? Hubungi tim teknis LapakMobile.
-                </p>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-
       <Toaster position="top-center" expand={false} richColors theme="dark" />
       
       <Suspense fallback={null}>

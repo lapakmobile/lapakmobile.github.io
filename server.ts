@@ -4,7 +4,6 @@ import path from "path";
 import { fileURLToPath } from "url";
 import OpenAI from "openai";
 import dotenv from "dotenv";
-import { ALL_PRODUCTS } from "./src/constants";
 
 dotenv.config();
 
@@ -16,50 +15,6 @@ async function startServer() {
   const PORT = 3000;
 
   app.use(express.json());
-
-  // Google Merchant Center XML Feed
-  app.get("/api/products/xml", (req, res) => {
-    const baseUrl = process.env.APP_URL || `http://localhost:${PORT}`;
-    
-    let xml = `<?xml version="1.0"?>
-<rss xmlns:g="http://base.google.com/ns/1.0" version="2.0">
-  <channel>
-    <title>LapakMobile Product Feed</title>
-    <link>${baseUrl}</link>
-    <description>Top Up Game dan Layanan Digital Terpercaya</description>`;
-
-    ALL_PRODUCTS.forEach(product => {
-      // Use the first package as the base price for the feed
-      const basePackage = product.packages[0];
-      const priceValue = basePackage.price.replace(/[^0-9]/g, '');
-      
-      xml += `
-    <item>
-      <g:id>${product.id}</g:id>
-      <g:title>${product.name}</g:title>
-      <g:description>Top up ${product.name} murah dan instan di LapakMobile. Tersedia berbagai pilihan paket.</g:description>
-      <g:link>${baseUrl}/#product-${product.id}</g:link>
-      <g:image_link>${product.image.startsWith('http') ? product.image : baseUrl + '/' + product.image}</g:image_link>
-      <g:condition>new</g:condition>
-      <g:availability>in stock</g:availability>
-      <g:price>${priceValue} IDR</g:price>
-      <g:brand>LapakMobile</g:brand>
-      <g:google_product_category>Software &gt; Video Game Software</g:google_product_category>
-    </item>`;
-    });
-
-    xml += `
-  </channel>
-</rss>`;
-
-    res.setHeader("Content-Type", "application/xml");
-    res.send(xml);
-  });
-
-  // JSON Products API
-  app.get("/api/products", (req, res) => {
-    res.json(ALL_PRODUCTS);
-  });
 
   // OpenAI Client
   const openai = new OpenAI({

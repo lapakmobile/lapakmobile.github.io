@@ -1,32 +1,11 @@
 import React, { useState, useEffect, memo } from 'react';
-import { Menu, X, Zap, Search, History, Sun, Moon, Sparkles } from 'lucide-react';
+import { Menu, X, Search, Gamepad2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 const Navbar = memo(function Navbar({ onSearch }: { onSearch?: (query: string) => void }) {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [localSearch, setLocalSearch] = useState('');
-  const [theme, setTheme] = useState<'dark' | 'light'>(() => {
-    if (typeof window !== 'undefined') {
-      return (localStorage.getItem('theme') as 'dark' | 'light') || 'dark';
-    }
-    return 'dark';
-  });
-
-  useEffect(() => {
-    const root = window.document.documentElement;
-    if (theme === 'light') {
-      root.classList.add('light');
-    } else {
-      root.classList.remove('light');
-    }
-    localStorage.setItem('theme', theme);
-  }, [theme]);
-
-  const toggleTheme = () => {
-    setTheme(prev => prev === 'dark' ? 'light' : 'dark');
-  };
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -41,153 +20,101 @@ const Navbar = memo(function Navbar({ onSearch }: { onSearch?: (query: string) =
   };
 
   const navLinks = [
-    { name: 'Home', href: '#' },
-    { name: 'Produk', href: '#products' },
-    { name: 'Riwayat', href: '#history', icon: History },
-    { name: 'Tentang Kami', href: '#about' },
+    { name: 'Cek Region', href: '#products' },
+    { name: 'Cek Transaksi', href: '#history' },
+    { name: 'Daftar Reseller', href: '#' },
   ];
 
   return (
     <nav 
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled ? 'glass py-3' : 'bg-transparent py-5'
+        scrolled ? 'bg-dark/95 shadow-lg border-b border-white/5 py-3' : 'bg-dark py-5'
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center neon-glow">
-              <Zap className="text-white w-6 h-6 fill-current" />
+          {/* Logo */}
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-primary/20 rounded-xl flex items-center justify-center">
+              <Gamepad2 className="text-primary w-6 h-6 fill-current" />
             </div>
-            <span className="text-2xl font-display font-bold tracking-tighter">
-              LAPAK<span className="text-primary">MOBILE</span>
+            <span className="text-2xl font-display font-black tracking-tighter text-white">
+              Lapak<span className="text-primary">Mobile</span>
             </span>
           </div>
 
-          {/* Desktop Nav */}
-          <div className="hidden md:flex items-center gap-8">
-            <AnimatePresence>
-              {isSearchOpen ? (
-                <motion.div 
-                  initial={{ width: 0, opacity: 0 }}
-                  animate={{ width: 240, opacity: 1 }}
-                  exit={{ width: 0, opacity: 0 }}
-                  className="relative"
+          {/* Desktop Links & Tools */}
+          <div className="hidden lg:flex items-center gap-8 flex-grow justify-end">
+            <div className="flex items-center gap-8 mr-8">
+              {navLinks.map((link) => (
+                <a
+                  key={link.name}
+                  href={link.href}
+                  className="text-sm font-bold text-gray-200 hover:text-primary transition-colors"
                 >
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 w-4 h-4" />
-                  <input 
-                    autoFocus
-                    type="text"
-                    placeholder="Cari produk..."
-                    value={localSearch}
-                    onChange={handleSearchChange}
-                    onBlur={() => !localSearch && setIsSearchOpen(false)}
-                    className="w-full pl-10 pr-4 py-2 bg-white/5 border border-white/10 rounded-full text-sm focus:border-primary outline-none transition-all"
-                  />
-                </motion.div>
-              ) : (
-                <div className="flex items-center gap-8">
-                  {navLinks.map((link) => (
-                    <a
-                      key={link.name}
-                      href={link.href}
-                      className={`text-sm font-medium transition-colors flex items-center gap-1.5 ${
-                        link.name === 'Riwayat' 
-                          ? 'px-4 py-2 bg-primary/10 text-primary rounded-full hover:bg-primary/20' 
-                          : 'text-gray-300 hover:text-primary'
-                      }`}
-                    >
-                      {link.icon && <link.icon className="w-4 h-4" />}
-                      {link.name}
-                    </a>
-                  ))}
-                  <button 
-                    onClick={() => setIsSearchOpen(true)}
-                    className="p-2 hover:bg-white/10 rounded-full transition-colors"
-                  >
-                    <Search className="w-5 h-5" />
-                  </button>
-                  <button 
-                    onClick={toggleTheme}
-                    className="p-2 hover:bg-white/10 rounded-full transition-colors text-primary"
-                    title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-                  >
-                    {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-                  </button>
-                </div>
-              )}
-            </AnimatePresence>
+                  {link.name}
+                </a>
+              ))}
+            </div>
+
+            {/* Search Bar */}
+            <div className="relative w-72">
+              <input 
+                type="text"
+                placeholder="Pencarian..."
+                value={localSearch}
+                onChange={handleSearchChange}
+                className="w-full bg-white/5 border border-white/10 rounded-lg py-2.5 pl-4 pr-10 text-sm placeholder:text-gray-500 text-white outline-none focus:border-primary/50 transition-all"
+              />
+              <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 w-4 h-4" />
+            </div>
+
+            {/* Menu Button */}
+            <button className="p-2.5 bg-white/5 rounded-lg border border-white/10 hover:bg-white/10 transition-colors">
+              <Menu className="w-6 h-6 text-white" />
+            </button>
           </div>
 
           {/* Mobile Toggle */}
-          <div className="md:hidden flex items-center gap-2">
-            <button 
-              onClick={toggleTheme}
-              className="p-2 hover:bg-white/10 rounded-full transition-colors text-primary"
-            >
-              {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-            </button>
-            <button 
-              onClick={() => setIsSearchOpen(!isSearchOpen)}
-              className="p-2 hover:bg-white/10 rounded-full transition-colors"
-            >
-              <Search className="w-5 h-5" />
-            </button>
+          <div className="lg:hidden flex items-center gap-3">
             <button 
               onClick={() => setIsOpen(!isOpen)}
-              className="p-2 text-gray-300 hover:text-white"
+              className="p-2.5 bg-white/5 rounded-lg border border-white/10"
             >
-              {isOpen ? <X /> : <Menu />}
+              {isOpen ? <X className="text-white" /> : <Menu className="text-white" />}
             </button>
           </div>
         </div>
-
-        {/* Mobile Search Input */}
-        <AnimatePresence>
-          {isSearchOpen && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              className="md:hidden pt-4 pb-2"
-            >
-              <div className="relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 w-5 h-5" />
-                <input 
-                  autoFocus
-                  type="text"
-                  placeholder="Cari produk..."
-                  value={localSearch}
-                  onChange={handleSearchChange}
-                  className="w-full pl-12 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl outline-none focus:border-primary transition-all"
-                />
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </div>
 
       {/* Mobile Menu */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            className="md:hidden glass border-t border-white/10 overflow-hidden"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="lg:hidden bg-dark border-t border-white/5"
           >
-            <div className="px-4 pt-2 pb-6 space-y-1">
+            <div className="px-4 py-6 space-y-4">
+              <div className="relative mb-6">
+                <input 
+                  type="text"
+                  placeholder="Pencarian..."
+                  value={localSearch}
+                  onChange={handleSearchChange}
+                  className="w-full bg-white/5 border border-white/10 rounded-lg py-3 pl-4 pr-10 text-sm text-white outline-none"
+                />
+                <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 w-5 h-5" />
+              </div>
               {navLinks.map((link) => (
                 <a
                   key={link.name}
                   href={link.href}
                   onClick={() => setIsOpen(false)}
-                  className="block px-3 py-4 text-base font-medium text-gray-300 hover:text-primary hover:bg-white/5 rounded-md transition-all"
+                  className="block text-lg font-bold text-gray-200 hover:text-primary transition-colors"
                 >
-                  <div className="flex items-center gap-3">
-                    {link.icon && <link.icon className="w-5 h-5 text-primary" />}
-                    {link.name}
-                  </div>
+                  {link.name}
                 </a>
               ))}
             </div>

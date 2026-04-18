@@ -1,8 +1,7 @@
 import React, { useState, useEffect, memo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { MessageCircle, Star, Share2, Copy, Facebook, Twitter, Send, X, Zap, ShieldCheck, Clock, AlertCircle, RefreshCw, MessageSquare, User, Heart, Bell, Minus, Plus, Tag } from 'lucide-react';
+import { MessageCircle, Star, Share2, Copy, Facebook, Twitter, Send, X, Zap, ShieldCheck, Clock, AlertCircle, MessageSquare, User, Heart, Bell, Minus, Plus, Tag } from 'lucide-react';
 import { toast } from 'sonner';
-import Skeleton from './ui/Skeleton';
 import LazyImage from './ui/LazyImage';
 import { Product, Order, Review, PriceAlert } from '../types';
 import { WHATSAPP_NUMBER } from '../constants';
@@ -15,14 +14,12 @@ interface ProductCardProps {
 
 const ProductCard = memo(function ProductCard({ product: initialProduct, index = 0 }: ProductCardProps) {
   const [product, setProduct] = useState<Product>(initialProduct);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isLoadingPrice, setIsLoadingPrice] = useState(false);
-  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
-  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
-  const [newReview, setNewReview] = useState({ rating: 5, comment: '', userName: '' });
   const [isFavorite, setIsFavorite] = useState(false);
+  const [quantity, setQuantity] = useState(1);
   const [isAlertModalOpen, setIsAlertModalOpen] = useState(false);
   const [targetPrice, setTargetPrice] = useState('');
-  const [quantity, setQuantity] = useState(1);
 
   // Bulk discount tiers
   const bulkTiers = [
@@ -35,81 +32,10 @@ const ProductCard = memo(function ProductCard({ product: initialProduct, index =
     .filter(tier => quantity >= tier.min)
     .reduce((max, tier) => Math.max(max, tier.discount), 0);
 
-  // Load reviews and favorite status from localStorage on mount
   useEffect(() => {
-    const savedReviews = JSON.parse(localStorage.getItem(`reviews_${initialProduct.id}`) || '[]');
-    if (savedReviews.length > 0) {
-      const totalRating = savedReviews.reduce((acc: number, rev: Review) => acc + rev.rating, 0);
-      setProduct(prev => ({
-        ...prev,
-        reviews: savedReviews,
-        rating: totalRating / savedReviews.length,
-        reviewCount: savedReviews.length
-      }));
-    }
-
     const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
     setIsFavorite(favorites.includes(initialProduct.id));
   }, [initialProduct.id]);
-
-  // Track recently viewed
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            // Wait 1.5 seconds before marking as viewed to ensure user is actually looking
-            const timer = setTimeout(() => {
-              const recentlyViewed = JSON.parse(localStorage.getItem('recently_viewed') || '[]');
-              const updated = [product.id, ...recentlyViewed.filter((id: string) => id !== product.id)].slice(0, 10);
-              localStorage.setItem('recently_viewed', JSON.stringify(updated));
-              window.dispatchEvent(new Event('recentlyViewedUpdated'));
-            }, 1500);
-            return () => clearTimeout(timer);
-          }
-        });
-      },
-      { threshold: 0.5 } // 50% of the card must be visible
-    );
-
-    const element = document.getElementById(`product-${product.id}`);
-    if (element) observer.observe(element);
-
-    return () => {
-      if (element) observer.unobserve(element);
-    };
-  }, [product.id]);
-
-  const handleSetAlert = (e: React.FormEvent) => {
-    e.preventDefault();
-    const price = parseInt(targetPrice.replace(/[^0-9]/g, ''));
-    if (isNaN(price) || price <= 0) {
-      toast.error('Mohon masukkan harga target yang valid.');
-      return;
-    }
-
-    const currentPriceVal = parseInt(lowestPrice.replace(/[^0-9]/g, '')) || 0;
-
-    const newAlert = {
-      id: Math.random().toString(36).substr(2, 9),
-      productId: product.id,
-      productName: product.name,
-      targetPrice: price,
-      currentPrice: currentPriceVal,
-      isActive: true,
-      createdAt: new Date().toISOString()
-    };
-
-    const existingAlerts = JSON.parse(localStorage.getItem('price_alerts') || '[]');
-    localStorage.setItem('price_alerts', JSON.stringify([newAlert, ...existingAlerts]));
-    
-    window.dispatchEvent(new Event('priceAlertsUpdated'));
-    setIsAlertModalOpen(false);
-    setTargetPrice('');
-    toast.success(`Alert harga diset untuk ${product.name}`, {
-      description: `Kami akan memberitahu Anda jika harga turun ke Rp ${price.toLocaleString('id-ID')}`
-    });
-  };
 
   const toggleFavorite = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -124,31 +50,8 @@ const ProductCard = memo(function ProductCard({ product: initialProduct, index =
     }
     localStorage.setItem('favorites', JSON.stringify(newFavorites));
     setIsFavorite(!isFavorite);
-    
-    // Dispatch custom event to notify App.tsx if needed
     window.dispatchEvent(new Event('favoritesUpdated'));
   };
-
-  const shareLinks = [
-    {
-      name: 'WhatsApp',
-      icon: Send,
-      color: 'bg-[#25D366]',
-      href: `https://wa.me/?text=${encodeURIComponent(`Cek ${product.name} di LapakMobile! ${window.location.origin}/#product-${product.id}`)}`,
-    },
-    {
-      name: 'Facebook',
-      icon: Facebook,
-      color: 'bg-[#1877F2]',
-      href: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(`${window.location.origin}/#product-${product.id}`)}`,
-    },
-    {
-      name: 'Twitter',
-      icon: Twitter,
-      color: 'bg-[#1DA1F2]',
-      href: `https://twitter.com/intent/tweet?text=${encodeURIComponent(`Cek ${product.name} di LapakMobile!`)}&url=${encodeURIComponent(`${window.location.origin}/#product-${product.id}`)}`,
-    },
-  ];
 
   const lowestPrice = product.packages.length > 0 
     ? product.packages.reduce((min, p) => {
@@ -165,51 +68,11 @@ const ProductCard = memo(function ProductCard({ product: initialProduct, index =
     return `Rp ${discounted.toLocaleString('id-ID')}`;
   };
 
-  useEffect(() => {
-    const fetchPrice = async () => {
-      setIsLoadingPrice(true);
-      try {
-        const updated = await priceService.getUpdatedPrices(initialProduct);
-        setProduct(updated);
-
-        // Check for price alerts
-        const currentPriceVal = parseInt(lowestPrice.replace(/[^0-9]/g, '')) || 0;
-        const alerts = JSON.parse(localStorage.getItem('price_alerts') || '[]');
-        let alertsUpdated = false;
-
-        const updatedAlerts = alerts.map((alert: PriceAlert) => {
-          if (alert.productId === product.id && alert.isActive && currentPriceVal <= alert.targetPrice) {
-            // Trigger Toast
-            toast.success(`⚡ Harga ${product.name} Turun!`, {
-              description: `Harga sekarang Rp ${currentPriceVal.toLocaleString('id-ID')}, mencapai target Rp ${alert.targetPrice.toLocaleString('id-ID')}`
-            });
-
-            alertsUpdated = true;
-            return { ...alert, isActive: false, currentPrice: currentPriceVal };
-          }
-          return alert;
-        });
-
-        if (alertsUpdated) {
-          localStorage.setItem('price_alerts', JSON.stringify(updatedAlerts));
-          window.dispatchEvent(new Event('priceAlertsUpdated'));
-        }
-      } catch (error) {
-        console.error('Failed to fetch real-time price:', error);
-      } finally {
-        setIsLoadingPrice(false);
-      }
-    };
-
-    fetchPrice();
-  }, [initialProduct, lowestPrice]);
-
   const handleOrder = (packageName: string) => {
     const pkg = product.packages.find(p => p.name === packageName);
     const basePrice = pkg?.price || 'N/A';
     const finalPrice = getDiscountedPrice(basePrice);
 
-    // Simulate saving order to history
     const newOrder: Order = {
       id: `ORD-${Math.random().toString(36).substr(2, 9).toUpperCase()}`,
       productId: product.id,
@@ -223,475 +86,178 @@ const ProductCard = memo(function ProductCard({ product: initialProduct, index =
     const existingOrders = JSON.parse(localStorage.getItem('order_history') || '[]');
     localStorage.setItem('order_history', JSON.stringify([newOrder, ...existingOrders]));
 
-    toast.success(`Memulai pesanan ${product.name}...`, {
-      description: `Mengarahkan ke WhatsApp untuk ${quantity}x paket ${packageName}`,
-    });
+    toast.success(`Memulai pesanan ${product.name}...`);
     const text = encodeURIComponent(`Halo Admin LapakMobile, saya ingin order:\n\nProduk: ${product.name}\nPaket: ${packageName}\nJumlah: ${quantity}\nTotal Harga: ${finalPrice}\n\nMohon instruksi pembayarannya.`);
     setTimeout(() => {
       window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${text}`, '_blank');
     }, 1000);
   };
 
-  const handleAddReview = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newReview.userName || !newReview.comment) {
-      toast.error('Mohon isi nama dan komentar Anda.');
-      return;
-    }
-
-    const review: Review = {
-      id: Math.random().toString(36).substr(2, 9),
-      userName: newReview.userName,
-      rating: newReview.rating,
-      comment: newReview.comment,
-      date: new Date().toISOString()
-    };
-
-    const updatedReviews = [review, ...(product.reviews || [])];
-    localStorage.setItem(`reviews_${product.id}`, JSON.stringify(updatedReviews));
-
-    const totalRating = updatedReviews.reduce((acc, rev) => acc + rev.rating, 0);
-    
-    setProduct(prev => ({
-      ...prev,
-      reviews: updatedReviews,
-      rating: totalRating / updatedReviews.length,
-      reviewCount: updatedReviews.length
-    }));
-
-    setNewReview({ rating: 5, comment: '', userName: '' });
-    toast.success('Terima kasih atas ulasan Anda!');
-  };
-
-  const handleCopyLink = () => {
-    const url = `${window.location.origin}/#product-${product.id}`;
-    navigator.clipboard.writeText(url);
-    toast.success('Link berhasil disalin!', {
-      description: 'Anda sekarang dapat membagikannya ke teman-teman.',
-    });
-  };
-
-  const features = [
-    { icon: Zap, text: 'Proses Instan', color: 'text-yellow-400' },
-    { icon: ShieldCheck, text: 'Legal & Aman', color: 'text-green-400' },
-    { icon: Clock, text: '24/7 Support', color: 'text-blue-400' },
-  ];
-
   return (
-    <motion.div
-      id={`product-${product.id}`}
-      layout
-      initial={{ opacity: 0, scale: 0.9 }}
-      animate={{ opacity: 1, scale: 1 }}
-      whileHover={{ y: -8, transition: { duration: 0.3 } }}
-      transition={{ duration: 0.3 }}
-      className="glass rounded-[2.5rem] overflow-hidden group hover:border-primary/50 transition-all flex flex-col h-full border border-white/5 hover:shadow-[0_20px_50px_rgba(0,242,255,0.15)]"
-    >
-      <div className="p-5 pb-0 relative">
-        <button 
-          onClick={() => setIsShareModalOpen(true)}
-          className="absolute top-4 right-4 md:top-8 md:right-8 z-20 w-8 h-8 md:w-10 md:h-10 glass rounded-full flex items-center justify-center text-white hover:text-primary hover:scale-110 transition-all shadow-lg"
-          title="Bagikan Produk"
-        >
-          <Share2 className="w-4 h-4 md:w-5 md:h-5" />
-        </button>
-        <button 
-          onClick={toggleFavorite}
-          className={`absolute top-4 right-14 md:top-8 md:right-20 z-20 w-8 h-8 md:w-10 md:h-10 glass rounded-full flex items-center justify-center transition-all shadow-lg hover:scale-110 ${isFavorite ? 'text-red-500' : 'text-white hover:text-red-400'}`}
-          title={isFavorite ? 'Hapus dari Favorit' : 'Tambah ke Favorit'}
-        >
-          <Heart className={`w-4 h-4 md:w-5 md:h-5 ${isFavorite ? 'fill-current' : ''}`} />
-        </button>
-        <div className="relative aspect-square overflow-hidden rounded-[2.2rem] shadow-2xl group-hover:shadow-primary/30 transition-all duration-500 border border-white/10">
-          <LazyImage 
-            src={product.image} 
-            alt={product.name}
-            className="w-full h-full group-hover:scale-110 transition-transform duration-700 ease-out"
-            skeletonClassName="rounded-[2.2rem]"
-            width={400}
-            priority={index < 4 ? 'high' : 'auto'}
-          />
-          {product.isBestSeller && (
-            <div className="absolute top-2 left-2 md:top-4 md:left-4 bg-gradient-to-r from-accent to-secondary text-white text-[7px] md:text-[9px] font-black uppercase tracking-[0.15em] px-2 py-1 md:px-3 md:py-1.5 rounded-full flex items-center gap-1 md:gap-1.5 neon-glow z-10 shadow-lg">
-              <Star className="w-2 h-2 md:w-3 md:h-3 fill-current" />
-              Best Seller
-            </div>
-          )}
-          <div className="absolute inset-0 bg-gradient-to-t from-dark/80 via-dark/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-center p-6">
-            <div className="bg-primary text-dark text-[10px] font-bold px-4 py-2 rounded-full transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
-              PILIH PAKET
-            </div>
+    <>
+      <motion.div
+        layout
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        whileHover={{ scale: 1.02, backgroundColor: 'rgba(255, 255, 255, 0.03)' }}
+        className="bg-dark-lighter border border-white/5 rounded-2xl p-3 cursor-pointer group transition-all"
+        onClick={() => setIsDetailModalOpen(true)}
+      >
+        <div className="flex items-center gap-4">
+          <div className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 shadow-lg border border-white/10 group-hover:border-primary/30 transition-colors">
+            <LazyImage 
+              src={product.image} 
+              alt={product.name}
+              className="w-full h-full object-cover"
+              skeletonClassName="w-full h-full"
+            />
+          </div>
+          <div className="flex-grow min-w-0">
+            <h3 className="font-bold text-gray-100 group-hover:text-primary transition-colors truncate">{product.name}</h3>
+            {product.isBestSeller && (
+              <span className="text-[10px] bg-primary/20 text-primary px-2 py-0.5 rounded-full font-black uppercase tracking-widest mt-1 inline-block">
+                Hot
+              </span>
+            )}
           </div>
         </div>
-      </div>
+      </motion.div>
 
-      <div className="p-6 flex flex-col flex-grow">
-        <div className="text-center mb-6">
-          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/60 mb-1.5 block">{product.category}</span>
-          <h3 className="text-xl font-display font-black group-hover:text-primary transition-colors line-clamp-1 px-2">{product.name}</h3>
-          <div className="flex items-center justify-center gap-1.5 mt-2">
-            <div className="flex items-center gap-0.5">
-              {[...Array(5)].map((_, i) => (
-                <Star 
-                  key={i} 
-                  className={`w-3 h-3 ${i < Math.round(product.rating || 5) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-600'}`} 
-                />
-              ))}
-            </div>
-            <span className="text-[10px] font-bold text-gray-500">({product.reviewCount || 0} ulasan)</span>
-          </div>
-        </div>
-        
-        <div className="bg-white/5 rounded-[2rem] p-6 mb-6 border border-white/5 flex-grow">
-          <div className="flex flex-col items-center gap-5 h-full">
-            <div className="text-center w-full">
-              <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">Mulai dari</p>
-              <div className="flex items-center justify-center gap-3">
-                {isLoadingPrice ? (
-                  <Skeleton width={120} height={32} className="mx-auto" />
-                ) : (
-                  <>
-                    <div className="flex flex-col items-center">
-                      {currentDiscount > 0 && (
-                        <span className="text-[10px] font-bold text-accent line-through opacity-50">
-                          {lowestPrice}
-                        </span>
-                      )}
-                      <p className="text-3xl font-black text-primary tracking-tight">
-                        {getDiscountedPrice(lowestPrice)}
-                      </p>
-                    </div>
-                    <button 
-                      onClick={() => setIsAlertModalOpen(true)}
-                      className="w-8 h-8 md:w-9 md:h-9 glass rounded-full flex items-center justify-center text-gray-400 hover:text-primary hover:scale-110 transition-all border border-white/10 shadow-lg"
-                      title="Set Alert Harga"
-                    >
-                      <Bell className="w-3.5 h-3.5 md:w-4 md:h-4" />
-                    </button>
-                  </>
-                )}
-              </div>
-
-              {/* Quantity Selector */}
-              <div className="mt-6 flex flex-col items-center gap-3">
-                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Jumlah Pembelian</p>
-                <div className="flex items-center gap-4 bg-white/5 p-1.5 rounded-2xl border border-white/10">
-                  <button 
-                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="w-8 h-8 rounded-xl flex items-center justify-center hover:bg-white/10 transition-colors text-gray-400"
-                  >
-                    <Minus className="w-4 h-4" />
-                  </button>
-                  <span className="w-8 text-center font-black text-primary">{quantity}</span>
-                  <button 
-                    onClick={() => setQuantity(quantity + 1)}
-                    className="w-8 h-8 rounded-xl flex items-center justify-center hover:bg-white/10 transition-colors text-gray-400"
-                  >
-                    <Plus className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-
-              {/* Bulk Tiers Display */}
-              <div className="mt-4 flex flex-wrap justify-center gap-2">
-                {bulkTiers.map((tier) => (
-                  <div 
-                    key={tier.min}
-                    className={`px-3 py-1.5 rounded-xl border text-[9px] font-black uppercase tracking-wider transition-all ${
-                      quantity >= tier.min 
-                        ? 'bg-primary/20 border-primary text-primary shadow-[0_0_10px_rgba(0,242,255,0.2)]' 
-                        : 'bg-white/5 border-white/10 text-gray-500'
-                    }`}
-                  >
-                    <div className="flex items-center gap-1">
-                      <Tag className="w-2.5 h-2.5" />
-                      {tier.label}: -{tier.discount}%
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {product.isRealTime && !isLoadingPrice && (
-                <div className="flex items-center justify-center gap-1.5 mt-4 text-[9px] font-bold text-amber-400/80 uppercase tracking-wider bg-amber-400/10 px-3 py-1.5 rounded-full border border-amber-400/20">
-                  <AlertCircle className="w-3 h-3" />
-                  Harga Real-time
-                </div>
-              )}
-            </div>
-            
-            <div className="w-full h-px bg-white/10" />
-            
-            <div className="grid grid-cols-1 gap-4 w-full">
-              {features.map((feature, i) => (
-                <div key={i} className="flex items-center gap-3.5 px-2 group/feat">
-                  <div className={`w-9 h-9 rounded-xl bg-white/5 flex items-center justify-center ${feature.color} group-hover/feat:scale-110 transition-transform`}>
-                    <feature.icon className="w-4.5 h-4.5" />
-                  </div>
-                  <span className="text-[11px] font-bold text-gray-400 group-hover/feat:text-gray-200 transition-colors">{feature.text}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        <button 
-          onClick={() => handleOrder(product.packages[0].name)}
-          className="w-full py-4 bg-gradient-to-r from-primary to-secondary text-dark font-black text-xs uppercase tracking-widest rounded-2xl flex items-center justify-center gap-2 transition-all shadow-lg hover:shadow-primary/40 hover:scale-[1.02] active:scale-[0.98] mb-3"
-        >
-          <MessageCircle className="w-4 h-4" />
-          Pesan Sekarang
-        </button>
-
-        <button 
-          onClick={() => setIsReviewModalOpen(true)}
-          className="w-full py-3 glass text-gray-400 font-bold text-[10px] uppercase tracking-widest rounded-xl flex items-center justify-center gap-2 hover:bg-white/10 transition-all"
-        >
-          <MessageSquare className="w-3.5 h-3.5" />
-          Lihat Ulasan
-        </button>
-      </div>
-
-      {/* Review Modal */}
       <AnimatePresence>
-        {isReviewModalOpen && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center px-4">
+        {isDetailModalOpen && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={() => setIsReviewModalOpen(false)}
-              className="absolute inset-0 bg-dark/80 backdrop-blur-sm"
+              onClick={() => setIsDetailModalOpen(false)}
+              className="absolute inset-0 bg-dark/90 backdrop-blur-sm"
             />
             <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative w-full max-w-lg glass rounded-[2.5rem] p-8 border border-white/10 shadow-2xl max-h-[90vh] overflow-y-auto no-scrollbar"
+              className="relative w-full max-w-2xl bg-dark-lighter border border-white/10 rounded-[2.5rem] overflow-hidden shadow-2xl flex flex-col max-h-[90vh]"
             >
-              <button 
-                onClick={() => setIsReviewModalOpen(false)}
-                className="absolute top-6 right-6 p-2 hover:bg-white/10 rounded-full transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-
-              <div className="mb-8">
-                <h3 className="text-2xl font-display font-bold mb-2">Ulasan {product.name}</h3>
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center gap-0.5">
-                    {[...Array(5)].map((_, i) => (
-                      <Star 
-                        key={i} 
-                        className={`w-4 h-4 ${i < Math.round(product.rating || 5) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-600'}`} 
-                      />
-                    ))}
+              {/* Modal Header */}
+              <div className="p-8 pb-4 flex justify-between items-start">
+                <div className="flex items-center gap-6">
+                  <div className="w-24 h-24 rounded-2xl overflow-hidden shadow-2xl border border-white/10">
+                    <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
                   </div>
-                  <span className="text-sm font-bold text-gray-400">{product.rating?.toFixed(1) || '5.0'} / 5.0 ({product.reviewCount || 0} ulasan)</span>
+                  <div>
+                    <h2 className="text-3xl font-display font-black text-white">{product.name}</h2>
+                    <p className="text-gray-400 text-sm mt-1">{product.category}</p>
+                    <div className="flex items-center gap-1.5 mt-2">
+                       <Star className="w-4 h-4 text-primary fill-current" />
+                       <span className="text-sm font-bold text-gray-300">{product.rating}</span>
+                       <span className="text-sm text-gray-500">({product.reviewCount} ulasan)</span>
+                    </div>
+                  </div>
                 </div>
+                <button 
+                  onClick={() => setIsDetailModalOpen(false)}
+                  className="p-3 bg-white/5 rounded-xl hover:bg-white/10 transition-colors"
+                >
+                  <X className="w-6 h-6" />
+                </button>
               </div>
 
-              {/* Add Review Form */}
-              <form onSubmit={handleAddReview} className="bg-white/5 p-6 rounded-3xl border border-white/10 mb-8">
-                <h4 className="text-sm font-bold mb-4 uppercase tracking-widest text-primary">Tulis Ulasan</h4>
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <button
-                        key={star}
-                        type="button"
-                        onClick={() => setNewReview(prev => ({ ...prev, rating: star }))}
-                        className="p-1 hover:scale-110 transition-transform"
-                      >
-                        <Star className={`w-6 h-6 ${star <= newReview.rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-600'}`} />
-                      </button>
-                    ))}
-                  </div>
-                  <input 
-                    type="text"
-                    placeholder="Nama Anda"
-                    value={newReview.userName}
-                    onChange={(e) => setNewReview(prev => ({ ...prev, userName: e.target.value }))}
-                    className="w-full bg-dark/50 border border-white/10 rounded-xl py-3 px-4 text-sm outline-none focus:border-primary transition-all"
-                  />
-                  <textarea 
-                    placeholder="Komentar Anda..."
-                    value={newReview.comment}
-                    onChange={(e) => setNewReview(prev => ({ ...prev, comment: e.target.value }))}
-                    className="w-full bg-dark/50 border border-white/10 rounded-xl py-3 px-4 text-sm outline-none focus:border-primary transition-all min-h-[100px] resize-none"
-                  />
-                  <button 
-                    type="submit"
-                    className="w-full py-3 bg-primary text-dark font-bold text-xs uppercase tracking-widest rounded-xl hover:scale-[1.02] transition-all shadow-lg shadow-primary/20"
-                  >
-                    Kirim Ulasan
-                  </button>
-                </div>
-              </form>
-
-              {/* Reviews List */}
-              <div className="space-y-6">
-                {product.reviews && product.reviews.length > 0 ? (
-                  product.reviews.map((review) => (
-                    <div key={review.id} className="border-b border-white/5 pb-6 last:border-0">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                            <User className="w-4 h-4 text-primary" />
+              {/* Modal Content */}
+              <div className="p-8 pt-0 overflow-y-auto custom-scrollbar">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-4">
+                  {/* Left Column: Packages */}
+                  <div className="space-y-4">
+                    <h3 className="text-sm font-bold uppercase tracking-[0.2em] text-primary/60">Pilih Paket</h3>
+                    <div className="space-y-3">
+                      {product.packages.map((pkg) => (
+                        <button
+                          key={pkg.name}
+                          onClick={() => handleOrder(pkg.name)}
+                          className="w-full p-4 bg-white/5 border border-white/10 rounded-2xl hover:border-primary/50 hover:bg-primary/5 transition-all text-left flex justify-between items-center group/pkg"
+                        >
+                          <div>
+                            <p className="font-bold text-gray-200 group-hover/pkg:text-primary transition-colors">{pkg.name}</p>
+                            <p className="text-xs text-gray-500 mt-1">{pkg.price}</p>
                           </div>
-                          <span className="font-bold text-sm">{review.userName}</span>
+                          <Zap className="w-5 h-5 text-gray-600 group-hover/pkg:text-primary transition-colors" />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Right Column: Features & Quantity */}
+                  <div className="space-y-8">
+                    <div className="bg-white/5 p-6 rounded-3xl border border-white/10">
+                      <h3 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-6 text-center">Informasi Transaksi</h3>
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-3">
+                          <ShieldCheck className="text-green-400 w-5 h-5" />
+                          <span className="text-sm text-gray-300 font-medium">Layanan Legal & Aman</span>
                         </div>
-                        <span className="text-[10px] text-gray-500">{new Date(review.date).toLocaleDateString('id-ID')}</span>
+                        <div className="flex items-center gap-3">
+                          <Zap className="text-yellow-400 w-5 h-5" />
+                          <span className="text-sm text-gray-300 font-medium">Proses Instan (1-5 Menit)</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <Clock className="text-blue-400 w-5 h-5" />
+                          <span className="text-sm text-gray-300 font-medium">Buka 24 Jam Non-Stop</span>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-0.5 mb-2">
-                        {[...Array(5)].map((_, i) => (
-                          <Star 
-                            key={i} 
-                            className={`w-3 h-3 ${i < review.rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-600'}`} 
-                          />
-                        ))}
-                      </div>
-                      <p className="text-gray-400 text-sm leading-relaxed">{review.comment}</p>
                     </div>
-                  ))
-                ) : (
-                  <div className="text-center py-8 text-gray-500 italic text-sm">
-                    Belum ada ulasan untuk produk ini.
+
+                    <div className="space-y-4">
+                       <h3 className="text-sm font-bold uppercase tracking-[0.2em] text-primary/60">Jumlah Pembelian</h3>
+                       <div className="flex items-center gap-6 bg-white/5 p-4 rounded-3xl border border-white/10 justify-between">
+                          <div className="flex items-center gap-4">
+                            <button 
+                              onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                              className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center hover:bg-primary/20 hover:text-primary transition-colors"
+                            >
+                              <Minus className="w-4 h-4" />
+                            </button>
+                            <span className="text-xl font-black text-primary min-w-[20px] text-center">{quantity}</span>
+                            <button 
+                              onClick={() => setQuantity(quantity + 1)}
+                              className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center hover:bg-primary/20 hover:text-primary transition-colors"
+                            >
+                              <Plus className="w-4 h-4" />
+                            </button>
+                          </div>
+                          <div className="flex flex-col items-end">
+                             <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Diskon</p>
+                             <div className="flex items-center gap-2 text-primary">
+                                <Tag className="w-4 h-4" />
+                                <span className="font-black">-{currentDiscount}%</span>
+                             </div>
+                          </div>
+                       </div>
+                    </div>
                   </div>
-                )}
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-
-      {/* Share Modal */}
-      <AnimatePresence>
-        {isAlertModalOpen && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center px-4">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setIsAlertModalOpen(false)}
-              className="absolute inset-0 bg-dark/80 backdrop-blur-sm"
-            />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative w-full max-w-sm glass rounded-[2.5rem] p-8 border border-white/10 shadow-2xl"
-            >
-              <button 
-                onClick={() => setIsAlertModalOpen(false)}
-                className="absolute top-6 right-6 p-2 hover:bg-white/10 rounded-full transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-
-              <div className="text-center mb-8">
-                <div className="w-16 h-16 bg-primary/10 rounded-3xl flex items-center justify-center mx-auto mb-4">
-                  <Bell className="text-primary w-8 h-8" />
                 </div>
-                <h3 className="text-2xl font-display font-bold">Alert Harga</h3>
-                <p className="text-gray-400 text-sm mt-2">Dapatkan notifikasi saat harga {product.name} turun.</p>
               </div>
 
-              <form onSubmit={handleSetAlert} className="space-y-6">
-                <div>
-                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2 block">Harga Target (Rp)</label>
-                  <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-primary font-bold">Rp</span>
-                    <input 
-                      type="text"
-                      placeholder="Contoh: 50000"
-                      value={targetPrice}
-                      onChange={(e) => setTargetPrice(e.target.value.replace(/[^0-9]/g, ''))}
-                      className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-sm outline-none focus:border-primary transition-all"
-                    />
+              {/* Modal Footer */}
+              <div className="p-8 border-t border-white/10 bg-dark/50">
+                <div className="flex items-center justify-between gap-8">
+                  <div>
+                    <p className="text-xs text-gray-500 font-bold uppercase tracking-widest mb-1">Total Pembayaran</p>
+                    <p className="text-3xl font-black text-primary tracking-tight">{getDiscountedPrice(lowestPrice)}</p>
                   </div>
-                  <p className="text-[10px] text-gray-500 mt-2 italic">Harga saat ini: {lowestPrice}</p>
-                </div>
-
-                <button 
-                  type="submit"
-                  className="w-full py-4 bg-primary text-dark font-bold text-xs uppercase tracking-widest rounded-2xl hover:scale-[1.02] transition-all shadow-lg shadow-primary/20"
-                >
-                  Pasang Alert
-                </button>
-              </form>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-
-      {/* Share Modal */}
-      <AnimatePresence>
-        {isShareModalOpen && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center px-4">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setIsShareModalOpen(false)}
-              className="absolute inset-0 bg-dark/80 backdrop-blur-sm"
-            />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative w-full max-w-sm glass rounded-[2.5rem] p-8 border border-white/10 shadow-2xl"
-            >
-              <button 
-                onClick={() => setIsShareModalOpen(false)}
-                className="absolute top-6 right-6 p-2 hover:bg-white/10 rounded-full transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-
-              <div className="text-center mb-8">
-                <div className="w-16 h-16 bg-primary/10 rounded-3xl flex items-center justify-center mx-auto mb-4">
-                  <Share2 className="text-primary w-8 h-8" />
-                </div>
-                <h3 className="text-2xl font-display font-bold">Bagikan Produk</h3>
-                <p className="text-gray-400 text-sm mt-2">Bantu temanmu menemukan {product.name}</p>
-              </div>
-
-              <div className="grid grid-cols-3 gap-4 mb-8">
-                {shareLinks.map((link) => (
-                  <a
-                    key={link.name}
-                    href={link.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex flex-col items-center gap-2 group"
+                  <button 
+                    onClick={() => handleOrder(product.packages[0].name)}
+                    className="flex-grow max-w-xs py-5 bg-primary text-dark font-black rounded-2xl flex items-center justify-center gap-3 transition-all shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98]"
                   >
-                    <div className={`w-14 h-14 ${link.color} rounded-2xl flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform`}>
-                      <link.icon className="w-6 h-6" />
-                    </div>
-                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{link.name}</span>
-                  </a>
-                ))}
-              </div>
-
-              <div className="relative">
-                <input 
-                  readOnly
-                  type="text" 
-                  value={`${window.location.origin}/#product-${product.id}`}
-                  className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-4 pr-16 text-xs text-gray-400 outline-none"
-                />
-                <button 
-                  onClick={handleCopyLink}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 p-3 bg-primary text-dark rounded-xl hover:scale-105 transition-all shadow-lg"
-                >
-                  <Copy className="w-4 h-4" />
-                </button>
+                    <MessageCircle className="w-5 h-5" />
+                    PESAN VIA WHATSAPP
+                  </button>
+                </div>
               </div>
             </motion.div>
           </div>
         )}
       </AnimatePresence>
-    </motion.div>
+    </>
   );
 });
 
