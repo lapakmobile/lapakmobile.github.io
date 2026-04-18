@@ -18,10 +18,38 @@ export default function ProductDetail({ product, onBack, otherProducts, onSelect
   const [selectedMethod, setSelectedMethod] = useState<string | null>(null);
   const [whatsappNumber, setWhatsappNumber] = useState('');
   const [email, setEmail] = useState('');
+  const [errors, setErrors] = useState<{ whatsapp?: string; email?: string }>({});
+
+  const validate = () => {
+    const newErrors: { whatsapp?: string; email?: string } = {};
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const phoneRegex = /^(\+?\d[\d\s\-]{7,}\d)$/;
+
+    if (!whatsappNumber && !email) {
+      newErrors.whatsapp = 'Silakan isi minimal satu kontak';
+      newErrors.email = 'Silakan isi minimal satu kontak';
+    }
+
+    if (whatsappNumber && !phoneRegex.test(whatsappNumber)) {
+      newErrors.whatsapp = 'Nomor WhatsApp tidak valid (min. 9 digit)';
+    }
+
+    if (email && !emailRegex.test(email)) {
+      newErrors.email = 'Format email tidak valid';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleOrder = (packageName: string) => {
     if (!selectedMethod) {
       toast.error('Silakan pilih metode pembayaran terlebih dahulu');
+      return;
+    }
+
+    if (!validate()) {
+      toast.error('Mohon perbaiki kesalahan pada formulir');
       return;
     }
 
@@ -345,17 +373,26 @@ export default function ProductDetail({ product, onBack, otherProducts, onSelect
                     <label className="block text-lg font-bold text-white">Nomor WhatsApp</label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                        <Phone className="h-5 w-5 text-gray-500" />
+                        <Phone className={`h-5 w-5 ${errors.whatsapp ? 'text-red-500' : 'text-gray-500'}`} />
                       </div>
                       <input
                         type="tel"
                         value={whatsappNumber}
-                        onChange={(e) => setWhatsappNumber(e.target.value)}
+                        onChange={(e) => {
+                          setWhatsappNumber(e.target.value);
+                          if (errors.whatsapp) setErrors(prev => ({ ...prev, whatsapp: undefined }));
+                        }}
                         placeholder="0812xxx"
-                        className="w-full bg-dark border border-white/10 rounded-xl py-4 pl-12 pr-4 text-white focus:border-primary focus:ring-1 focus:ring-primary transition-all outline-none"
+                        className={`w-full bg-dark border rounded-xl py-4 pl-12 pr-4 text-white focus:ring-1 transition-all outline-none ${
+                          errors.whatsapp ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-white/10 focus:border-primary focus:ring-primary'
+                        }`}
                       />
                     </div>
-                    <p className="text-xs text-gray-400">Bukti pembayaran atas pembelianmu akan kami kirimkan ke WhatsApp Anda.</p>
+                    {errors.whatsapp ? (
+                      <p className="text-xs text-red-500 font-bold">{errors.whatsapp}</p>
+                    ) : (
+                      <p className="text-xs text-gray-400">Bukti pembayaran atas pembelianmu akan kami kirimkan ke WhatsApp Anda.</p>
+                    )}
                   </div>
 
                   <div className="relative flex items-center py-4">
@@ -368,17 +405,26 @@ export default function ProductDetail({ product, onBack, otherProducts, onSelect
                     <label className="block text-lg font-bold text-white">Alamat Email</label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                        <Mail className="h-5 w-5 text-gray-500" />
+                        <Mail className={`h-5 w-5 ${errors.email ? 'text-red-500' : 'text-gray-500'}`} />
                       </div>
                       <input
                         type="email"
                         value={email}
-                        onChange={(e) => setEmail(e.target.value)}
+                        onChange={(e) => {
+                          setEmail(e.target.value);
+                          if (errors.email) setErrors(prev => ({ ...prev, email: undefined }));
+                        }}
                         placeholder="nama@email.com"
-                        className="w-full bg-dark border border-white/10 rounded-xl py-4 pl-12 pr-4 text-white focus:border-primary focus:ring-1 focus:ring-primary transition-all outline-none"
+                        className={`w-full bg-dark border rounded-xl py-4 pl-12 pr-4 text-white focus:ring-1 transition-all outline-none ${
+                          errors.email ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-white/10 focus:border-primary focus:ring-primary'
+                        }`}
                       />
                     </div>
-                    <p className="text-xs text-gray-400">Bukti pembayaran atas pembelianmu akan kami kirimkan ke Email Anda.</p>
+                    {errors.email ? (
+                      <p className="text-xs text-red-500 font-bold">{errors.email}</p>
+                    ) : (
+                      <p className="text-xs text-gray-400">Bukti pembayaran atas pembelianmu akan kami kirimkan ke Email Anda.</p>
+                    )}
                   </div>
                 </div>
 
