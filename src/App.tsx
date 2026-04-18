@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, lazy, Suspense } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Search, Filter, Star, ChevronDown, ChevronUp, CheckCircle2, Zap, Shield, FileText, X, Heart, ShoppingCart, ReceiptText, CreditCard, Clock, ThumbsUp, Percent, MessageCircle } from 'lucide-react';
+import { Search, Filter, Star, ChevronDown, ChevronUp, CheckCircle2, Zap, Shield, FileText, X, Heart, ShoppingCart, ReceiptText, CreditCard, Clock, ThumbsUp, Percent, MessageCircle, User } from 'lucide-react';
 import { Toaster, toast } from 'sonner';
 import Navbar from './components/Navbar';
 import BannerSlider from './components/BannerSlider';
@@ -8,6 +8,7 @@ import Hero from './components/Hero';
 import ProductCard from './components/ProductCard';
 import Footer from './components/Footer';
 import BackToTop from './components/BackToTop';
+import ProductDetail from './components/ProductDetail';
 
 // Lazy load non-critical components
 const OrderHistory = lazy(() => import('./components/OrderHistory'));
@@ -20,11 +21,12 @@ import ProductCardSkeleton from './components/ProductCardSkeleton';
 import PriceListSkeleton from './components/PriceListSkeleton';
 import LazyImage from './components/ui/LazyImage';
 import { ALL_PRODUCTS, TESTIMONIALS, FAQS } from './constants';
-import { Category, PriceAlert } from './types';
+import { Product, Category, PriceAlert } from './types';
 import { priceService } from './services/priceService';
 
 export default function App() {
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategories, setActiveCategories] = useState<(Category | 'Favorites')[]>([]);
 
@@ -152,64 +154,114 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-dark">
-      <Navbar onSearch={setSearchQuery} />
+      <Navbar 
+        onSearch={setSearchQuery} 
+        onHomeClick={() => {
+          setSelectedProduct(null);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }} 
+      />
       
       <main className="pt-24 min-h-screen">
-        <BannerSlider />
-        
-        {/* Voucher Section */}
-        <section id="voucher" className="py-12">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center gap-3 mb-10">
-              <ShoppingCart className="text-white w-8 h-8" />
-              <h2 className="text-3xl font-display font-black text-white">Voucher</h2>
-            </div>
+        <AnimatePresence mode="wait">
+          {selectedProduct ? (
+            <motion.div
+              key="detail"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+            >
+              <ProductDetail 
+                product={selectedProduct} 
+                onBack={() => {
+                  setSelectedProduct(null);
+                  window.scrollTo(0, 0);
+                }}
+                otherProducts={ALL_PRODUCTS.filter(p => p.id !== selectedProduct.id)}
+                onSelectProduct={(p) => {
+                  setSelectedProduct(p);
+                  window.scrollTo(0, 0);
+                }}
+              />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="home"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 20 }}
+            >
+              <BannerSlider />
+              
+              {/* Voucher Section */}
+              <section id="voucher" className="py-12">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                  <div className="flex items-center gap-3 mb-10">
+                    <ShoppingCart className="text-white w-8 h-8" />
+                    <h2 className="text-3xl font-display font-black text-white">Voucher</h2>
+                  </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-              {voucherProducts.slice(0, voucherLimit).map((product, index) => (
-                <ProductCard key={product.id} product={product} index={index} />
-              ))}
-            </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                    {voucherProducts.slice(0, voucherLimit).map((product, index) => (
+                      <ProductCard 
+                        key={product.id} 
+                        product={product} 
+                        index={index} 
+                        onClick={(p) => {
+                          setSelectedProduct(p);
+                          window.scrollTo(0, 0);
+                        }}
+                      />
+                    ))}
+                  </div>
 
-            {voucherLimit < voucherProducts.length && (
-              <div className="flex justify-center mt-12">
-                <button 
-                  onClick={() => setVoucherLimit(prev => prev + 10)}
-                  className="bg-primary text-dark font-black px-8 py-3 rounded-xl flex items-center gap-2 hover:scale-105 transition-all shadow-lg shadow-primary/20"
-                >
-                  Tampilkan Lainnya <ChevronDown className="w-5 h-5" />
-                </button>
-              </div>
-            )}
-          </div>
-        </section>
+                  {voucherLimit < voucherProducts.length && (
+                    <div className="flex justify-center mt-12">
+                      <button 
+                        onClick={() => setVoucherLimit(prev => prev + 10)}
+                        className="bg-primary text-dark font-black px-8 py-3 rounded-xl flex items-center gap-2 hover:scale-105 transition-all shadow-lg shadow-primary/20"
+                      >
+                        Tampilkan Lainnya <ChevronDown className="w-5 h-5" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </section>
 
-        {/* PPOB Section */}
-        <section id="ppob" className="py-12 bg-dark-lighter/30">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center gap-3 mb-10">
-              <ReceiptText className="text-white w-8 h-8" />
-              <h2 className="text-3xl font-display font-black text-white">PPOB</h2>
-            </div>
+              {/* PPOB Section */}
+              <section id="ppob" className="py-12 bg-dark-lighter/30">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                  <div className="flex items-center gap-3 mb-10">
+                    <ReceiptText className="text-white w-8 h-8" />
+                    <h2 className="text-3xl font-display font-black text-white">PPOB</h2>
+                  </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-              {ppobProducts.slice(0, ppobLimit).map((product, index) => (
-                <ProductCard key={product.id} product={product} index={index} />
-              ))}
-            </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                    {ppobProducts.slice(0, ppobLimit).map((product, index) => (
+                      <ProductCard 
+                        key={product.id} 
+                        product={product} 
+                        index={index} 
+                        onClick={(p) => {
+                          setSelectedProduct(p);
+                          window.scrollTo(0, 0);
+                        }}
+                      />
+                    ))}
+                  </div>
 
-            {ppobLimit < ppobProducts.length && (
-              <div className="flex justify-center mt-12">
-                <button 
-                  onClick={() => setPpobLimit(prev => prev + 10)}
-                  className="bg-primary text-dark font-black px-8 py-3 rounded-xl flex items-center gap-2 hover:scale-105 transition-all shadow-lg shadow-primary/20"
-                >
-                  Tampilkan Lainnya <ChevronDown className="w-5 h-5" />
-                </button>
-              </div>
-            )}
-          </div>
-        </section>
+                  {ppobLimit < ppobProducts.length && (
+                    <div className="flex justify-center mt-12">
+                      <button 
+                        onClick={() => setPpobLimit(prev => prev + 10)}
+                        className="bg-primary text-dark font-black px-8 py-3 rounded-xl flex items-center gap-2 hover:scale-105 transition-all shadow-lg shadow-primary/20"
+                      >
+                        Tampilkan Lainnya <ChevronDown className="w-5 h-5" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </section>
 
         {/* Other sections below */}
         <Suspense fallback={<div className="h-96 animate-pulse bg-white/5 rounded-3xl" />}>
@@ -578,6 +630,9 @@ export default function App() {
             </div>
           </div>
         </section>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </main>
 
       <Footer />

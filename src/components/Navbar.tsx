@@ -2,7 +2,7 @@ import React, { useState, useEffect, memo } from 'react';
 import { Menu, X, Search, Gamepad2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
-const Navbar = memo(function Navbar({ onSearch }: { onSearch?: (query: string) => void }) {
+const Navbar = memo(function Navbar({ onSearch, onHomeClick }: { onSearch?: (query: string) => void, onHomeClick?: () => void }) {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [localSearch, setLocalSearch] = useState('');
@@ -34,14 +34,17 @@ const Navbar = memo(function Navbar({ onSearch }: { onSearch?: (query: string) =
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center">
           {/* Logo */}
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-primary/20 rounded-xl flex items-center justify-center">
+          <button 
+            onClick={onHomeClick}
+            className="flex items-center gap-3 cursor-pointer group"
+          >
+            <div className="w-10 h-10 bg-primary/20 rounded-xl flex items-center justify-center group-hover:bg-primary/30 transition-colors">
               <Gamepad2 className="text-primary w-6 h-6 fill-current" />
             </div>
             <span className="text-2xl font-display font-black tracking-tighter text-white">
               Lapak<span className="text-primary">Mobile</span>
             </span>
-          </div>
+          </button>
 
           {/* Desktop Links & Tools */}
           <div className="hidden lg:flex items-center gap-8 flex-grow justify-end">

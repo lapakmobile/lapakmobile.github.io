@@ -7,6 +7,7 @@ export const GAMES: Product[] = [
     id: 'ml',
     name: 'Mobile Legends',
     category: 'Game',
+    description: 'Mobile Legends: Bang Bang adalah game mobile MOBA 5v5 yang sangat populer. Bertarung bersama teman-temanmu melawan pemain asli dari seluruh dunia! Pilih hero favoritmu dan bangun tim yang sempurna dengan kawan seperjuanganmu!',
     image: 'https://vip-reseller.co.id/library/assets/images/product/ML_A-01.webp',
     isBestSeller: true,
     packages: [
@@ -26,6 +27,7 @@ export const GAMES: Product[] = [
     id: 'hok',
     name: 'Honor of Kings',
     category: 'Game',
+    description: 'Honor of Kings adalah game mobile MOBA yang paling banyak dimainkan di dunia. Memberikan pengalaman kompetitif terbaik di perangkat mobile dengan grafis memukau dan gameplay yang adu strategi.',
     image: 'https://vip-reseller.co.id/library/assets/images/product/honor-of-kings.webp',
     isBestSeller: true,
     packages: [
@@ -82,6 +84,7 @@ export const GAMES: Product[] = [
     id: 'ff',
     name: 'Free Fire',
     category: 'Game',
+    description: 'Free Fire adalah game mobile battle royale yang memungkinkan pemain bertanding dalam durasi 10 menit melawan 49 pemain lainnya. Bertahanlah menjadi yang terakhir untuk mendapatkan Booyah!',
     image: 'https://vip-reseller.co.id/library/assets/images/product/free-fire.webp',
     isBestSeller: true,
     packages: [
@@ -441,6 +444,20 @@ export const GAMES: Product[] = [
 ];
 
 export const DIGITAL_PRODUCTS: Product[] = [
+  {
+    id: 'bstation',
+    name: 'Bstation (Bilibili)',
+    category: 'Streaming',
+    description: 'Bstation (Bilibili) adalah platform streaming video yang populer di kalangan pengguna di Asia dan khususnya di Indonesia. Bilibili menyajikan beragam konten video, termasuk anime, game, musik, vlog, serta konten buatan pengguna lainnya. Pengguna dapat menonton video secara gratis atau memilih layanan berlangganan untuk menikmati konten tanpa iklan dan fitur eksklusif lainnya.',
+    image: 'https://play-lh.googleusercontent.com/IUpJ8qD8C96sDq7q3R1w_U6d_uL9X-hWb5U_E-MvS5k2_U8rS7_mG9G_zW_Xm_X-f=w240-h480-rw',
+    packages: [
+      { name: '7 Days Premium', price: 'Rp 8.610' },
+      { name: '14 Days Premium', price: 'Rp 13.377' },
+      { name: '30 Days Premium', price: 'Rp 28.500' },
+      { name: '93 Days Premium', price: 'Rp 71.663' },
+      { name: '366 Days Premium', price: 'Rp 209.255' },
+    ]
+  },
   {
     id: 'pulsa',
     name: 'Isi Pulsa All Operator',
