@@ -1,13 +1,15 @@
 import React, { useState, useEffect, memo } from 'react';
-import { Menu, X, Search, Gamepad2, Trash2, History, Zap } from 'lucide-react';
+import { Menu, X, Zap, Cpu, ShoppingBag, Info, PhoneCall } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { toast } from 'sonner';
 
-const Navbar = memo(function Navbar({ onSearch, onHomeClick }: { onSearch?: (query: string) => void, onHomeClick?: () => void }) {
+interface NavbarProps {
+  onNavClick: (view: string) => void;
+  currentView: string;
+}
+
+const Navbar = memo(function Navbar({ onNavClick, currentView }: NavbarProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [localSearch, setLocalSearch] = useState('');
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -15,105 +17,73 @@ const Navbar = memo(function Navbar({ onSearch, onHomeClick }: { onSearch?: (que
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const query = e.target.value;
-    setLocalSearch(query);
-    if (onSearch) onSearch(query);
-  };
-
-  const clearOrderHistory = () => {
-    if (window.confirm('Hapus semua riwayat pesanan?')) {
-      localStorage.removeItem('order_history');
-      window.dispatchEvent(new Event('orderHistoryUpdated'));
-      toast.success('Riwayat pesanan dikosongkan');
-      setMenuOpen(false);
-    }
-  };
-
-  const clearViewHistory = () => {
-    if (window.confirm('Hapus semua riwayat produk yang dilihat?')) {
-      localStorage.removeItem('recently_viewed');
-      window.dispatchEvent(new Event('recentlyViewedUpdated'));
-      toast.success('Riwayat lihat dikosongkan');
-      setMenuOpen(false);
-    }
-  };
-
-  const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
-    if (onHomeClick) {
-      e.preventDefault();
-      onHomeClick();
-      // Wait for navigation back to home before scrolling
-      setTimeout(() => {
-        const element = document.querySelector(href);
-        if (element) {
-          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-      }, 100);
-    }
-    setIsOpen(false);
-  };
-
   const navLinks = [
-    { name: 'Produk', href: '#pricing-lp' },
-    { name: 'Keunggulan', href: '#benefits' },
-    { name: 'Cara Order', href: '#timeline' },
-    { name: 'FAQ', href: '#faq-lp' },
+    { name: 'Home', view: 'home', icon: Zap },
+    { name: 'AI Tools', view: 'tools', icon: Cpu },
+    { name: 'Marketplace', view: 'marketplace', icon: ShoppingBag },
+    { name: 'About', view: 'about', icon: Info },
+    { name: 'Contact', view: 'contact', icon: PhoneCall },
   ];
 
   return (
     <nav 
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled ? 'bg-black/95 backdrop-blur-xl border-b border-white/5 py-3' : 'bg-transparent py-6'
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+        scrolled ? 'bg-slate-950/80 backdrop-blur-2xl border-b border-white/5 py-3' : 'bg-transparent py-6'
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center">
           {/* Logo */}
           <button 
-            onClick={onHomeClick}
-            className="flex items-center gap-2 cursor-pointer group"
+            onClick={() => onNavClick('home')}
+            className="flex items-center gap-3 cursor-pointer group"
           >
-            <div className="w-10 h-10 bg-primary/20 rounded-xl flex items-center justify-center shadow-[0_0_20px_rgba(255,184,0,0.2)]">
-              <Zap className="w-6 h-6 text-primary fill-primary" />
+            <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center shadow-lg shadow-primary/30 group-hover:rotate-12 transition-transform">
+              <Zap className="w-6 h-6 text-white fill-white" />
             </div>
-            <span className="text-xl font-display font-black tracking-tight text-white">
-              Lapak<span className="text-primary truncate">Mobile</span>
+            <span className="text-2xl font-display font-black tracking-tighter text-white">
+              Lapak<span className="text-primary"> Mobile</span>
             </span>
           </button>
 
           {/* Desktop Links */}
-          <div className="hidden lg:flex items-center gap-8 flex-grow justify-center translate-x-12">
+          <div className="hidden lg:flex items-center gap-1 bg-white/5 p-1 rounded-2xl border border-white/5">
             {navLinks.map((link) => (
-              <a
-                key={link.name}
-                href={link.href}
-                onClick={(e) => handleLinkClick(e, link.href)}
-                className="text-[13px] font-semibold text-gray-400 hover:text-primary transition-colors tracking-wide uppercase"
+              <button
+                key={link.view}
+                onClick={() => {
+                  onNavClick(link.view);
+                  setIsOpen(false);
+                }}
+                className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-[13px] font-bold tracking-wide uppercase transition-all ${
+                  currentView === link.view 
+                  ? 'bg-white/10 text-white border border-white/10 shadow-lg' 
+                  : 'text-gray-400 hover:text-white hover:bg-white/5'
+                }`}
               >
+                <link.icon className="w-4 h-4" />
                 {link.name}
-              </a>
+              </button>
             ))}
           </div>
 
           {/* Right Action */}
           <div className="hidden lg:flex items-center gap-4">
-            <a 
-              href="#pricing-lp"
-              onClick={(e) => handleLinkClick(e, '#pricing-lp')}
-              className="px-8 py-2.5 bg-primary text-dark font-black rounded-full hover:scale-105 transition-all shadow-[0_4px_20px_rgba(255,184,0,0.3)] text-sm"
+            <button
+               onClick={() => onNavClick('marketplace')}
+               className="px-8 py-3 bg-white text-slate-950 font-black rounded-2xl hover:scale-105 transition-all shadow-xl text-sm"
             >
-              Beli Sekarang
-            </a>
+              Get Started
+            </button>
           </div>
 
           {/* Mobile Toggle */}
-          <div className="lg:hidden flex items-center gap-3">
+          <div className="lg:hidden">
             <button 
               onClick={() => setIsOpen(!isOpen)}
-              className="p-2.5 bg-white/5 rounded-lg border border-white/10"
+              className="p-3 bg-white/5 rounded-2xl border border-white/10 text-white"
             >
-              {isOpen ? <X className="text-white" /> : <Menu className="text-white" />}
+              {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
           </div>
         </div>
@@ -123,21 +93,28 @@ const Navbar = memo(function Navbar({ onSearch, onHomeClick }: { onSearch?: (que
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="lg:hidden bg-dark border-t border-white/5"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="lg:hidden bg-slate-950 border-t border-white/5 overflow-hidden"
           >
-            <div className="px-4 py-6 space-y-4">
+            <div className="px-4 py-8 space-y-4">
               {navLinks.map((link) => (
-                <a
-                  key={link.name}
-                  href={link.href}
-                  onClick={(e) => handleLinkClick(e, link.href)}
-                  className="block text-lg font-bold text-gray-200 hover:text-primary transition-colors uppercase"
+                <button
+                  key={link.view}
+                  onClick={() => {
+                    onNavClick(link.view);
+                    setIsOpen(false);
+                  }}
+                  className={`flex items-center gap-4 w-full p-6 h-12 rounded-2xl text-lg font-bold transition-all ${
+                    currentView === link.view 
+                    ? 'bg-primary text-white' 
+                    : 'bg-white/5 text-gray-300'
+                  }`}
                 >
+                  <link.icon className="w-6 h-6" />
                   {link.name}
-                </a>
+                </button>
               ))}
             </div>
           </motion.div>

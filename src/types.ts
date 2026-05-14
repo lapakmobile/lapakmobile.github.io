@@ -1,4 +1,4 @@
-export type Category = 'Game' | 'Digital' | 'Sosmed' | 'Streaming' | 'Apps' | 'Jasa';
+export type Category = 'AI Tools' | 'Prompt AI' | 'Ebook' | 'Template' | 'Video Editing' | 'Marketing' | 'Social Media' | 'Software' | 'Course' | 'Subscription' | 'Game' | 'Games' | 'Digital' | 'Sosmed' | 'Streaming' | 'Apps' | 'Jasa' | 'Services';
 
 export interface Product {
   id: string;
@@ -6,12 +6,17 @@ export interface Product {
   category: Category;
   description?: string;
   image: string;
+  price?: string;
+  originalPrice?: string;
+  sales?: number;
   packages: {
+    id: string;
     name: string;
     price: string;
     isRealTime?: boolean;
   }[];
   isBestSeller?: boolean;
+  features?: string[];
   isRealTime?: boolean;
   rating?: number;
   reviewCount?: number;

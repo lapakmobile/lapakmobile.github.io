@@ -1,110 +1,80 @@
-import React, { useState, useEffect, memo } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import { MessageCircle, Star, Share2, Copy, Facebook, Twitter, Send, X, Zap, ShieldCheck, Clock, AlertCircle, MessageSquare, User, Heart, Bell, Minus, Plus, Tag } from 'lucide-react';
-import { toast } from 'sonner';
-import LazyImage from './ui/LazyImage';
-import { Product, Order, Review, PriceAlert } from '../types';
-import { WHATSAPP_NUMBER } from '../constants';
-import { priceService } from '../services/priceService';
+import React, { memo } from 'react';
+import { motion } from 'motion/react';
+import { CheckCircle2, ChevronRight } from 'lucide-react';
+import { Product } from '../types';
 
 interface ProductCardProps {
   product: Product;
-  index?: number;
   onClick?: (product: Product) => void;
 }
 
-const ProductCard = memo(function ProductCard({ product: initialProduct, index = 0, onClick }: ProductCardProps) {
-  const [product, setProduct] = useState<Product>(initialProduct);
-  const [isFavorite, setIsFavorite] = useState(false);
-  const [isAlertModalOpen, setIsAlertModalOpen] = useState(false);
-  const [targetPrice, setTargetPrice] = useState('');
-
-  // Periodic Price Check
-  useEffect(() => {
-    const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
-    setIsFavorite(favorites.includes(initialProduct.id));
-  }, [initialProduct.id]);
-
-  const toggleFavorite = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
-    let newFavorites;
-    if (isFavorite) {
-      newFavorites = favorites.filter((id: string) => id !== product.id);
-      toast.info(`${product.name} dihapus dari favorit`);
-    } else {
-      newFavorites = [...favorites, product.id];
-      toast.success(`${product.name} ditambahkan ke favorit`);
-    }
-    localStorage.setItem('favorites', JSON.stringify(newFavorites));
-    setIsFavorite(!isFavorite);
-    window.dispatchEvent(new Event('favoritesUpdated'));
-  };
-
-  const lowestPrice = product.packages.length > 0 
-    ? product.packages.reduce((min, p) => {
-        const priceVal = parseInt(p.price.replace(/[^0-9]/g, '')) || 0;
-        const minVal = parseInt(min.replace(/[^0-9]/g, '')) || Infinity;
-        return priceVal < minVal ? p.price : min;
-      }, product.packages[0].price)
-    : 'N/A';
-
-  const handleOrder = (packageName: string) => {
-    const pkg = product.packages.find(p => p.name === packageName);
-    const finalPrice = pkg?.price || 'N/A';
-
-    const newOrder: Order = {
-      id: `ORD-${Math.random().toString(36).substr(2, 9).toUpperCase()}`,
-      productId: product.id,
-      productName: product.name,
-      packageName: packageName,
-      price: finalPrice,
-      date: new Date().toISOString(),
-      status: 'Processing',
-      paymentMethod: 'WhatsApp Gateway',
-      transactionId: `TXN-${Math.random().toString(36).substr(2, 12).toUpperCase()}`
-    };
-
-    const existingOrders = JSON.parse(localStorage.getItem('order_history') || '[]');
-    localStorage.setItem('order_history', JSON.stringify([newOrder, ...existingOrders]));
-
-    toast.success(`Memulai pesanan ${product.name}...`);
-    const text = encodeURIComponent(`Halo Admin LapakMobile, saya ingin order:\n\nProduk: ${product.name}\nPaket: ${packageName}\nTotal Harga: ${finalPrice}\n\nMohon instruksi pembayarannya.`);
-    setTimeout(() => {
-      window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${text}`, '_blank');
-    }, 1000);
-  };
-
+const ProductCard = memo(function ProductCard({ product, onClick }: ProductCardProps) {
   return (
-    <>
-      <motion.div
-        layout
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        whileHover={{ scale: 1.02, backgroundColor: 'rgba(255, 255, 255, 0.03)' }}
-        className="bg-dark-lighter border border-white/5 rounded-2xl p-3 cursor-pointer group transition-all"
-        onClick={() => onClick?.(product)}
-      >
-        <div className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 shadow-lg border border-white/10 group-hover:border-primary/30 transition-colors">
-            <LazyImage 
-              src={product.image} 
-              alt={product.name}
-              className="w-full h-full object-cover"
-              skeletonClassName="w-full h-full"
-            />
-          </div>
-          <div className="flex-grow min-w-0">
-            <h3 className="font-bold text-gray-100 group-hover:text-primary transition-colors truncate">{product.name}</h3>
-            {product.isBestSeller && (
-              <span className="text-[10px] bg-primary/20 text-primary px-2 py-0.5 rounded-full font-black uppercase tracking-widest mt-1 inline-block">
-                Hot
-              </span>
-            )}
+    <motion.div
+      whileHover={{ y: -10 }}
+      transition={{ duration: 0.3 }}
+      className="group relative bg-[#1a1a1a] border border-white/5 rounded-[40px] p-8 flex flex-col h-full hover:border-white/20 transition-all shadow-2xl"
+      onClick={() => onClick?.(product)}
+    >
+      {/* Best Seller Badge */}
+      {product.isBestSeller && (
+        <div className="absolute -top-4 left-1/2 -translate-x-1/2">
+          <div className="bg-[#ffcc00] text-black text-[10px] font-black px-6 py-2 rounded-full uppercase tracking-widest shadow-xl shadow-yellow-500/20">
+            Best Seller
           </div>
         </div>
-      </motion.div>
-    </>
+      )}
+
+      {/* Header: Icon + Info */}
+      <div className="flex items-start gap-5 mb-8">
+        <div className="w-20 h-20 bg-slate-800 rounded-3xl overflow-hidden flex-shrink-0 border border-white/10 shadow-lg">
+          <img 
+            src={product.image} 
+            alt={product.name}
+            className="w-full h-full object-cover"
+          />
+        </div>
+        <div className="pt-2">
+          <h3 className="text-2xl font-black text-white mb-1 leading-tight group-hover:text-[#ffcc00] transition-colors">
+            {product.name}
+          </h3>
+          <span className="text-[10px] font-black text-[#ffcc00] uppercase tracking-widest">
+            {product.category}
+          </span>
+        </div>
+      </div>
+
+      {/* Pricing */}
+      <div className="mb-8">
+        <div className="text-[11px] text-gray-500 font-bold mb-1">
+          Mulai dari <span className="line-through">{product.originalPrice || 'Rp 49.000'}</span>
+        </div>
+        <div className="flex items-baseline gap-1">
+          <span className="text-4xl font-black text-white tracking-tighter">
+            {product.price}
+          </span>
+          <span className="text-sm text-gray-500 font-bold">/ bln</span>
+        </div>
+      </div>
+
+      {/* Features List */}
+      <div className="space-y-4 mb-10 flex-grow">
+        {(product.features || ['Tanpa Watermark', 'Templates Premium', 'Invite Team']).map((feature, i) => (
+          <div key={i} className="flex items-center gap-3 text-gray-300">
+            <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0" />
+            <span className="text-sm font-medium">{feature}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* Action Button */}
+      <button 
+        className="w-full py-5 bg-white/5 border border-white/10 rounded-3xl text-sm font-black text-white flex items-center justify-center gap-3 group-hover:bg-white/10 group-hover:border-white/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
+      >
+        Order Sekarang
+        <ChevronRight className="w-5 h-5" />
+      </button>
+    </motion.div>
   );
 });
 

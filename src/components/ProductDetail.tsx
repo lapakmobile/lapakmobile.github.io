@@ -1,273 +1,148 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ShoppingCart, CreditCard, ChevronDown, ChevronUp, Zap, ShieldCheck, Clock, MessageCircle, ChevronRight, QrCode, Wallet, Landmark, Banknote, Mail, Phone, ThumbsUp } from 'lucide-react';
-import { Product, Order } from '../types';
+import { X, Star, ShoppingCart, CheckCircle2, ShieldCheck, Zap, ArrowLeft, MessageSquare } from 'lucide-react';
+import { Product } from '../types';
 import { WHATSAPP_NUMBER } from '../constants';
 import { toast } from 'sonner';
-import { gasService } from '../services/gasService';
 import LazyImage from './ui/LazyImage';
 
 interface ProductDetailProps {
   product: Product;
-  onBack: () => void;
-  otherProducts: Product[];
-  onSelectProduct: (p: Product) => void;
+  onClose: () => void;
 }
 
-export default function ProductDetail({ product, onBack, otherProducts, onSelectProduct }: ProductDetailProps) {
-  const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
+export default function ProductDetail({ product, onClose }: ProductDetailProps) {
+  const [selectedPackage, setSelectedPackage] = useState(product.packages[0]);
 
-  const handleOrder = (packageName: string) => {
-    const pkg = product.packages.find(p => p.name === packageName);
-    const finalPrice = pkg?.price || 'N/A';
-
-    const newOrder: Order = {
-      id: `ORD-${Math.random().toString(36).substr(2, 9).toUpperCase()}`,
-      productId: product.id,
-      productName: product.name,
-      packageName: packageName,
-      price: finalPrice,
-      date: new Date().toISOString(),
-      status: 'Processing',
-      paymentMethod: 'WhatsApp Manual',
-      transactionId: `TXN-${Math.random().toString(36).substr(2, 12).toUpperCase()}`
-    };
-
-    const existingOrders = JSON.parse(localStorage.getItem('order_history') || '[]');
-    localStorage.setItem('order_history', JSON.stringify([newOrder, ...existingOrders]));
-
-    // Sync to Google Sheets via GAS
-    gasService.saveOrder(newOrder, { whatsapp: '-', email: '-' })
-      .catch(err => console.error('Silent GAS sync failure:', err));
-
-    toast.success(`Memulai pesanan ${product.name}...`);
-    const text = encodeURIComponent(`Halo Admin LapakMobile, saya ingin order:\n\nProduk: ${product.name}\nPaket: ${packageName}\nTotal Harga: ${finalPrice}\n\nMohon instruksi pembayarannya.`);
+  const handlePurchase = () => {
+    toast.success(`Memproses pesanan untuk ${product.name}...`);
+    const text = encodeURIComponent(`Halo Admin Lapak Mobile, saya tertarik untuk membeli produk berikut:\n\nProduk: ${product.name}\nPaket: ${selectedPackage.name}\nHarga: ${selectedPackage.price}\n\nMohon informasi pembayarannya.`);
     setTimeout(() => {
       window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${text}`, '_blank');
-    }, 1000);
+    }, 1200);
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <button 
-        onClick={onBack}
-        className="flex items-center gap-2 text-gray-400 hover:text-primary mb-8 transition-colors group px-2 py-1 -ml-2 rounded-lg hover:bg-white/5"
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-8 bg-slate-950/80 backdrop-blur-xl overflow-y-auto"
+    >
+      <motion.div
+        initial={{ scale: 0.9, opacity: 0, y: 20 }}
+        animate={{ scale: 1, opacity: 1, y: 0 }}
+        className="bg-slate-900 border border-white/10 w-full max-w-6xl rounded-[40px] overflow-hidden relative shadow-2xl flex flex-col md:flex-row"
       >
-        <ChevronRight className="w-5 h-5 rotate-180 group-hover:-translate-x-1 transition-transform" />
-        Kembali ke Beranda
-      </button>
+        <button 
+          onClick={onClose}
+          className="absolute top-6 right-6 z-10 p-2 bg-black/50 hover:bg-black text-white rounded-full transition-colors"
+        >
+          <X className="w-6 h-6" />
+        </button>
 
-      <div className="max-w-4xl mx-auto space-y-8">
-        {/* Main Content */}
-        <div className="space-y-8">
-          {/* Step 1: Choose Quantity/Package */}
-          <div className="bg-dark-lighter border border-white/5 rounded-[2.5rem] overflow-hidden shadow-2xl">
-            <div className="bg-white/5 px-8 py-5 border-b border-white/5 flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center font-black text-primary">1</div>
-                <h2 className="text-xl font-display font-black text-white uppercase tracking-widest">PILIH JUMLAH</h2>
-              </div>
-              <Zap className="w-5 h-5 text-primary opacity-50" />
+        {/* Left Side: Media */}
+        <div className="w-full md:w-1/2 p-8 lg:p-12">
+          <div className="relative aspect-square rounded-[32px] overflow-hidden border border-white/5 shadow-2xl">
+            <LazyImage 
+              src={product.image} 
+              alt={product.name}
+              className="w-full h-full object-cover"
+            />
+          </div>
+          
+          <div className="grid grid-cols-3 gap-4 mt-8">
+            <div className="p-6 bg-white/5 rounded-3xl border border-white/5 text-center">
+              <Zap className="w-6 h-6 text-primary mx-auto mb-2" />
+              <div className="text-xl font-black text-white">Instan</div>
+              <div className="text-[10px] text-gray-500 uppercase font-bold tracking-widest">Delivery</div>
             </div>
-            <div className="p-8">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="p-6 bg-white/5 rounded-3xl border border-white/5 text-center">
+              <ShieldCheck className="w-6 h-6 text-secondary mx-auto mb-2" />
+              <div className="text-xl font-black text-white">100%</div>
+              <div className="text-[10px] text-gray-500 uppercase font-bold tracking-widest">Legal</div>
+            </div>
+            <div className="p-6 bg-white/5 rounded-3xl border border-white/5 text-center">
+              <Star className="w-6 h-6 text-accent mx-auto mb-2" />
+              <div className="text-xl font-black text-white">{product.rating}</div>
+              <div className="text-[10px] text-gray-500 uppercase font-bold tracking-widest">Rating</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Side: Details & Options */}
+        <div className="w-full md:w-1/2 p-8 lg:p-12 lg:pl-0 flex flex-col">
+          <div className="mb-4">
+            <span className="px-4 py-1 bg-primary/20 text-primary text-[10px] font-black rounded-full uppercase tracking-widest border border-primary/20">
+              {product.category}
+            </span>
+          </div>
+          <h2 className="text-4xl lg:text-5xl font-display font-black text-white mb-6 leading-tight">{product.name}</h2>
+          
+          <div className="space-y-6 mb-10 overflow-y-auto max-h-[300px] pr-4 no-scrollbar">
+            <p className="text-gray-400 text-lg leading-relaxed">
+              {product.description || "Dapatkan akses premium ke produk digital berkualitas tinggi dengan proses cepat dan garansi penuh."}
+            </p>
+            
+            <div className="space-y-4">
+              <h4 className="text-sm font-black text-gray-300 uppercase tracking-widest">Pilih Paket</h4>
+              <div className="grid grid-cols-1 gap-4">
                 {product.packages.map((pkg) => (
                   <button
-                    key={pkg.name}
-                    onClick={() => setSelectedPackage(pkg.name)}
-                    className={`relative p-6 rounded-2xl border transition-all text-left flex flex-col justify-between min-h-[8rem] group overflow-hidden ${
-                      selectedPackage === pkg.name 
-                        ? 'bg-primary/10 border-primary shadow-[0_0_30px_rgba(255,184,0,0.15)] ring-1 ring-primary/50' 
-                        : 'bg-dark border-white/5 hover:border-white/20 hover:bg-white/[0.02]'
+                    key={pkg.id}
+                    onClick={() => setSelectedPackage(pkg)}
+                    className={`p-5 rounded-2xl border flex items-center justify-between transition-all group ${
+                      selectedPackage.id === pkg.id 
+                      ? 'bg-primary border-primary shadow-xl shadow-primary/20' 
+                      : 'bg-white/5 border-white/10 hover:border-white/30'
                     }`}
                   >
-                    <div className="flex-1">
-                      <p className={`font-bold text-lg leading-tight transition-colors break-words ${selectedPackage === pkg.name ? 'text-primary' : 'text-gray-300'}`}>
+                    <div className="flex items-center gap-4">
+                      <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${
+                        selectedPackage.id === pkg.id ? 'border-white bg-white' : 'border-gray-500'
+                      }`}>
+                        {selectedPackage.id === pkg.id && <CheckCircle2 className="w-4 h-4 text-primary" />}
+                      </div>
+                      <span className={`font-bold transition-colors ${selectedPackage.id === pkg.id ? 'text-white' : 'text-gray-300'}`}>
                         {pkg.name}
-                      </p>
+                      </span>
                     </div>
-                    <div className="flex justify-between items-end mt-4 w-full">
-                      <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-gray-500">
-                        <ShieldCheck className="w-3.5 h-3.5" />
-                        <span>Resmi</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Banknote className={`w-4 h-4 ${selectedPackage === pkg.name ? 'text-primary' : 'text-gray-600'}`} />
-                        <p className={`font-black text-xl ${selectedPackage === pkg.name ? 'text-primary' : 'text-white'}`}>
-                          {pkg.price}
-                        </p>
-                      </div>
-                    </div>
+                    <span className={`font-black text-xl transition-colors ${selectedPackage.id === pkg.id ? 'text-white' : 'text-primary'}`}>
+                      {pkg.price}
+                    </span>
                   </button>
                 ))}
               </div>
             </div>
           </div>
 
-          {/* Step 2: Konfirmasi Pembelian */}
-          <div className="bg-dark-lighter border border-white/5 rounded-[2.5rem] overflow-hidden shadow-2xl">
-            <div className="bg-white/5 px-8 py-5 border-b border-white/5 flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center font-black text-primary">2</div>
-                <h2 className="text-xl font-display font-black text-white uppercase tracking-widest">KONFIRMASI PEMBELIAN</h2>
-              </div>
-              <CreditCard className="w-5 h-5 text-primary opacity-50" />
+          <div className="mt-auto space-y-4">
+            <div className="flex items-center justify-between p-6 bg-white/5 rounded-3xl border border-white/10">
+              <div className="text-sm text-gray-400 font-bold uppercase tracking-widest">Total Harga</div>
+              <div className="text-3xl font-black text-white">{selectedPackage.price}</div>
             </div>
-            <div className="p-8">
-              <div className="max-w-xl mx-auto space-y-8">
-                {/* Summary Table */}
-                <div className="bg-dark p-6 rounded-3xl border border-white/5 space-y-4">
-                  <div className="flex justify-between items-center py-1">
-                    <span className="text-gray-500 font-bold text-sm uppercase tracking-wider">Item</span>
-                    <span className={`font-black transition-colors ${selectedPackage ? 'text-white' : 'text-gray-700'}`}>
-                      {selectedPackage || 'Belum dipilih'}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center py-1">
-                    <span className="text-gray-500 font-bold text-sm uppercase tracking-wider">Layanan</span>
-                    <span className="text-white font-black">Proses Cepat (1-5 Menit)</span>
-                  </div>
-                  <div className="flex justify-between items-center py-1 border-t border-white/5 pt-4">
-                    <span className="text-gray-500 font-bold text-sm uppercase tracking-wider">Metode</span>
-                    <div className="flex items-center gap-2 bg-white/10 px-3 py-1 rounded-full border border-white/10">
-                      <MessageCircle className="w-3 h-3 text-green-500" />
-                      <span className="text-white font-black text-[10px] uppercase">WhatsApp</span>
-                    </div>
-                  </div>
-                </div>
 
-                <div className="flex flex-col sm:flex-row justify-between items-center gap-6 bg-white/5 p-6 rounded-3xl border border-white/10">
-                  <div className="text-center sm:text-left space-y-1">
-                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">Total Pembayaran</p>
-                    <p className="text-3xl font-black text-primary">
-                      {product.packages.find(p => p.name === selectedPackage)?.price || 'Rp 0'}
-                    </p>
-                  </div>
-                  <div className="w-full sm:w-auto">
-                    <button 
-                      disabled={!selectedPackage}
-                      onClick={() => selectedPackage && handleOrder(selectedPackage)}
-                      className={`w-full sm:px-12 py-5 rounded-2xl font-black transition-all flex items-center justify-center gap-3 shadow-xl ${
-                        selectedPackage
-                          ? 'bg-primary text-dark shadow-primary/20 hover:scale-[1.02] active:scale-[0.98]' 
-                          : 'bg-white/10 text-gray-500 grayscale cursor-not-allowed'
-                      }`}
-                    >
-                       <Zap className="w-5 h-5 fill-current" />
-                       <span className="whitespace-nowrap">ORDER VIA WHATSAPP</span>
-                    </button>
-                  </div>
-                </div>
-
-                {!selectedPackage && (
-                  <p className="text-center text-xs text-red-500/80 font-bold tracking-widest uppercase italic animate-pulse">
-                    * Silakan pilih paket untuk melanjutkan
-                  </p>
-                )}
-
-                <div className="grid grid-cols-2 gap-4 pt-4">
-                  <div className="flex items-center gap-3 p-4 bg-white/[0.02] rounded-2xl border border-white/5">
-                    <ShieldCheck className="w-6 h-6 text-primary" />
-                    <span className="text-[10px] text-gray-400 font-black uppercase tracking-widest leading-tight">TRANSAKSI<br />DIJAMIN AMAN</span>
-                  </div>
-                  <div className="flex items-center gap-3 p-4 bg-white/[0.02] rounded-2xl border border-white/5">
-                    <ThumbsUp className="w-6 h-6 text-primary" />
-                    <span className="text-[10px] text-gray-400 font-black uppercase tracking-widest leading-tight">GARANSI<br />SESUAI DURASI</span>
-                  </div>
-                </div>
-              </div>
+            <div className="grid grid-cols-2 gap-4">
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={handlePurchase}
+                className="col-span-2 py-5 bg-gradient-to-r from-primary to-secondary text-white font-black rounded-3xl flex items-center justify-center gap-3 shadow-xl"
+              >
+                <ShoppingCart className="w-6 h-6" />
+                Beli Sekarang
+              </motion.button>
+              <button className="py-4 bg-white/5 hover:bg-white/10 text-white font-bold rounded-2xl border border-white/10 transition-colors flex items-center justify-center gap-2">
+                <MessageSquare className="w-5 h-5" />
+                Chat Admin
+              </button>
+              <button className="py-4 bg-white/5 hover:bg-white/10 text-white font-bold rounded-2xl border border-white/10 transition-colors">
+                Affiliate
+              </button>
             </div>
-          </div>
-
-          {/* Product Info Section */}
-          <div className="bg-dark-lighter border border-white/5 rounded-[3rem] p-8 md:p-12 shadow-xl">
-            <div className="flex flex-col md:flex-row gap-10 items-start">
-              <div className="w-32 h-32 md:w-48 md:h-48 rounded-[2rem] overflow-hidden shrink-0 border-4 border-white/10 shadow-2xl skew-y-2">
-                 <LazyImage 
-                   src={product.image} 
-                   alt={product.name} 
-                   className="w-full h-full object-cover"
-                   width={400}
-                   priority="high"
-                 />
-              </div>
-              <div className="flex-grow space-y-6">
-                <div>
-                  <h3 className="text-3xl md:text-5xl font-display font-black text-white leading-none mb-2">{product.name}</h3>
-                  <div className="inline-block px-3 py-1 bg-primary/20 rounded-lg text-xs font-black text-primary uppercase tracking-[0.2em]">{product.category}</div>
-                </div>
-                
-                <div className="space-y-4 text-gray-400 text-lg leading-relaxed">
-                  {product.description ? (
-                    <div className="space-y-4">
-                      {product.description.split('\n').map((line, i) => (
-                        <p key={i}>{line}</p>
-                      ))}
-                    </div>
-                  ) : (
-                    <p>
-                      {product.name} adalah platform hiburan digital yang populer di kalangan pengguna di Asia dan khususnya di Indonesia. 
-                      Nikmati berbagai konten eksklusif dan fitur interaktif terbaik dengan harga termurah hanya di LapakMobile.
-                    </p>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Moved: Top-up Voucher Lainnya */}
-          <div className="bg-dark-lighter border border-white/5 rounded-[2.5rem] p-8">
-            <h2 className="text-xl font-display font-black text-white mb-6 uppercase tracking-wider">Top-up Voucher Lainnya</h2>
-            <div className="grid grid-cols-3 sm:grid-cols-6 gap-4">
-              {otherProducts.slice(0, 6).map((other) => (
-                <button 
-                  key={other.id}
-                  onClick={() => onSelectProduct(other)}
-                  className="aspect-square bg-dark rounded-2xl overflow-hidden border border-white/5 hover:border-primary/50 transition-all p-1 group"
-                >
-                  <LazyImage 
-                    src={other.image} 
-                    alt={other.name} 
-                    className="w-full h-full grayscale group-hover:grayscale-0 transition-all rounded-xl" 
-                    width={200}
-                  />
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Transaction Info (Footer of Page) */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-             <div className="bg-white/5 p-6 rounded-3xl border border-white/10 flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-green-500/10 flex items-center justify-center">
-                   <ShieldCheck className="text-green-500 w-6 h-6" />
-                </div>
-                <div>
-                  <h4 className="text-sm font-bold text-white">Legal & Aman</h4>
-                  <p className="text-[10px] text-gray-500 uppercase font-black">100% Tergaransi</p>
-                </div>
-             </div>
-             <div className="bg-white/5 p-6 rounded-3xl border border-white/10 flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-yellow-500/10 flex items-center justify-center">
-                   <Zap className="text-yellow-500 w-6 h-6" />
-                </div>
-                <div>
-                  <h4 className="text-sm font-bold text-white">Proses Instan</h4>
-                  <p className="text-[10px] text-gray-500 uppercase font-black">Otomatis 24 Jam</p>
-                </div>
-             </div>
-             <div className="bg-white/5 p-6 rounded-3xl border border-white/10 flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center">
-                   <Clock className="text-blue-500 w-6 h-6" />
-                </div>
-                <div>
-                  <h4 className="text-sm font-bold text-white">Layanan 24/7</h4>
-                  <p className="text-[10px] text-gray-500 uppercase font-black">Support Non-Stop</p>
-                </div>
-             </div>
           </div>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }

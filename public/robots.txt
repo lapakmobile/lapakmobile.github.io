@@ -1,5 +1,3 @@
 User-agent: *
 Allow: /
-
-# Sitemaps
-Sitemap: https://ais-dev-jnpyyalhhnvbist3dnvlhw-714968394444.asia-east1.run.app/sitemap.xml
+Sitemap: https://lapakpro.com/sitemap.xml

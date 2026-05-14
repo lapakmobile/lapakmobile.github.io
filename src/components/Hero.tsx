@@ -1,65 +1,79 @@
 import { motion } from 'motion/react';
-import { Zap, ShieldCheck, Clock } from 'lucide-react';
+import { Sparkles, ArrowRight, Zap, Shield, Users } from 'lucide-react';
 
-export default function Hero() {
+export default function Hero({ onExploreTools, onExploreMarketplace }: { onExploreTools: () => void, onExploreMarketplace: () => void }) {
   return (
     <section className="relative pt-32 pb-20 overflow-hidden">
-      {/* Background Glows */}
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-[120px] -z-10" />
-      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-secondary/20 rounded-full blur-[120px] -z-10" />
-
+      {/* Dynamic Background */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-primary/20 rounded-full blur-[120px] -z-10 opacity-30" />
+      
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center">
+        <div className="flex flex-col items-center text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.8 }}
           >
-            <span className="inline-block py-1 px-3 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold tracking-widest uppercase mb-6">
-              #1 Trusted Game Store
-            </span>
-            <h1 className="text-5xl md:text-7xl font-display font-extrabold tracking-tight mb-6 leading-tight">
-              Top Up Game Murah <br />
-              <span className="text-gradient">dan Mudah ⚡</span>
+            <div className="inline-flex items-center gap-2 py-2 px-4 rounded-full bg-white/5 border border-white/10 backdrop-blur-md mb-8">
+              <Sparkles className="w-4 h-4 text-primary" />
+              <span className="text-xs font-bold text-gray-300 uppercase tracking-widest">
+                Powering 10,000+ Creators & Businesses
+              </span>
+            </div>
+
+            <h1 className="text-5xl md:text-8xl font-display font-black text-white mb-8 leading-[1.1] tracking-tight">
+              Tools AI Gratis & <br />
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary via-secondary to-accent">
+                Produk Digital Terbaik
+              </span>
             </h1>
-            <p className="text-lg text-gray-400 max-w-2xl mx-auto mb-10 leading-relaxed">
-              Dapatkan diamond, UC, dan produk digital lainnya dengan harga termurah dan proses secepat kilat. 100% Aman & Terpercaya.
+
+            <p className="text-xl text-gray-400 max-w-3xl mx-auto mb-12 font-medium leading-relaxed">
+              Tingkatkan produktivitas kamu dengan tools AI canggih dan koleksi produk digital premium kami. Dari generator konten hingga template desain eksklusif.
             </p>
-            
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <a 
-                href="#products"
-                className="w-full sm:w-auto px-8 py-4 bg-primary text-dark font-bold rounded-xl hover:bg-primary/90 transition-all hover:scale-105 neon-glow"
+
+            <div className="flex flex-col sm:flex-row gap-6 justify-center w-full sm:w-auto">
+              <motion.button
+                whileHover={{ scale: 1.05, y: -2 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={onExploreTools}
+                className="group px-8 py-5 bg-primary text-white font-black rounded-3xl flex items-center justify-center gap-3 shadow-2xl shadow-primary/20"
               >
-                Mulai Belanja
-              </a>
-              <a 
-                href="#about"
-                className="w-full sm:w-auto px-8 py-4 glass text-white font-bold rounded-xl hover:bg-white/10 transition-all"
+                Coba Tools Gratis
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </motion.button>
+              
+              <motion.button
+                whileHover={{ scale: 1.05, y: -2 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={onExploreMarketplace}
+                className="px-8 py-5 bg-white/5 hover:bg-white/10 text-white font-black rounded-3xl border border-white/10 backdrop-blur-lg transition-all"
               >
-                Pelajari Lebih Lanjut
-              </a>
+                Lihat Produk Digital
+              </motion.button>
             </div>
           </motion.div>
 
-          {/* Features */}
-          <motion.div 
+          {/* Stats Section */}
+          <motion.div
             initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-20"
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.4, duration: 0.8 }}
+            className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-32 w-full max-w-5xl"
           >
             {[
-              { icon: Zap, title: 'Proses Instan', desc: 'Pesanan diproses otomatis dalam hitungan detik.' },
-              { icon: ShieldCheck, title: '100% Aman', desc: 'Metode pembayaran resmi dan legal.' },
-              { icon: Clock, title: 'Layanan 24/7', desc: 'Bantuan admin siap melayani kapan saja.' },
-            ].map((feature, i) => (
-              <div key={i} className="glass p-8 rounded-2xl text-left hover:border-primary/30 transition-colors group">
-                <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-primary/20 transition-colors">
-                  <feature.icon className="text-primary w-6 h-6" />
+              { label: 'Users Active', value: '50K+', icon: Users },
+              { label: 'Tools AI', value: '15+', icon: Zap },
+              { label: 'Digital Products', value: '500+', icon: Sparkles },
+              { label: 'Success Rate', value: '99.9%', icon: Shield },
+            ].map((stat, i) => (
+              <div key={i} className="flex flex-col items-center">
+                <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center mb-4 border border-white/10">
+                  <stat.icon className="w-6 h-6 text-primary" />
                 </div>
-                <h3 className="text-xl font-bold mb-3">{feature.title}</h3>
-                <p className="text-gray-400 text-sm leading-relaxed">{feature.desc}</p>
+                <div className="text-3xl font-black text-white mb-1 tracking-tight">{stat.value}</div>
+                <div className="text-xs font-bold text-gray-500 uppercase tracking-widest">{stat.label}</div>
               </div>
             ))}
           </motion.div>
