@@ -7,7 +7,6 @@ import WarningSection from './components/WarningSection';
 import WhyChooseUs from './components/WhyChooseUs';
 import Testimonials from './components/Testimonials';
 import PurchaseNotification from './components/PurchaseNotification';
-import Hero from './components/Hero';
 import ProductCard from './components/ProductCard';
 import Footer from './components/Footer';
 import BackToTop from './components/BackToTop';

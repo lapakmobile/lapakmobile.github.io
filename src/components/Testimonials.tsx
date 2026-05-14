@@ -65,8 +65,8 @@ const Testimonials = () => {
 
                 {/* Chat Background */}
                 <div className="flex-grow p-4 bg-[#e5ddd5] dark:bg-[#0b141a] overflow-hidden space-y-3 relative">
-                  {/* Subtle pattern or colors */}
-                  <div className="absolute inset-0 opacity-[0.05] pointer-events-none bg-[url('https://whatsapp-clone-react-js.netlify.app/static/media/chat-bg.a84d4d62.png')]" />
+                  {/* Subtle pattern overlay */}
+                  <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[radial-gradient(#000_1px,transparent_1px)] [background-size:16px_16px]" />
                   
                   {testi.messages.map((msg, mIdx) => (
                     <div 

@@ -39,6 +39,21 @@ const Navbar = memo(function Navbar({ onSearch, onHomeClick }: { onSearch?: (que
     }
   };
 
+  const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    if (onHomeClick) {
+      e.preventDefault();
+      onHomeClick();
+      // Wait for navigation back to home before scrolling
+      setTimeout(() => {
+        const element = document.querySelector(href);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100);
+    }
+    setIsOpen(false);
+  };
+
   const navLinks = [
     { name: 'Produk', href: '#pricing-lp' },
     { name: 'Keunggulan', href: '#benefits' },
@@ -49,7 +64,7 @@ const Navbar = memo(function Navbar({ onSearch, onHomeClick }: { onSearch?: (que
   return (
     <nav 
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled ? 'bg-black/90 backdrop-blur-xl border-b border-white/5 py-3' : 'bg-transparent py-6'
+        scrolled ? 'bg-black/95 backdrop-blur-xl border-b border-white/5 py-3' : 'bg-transparent py-6'
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -59,11 +74,11 @@ const Navbar = memo(function Navbar({ onSearch, onHomeClick }: { onSearch?: (que
             onClick={onHomeClick}
             className="flex items-center gap-2 cursor-pointer group"
           >
-            <div className="w-10 h-10 bg-[#5E47FF] rounded-xl flex items-center justify-center shadow-[0_0_20px_rgba(94,71,255,0.4)]">
-              <Zap className="w-6 h-6 text-white fill-white" />
+            <div className="w-10 h-10 bg-primary/20 rounded-xl flex items-center justify-center shadow-[0_0_20px_rgba(255,184,0,0.2)]">
+              <Zap className="w-6 h-6 text-primary fill-primary" />
             </div>
             <span className="text-xl font-display font-black tracking-tight text-white">
-              Lapak<span className="text-white/70"> Mobile</span>
+              Lapak<span className="text-primary truncate">Mobile</span>
             </span>
           </button>
 
@@ -73,7 +88,8 @@ const Navbar = memo(function Navbar({ onSearch, onHomeClick }: { onSearch?: (que
               <a
                 key={link.name}
                 href={link.href}
-                className="text-[13px] font-semibold text-gray-400 hover:text-white transition-colors tracking-wide"
+                onClick={(e) => handleLinkClick(e, link.href)}
+                className="text-[13px] font-semibold text-gray-400 hover:text-primary transition-colors tracking-wide uppercase"
               >
                 {link.name}
               </a>
@@ -84,7 +100,8 @@ const Navbar = memo(function Navbar({ onSearch, onHomeClick }: { onSearch?: (que
           <div className="hidden lg:flex items-center gap-4">
             <a 
               href="#pricing-lp"
-              className="px-8 py-2.5 bg-primary text-black font-bold rounded-full hover:scale-105 transition-all shadow-[0_4px_20px_rgba(255,184,0,0.3)] text-sm"
+              onClick={(e) => handleLinkClick(e, '#pricing-lp')}
+              className="px-8 py-2.5 bg-primary text-dark font-black rounded-full hover:scale-105 transition-all shadow-[0_4px_20px_rgba(255,184,0,0.3)] text-sm"
             >
               Beli Sekarang
             </a>
@@ -116,8 +133,8 @@ const Navbar = memo(function Navbar({ onSearch, onHomeClick }: { onSearch?: (que
                 <a
                   key={link.name}
                   href={link.href}
-                  onClick={() => setIsOpen(false)}
-                  className="block text-lg font-bold text-gray-200 hover:text-primary transition-colors"
+                  onClick={(e) => handleLinkClick(e, link.href)}
+                  className="block text-lg font-bold text-gray-200 hover:text-primary transition-colors uppercase"
                 >
                   {link.name}
                 </a>
