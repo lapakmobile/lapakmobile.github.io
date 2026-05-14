@@ -43,6 +43,10 @@ export const ALL_PRODUCTS: Product[] = [
     features: ['GPT-4 Access', 'DALL-E Integration', 'Fast Response'],
     rating: 4.9,
     sales: 1240,
+    reviewCount: 85,
+    reviews: [
+      { id: 'rev-gpt-1', userName: 'Fajar Ramdan', rating: 5, comment: 'GPT-4 kenceng banget, ngebantu buat coding.', date: '2024-05-14' }
+    ],
     packages: [
       { id: 'gpt-1', name: '1 Bulan Shared', price: 'Rp 50.000' },
       { id: 'gpt-2', name: '1 Bulan Private', price: 'Rp 300.000' }
@@ -127,6 +131,11 @@ export const ALL_PRODUCTS: Product[] = [
     features: ['Tanpa Watermark', 'Templates Premium', 'Invite Team'],
     rating: 5.0,
     sales: 5600,
+    reviewCount: 450,
+    reviews: [
+      { id: 'rev-canva-1', userName: 'Bagus Setiawan', rating: 5, comment: 'Gokil, langsung aktif gapake lama. Worth it banget!', date: '2024-05-12' },
+      { id: 'rev-canva-2', userName: 'Dinda Ayu', rating: 5, comment: 'Murah banget tapi fiturnya lengkap. Makasih Lapak Mobile!', date: '2024-05-10' }
+    ],
     packages: [{ id: 'canva-1', name: 'Lifetime Access', price: 'Rp 10.000' }]
   },
   {

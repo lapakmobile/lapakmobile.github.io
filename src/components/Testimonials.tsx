@@ -41,6 +41,7 @@ const Testimonials = () => {
                 <LazyImage 
                   src={testi.avatar} 
                   alt={testi.name} 
+                  width={120}
                   className="w-14 h-14 rounded-2xl object-cover border-2 border-white/10"
                 />
                 <div>

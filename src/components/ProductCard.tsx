@@ -1,15 +1,16 @@
 import React, { memo } from 'react';
 import { motion } from 'motion/react';
-import { CheckCircle2, ChevronRight } from 'lucide-react';
+import { CheckCircle2, ChevronRight, Star } from 'lucide-react';
 import { Product } from '../types';
 import LazyImage from './ui/LazyImage';
 
 interface ProductCardProps {
   product: Product;
   onClick?: (product: Product) => void;
+  priority?: 'high' | 'low' | 'auto';
 }
 
-const ProductCard = memo(function ProductCard({ product, onClick }: ProductCardProps) {
+const ProductCard = memo(function ProductCard({ product, onClick, priority = 'auto' }: ProductCardProps) {
   return (
     <motion.div
       layout
@@ -21,12 +22,13 @@ const ProductCard = memo(function ProductCard({ product, onClick }: ProductCardP
       initial="hidden"
       animate="visible"
       exit="exit"
-      whileHover={{ y: -10 }}
+      whileHover={{ y: -15, scale: 1.02 }}
       transition={{ 
         layout: { duration: 0.4, type: "spring", stiffness: 200, damping: 25 },
-        duration: 0.3 
+        duration: 0.4,
+        scale: { type: "spring", stiffness: 300, damping: 15 }
       }}
-      className="group relative bg-[#1a1a1a] border border-white/5 rounded-[40px] p-8 flex flex-col h-full hover:border-white/20 transition-all shadow-2xl"
+      className="group relative bg-[#1a1a1a] border border-white/5 rounded-[40px] p-8 flex flex-col h-full hover:border-white/20 hover:shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all shadow-2xl"
       onClick={() => onClick?.(product)}
     >
       {/* Best Seller Badge */}
@@ -44,10 +46,25 @@ const ProductCard = memo(function ProductCard({ product, onClick }: ProductCardP
           <LazyImage 
             src={product.image} 
             alt={product.name}
+            priority={priority}
+            width={160}
             className="w-full h-full object-cover"
           />
         </div>
         <div className="pt-2">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="flex items-center">
+              {[...Array(5)].map((_, i) => (
+                <Star 
+                  key={i} 
+                  className={`w-3 h-3 ${i < Math.floor(product.rating || 5) ? 'text-[#ffcc00] fill-[#ffcc00]' : 'text-gray-600'}`} 
+                />
+              ))}
+            </div>
+            <span className="text-[10px] font-black text-gray-400">
+              {product.rating || 5.0} ({product.reviewCount || 0})
+            </span>
+          </div>
           <h3 className="text-2xl font-black text-white mb-1 leading-tight group-hover:text-[#ffcc00] transition-colors">
             {product.name}
           </h3>
