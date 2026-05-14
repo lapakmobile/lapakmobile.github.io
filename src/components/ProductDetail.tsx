@@ -15,45 +15,8 @@ interface ProductDetailProps {
 
 export default function ProductDetail({ product, onBack, otherProducts, onSelectProduct }: ProductDetailProps) {
   const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
-  const [expandedPayment, setExpandedPayment] = useState<string | null>('qris');
-  const [selectedMethod, setSelectedMethod] = useState<string | null>(null);
-  const [whatsappNumber, setWhatsappNumber] = useState('');
-  const [email, setEmail] = useState('');
-  const [errors, setErrors] = useState<{ whatsapp?: string; email?: string }>({});
-
-  const validate = () => {
-    const newErrors: { whatsapp?: string; email?: string } = {};
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const phoneRegex = /^(\+?\d[\d\s\-]{7,}\d)$/;
-
-    if (!whatsappNumber && !email) {
-      newErrors.whatsapp = 'Silakan isi minimal satu kontak';
-      newErrors.email = 'Silakan isi minimal satu kontak';
-    }
-
-    if (whatsappNumber && !phoneRegex.test(whatsappNumber)) {
-      newErrors.whatsapp = 'Nomor WhatsApp tidak valid (min. 9 digit)';
-    }
-
-    if (email && !emailRegex.test(email)) {
-      newErrors.email = 'Format email tidak valid';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
 
   const handleOrder = (packageName: string) => {
-    if (!selectedMethod) {
-      toast.error('Silakan pilih metode pembayaran terlebih dahulu');
-      return;
-    }
-
-    if (!validate()) {
-      toast.error('Mohon perbaiki kesalahan pada formulir');
-      return;
-    }
-
     const pkg = product.packages.find(p => p.name === packageName);
     const finalPrice = pkg?.price || 'N/A';
 
@@ -65,7 +28,7 @@ export default function ProductDetail({ product, onBack, otherProducts, onSelect
       price: finalPrice,
       date: new Date().toISOString(),
       status: 'Processing',
-      paymentMethod: selectedMethod,
+      paymentMethod: 'WhatsApp Manual',
       transactionId: `TXN-${Math.random().toString(36).substr(2, 12).toUpperCase()}`
     };
 
@@ -73,12 +36,11 @@ export default function ProductDetail({ product, onBack, otherProducts, onSelect
     localStorage.setItem('order_history', JSON.stringify([newOrder, ...existingOrders]));
 
     // Sync to Google Sheets via GAS
-    gasService.saveOrder(newOrder, { whatsapp: whatsappNumber, email: email })
+    gasService.saveOrder(newOrder, { whatsapp: '-', email: '-' })
       .catch(err => console.error('Silent GAS sync failure:', err));
 
     toast.success(`Memulai pesanan ${product.name}...`);
-    const contactInfo = `\nWA: ${whatsappNumber || '-'}\nEmail: ${email || '-'}`;
-    const text = encodeURIComponent(`Halo Admin LapakMobile, saya ingin order:\n\nProduk: ${product.name}\nPaket: ${packageName}\nMetode Pembayaran: ${selectedMethod}\nTotal Harga: ${finalPrice}${contactInfo}\n\nMohon instruksi pembayarannya.`);
+    const text = encodeURIComponent(`Halo Admin LapakMobile, saya ingin order:\n\nProduk: ${product.name}\nPaket: ${packageName}\nTotal Harga: ${finalPrice}\n\nMohon instruksi pembayarannya.`);
     setTimeout(() => {
       window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${text}`, '_blank');
     }, 1000);
@@ -94,50 +56,9 @@ export default function ProductDetail({ product, onBack, otherProducts, onSelect
         Kembali ke Beranda
       </button>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* Sidebar Left */}
-        <div className="lg:col-span-4 space-y-8">
-          {/* Info Card */}
-          <div className="bg-dark-lighter border border-white/5 rounded-[2rem] p-8">
-            <h2 className="text-xl font-display font-black text-white mb-6 uppercase tracking-wider">Informasi Game/Aplikasi</h2>
-            <div className="flex gap-4 mb-6">
-              <div className="w-20 h-20 rounded-2xl overflow-hidden shrink-0 border border-white/10 shadow-xl">
-                 <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-white leading-tight">{product.name}</h3>
-                <p className="text-xs text-primary font-black uppercase tracking-widest mt-1">{product.category}</p>
-              </div>
-            </div>
-            <div className="prose prose-invert prose-sm max-w-none text-gray-400 leading-relaxed">
-              <p>
-                {product.description || `${product.name} adalah platform hiburan digital yang populer di kalangan pengguna di Asia dan khususnya di Indonesia. Nikmati berbagai konten eksklusif dan fitur interaktif terbaik.`}
-              </p>
-            </div>
-            <button className="text-primary font-bold text-xs mt-4 flex items-center gap-1 hover:translate-x-1 transition-transform">
-              Lihat Selengkapnya &gt;&gt;
-            </button>
-          </div>
-
-          {/* Other Products */}
-          <div className="bg-dark-lighter border border-white/5 rounded-[2rem] p-8">
-            <h2 className="text-xl font-display font-black text-white mb-6 uppercase tracking-wider">Top-up Voucher Lainnya</h2>
-            <div className="grid grid-cols-3 gap-3">
-              {otherProducts.slice(0, 6).map((other) => (
-                <button 
-                  key={other.id}
-                  onClick={() => onSelectProduct(other)}
-                  className="aspect-square bg-dark rounded-xl overflow-hidden border border-white/5 hover:border-primary/50 transition-all p-1 group"
-                >
-                  <img src={other.image} alt={other.name} className="w-full h-full object-cover rounded-lg grayscale group-hover:grayscale-0 transition-all" />
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Main Content Right */}
-        <div className="lg:col-span-8 space-y-8">
+      <div className="max-w-4xl mx-auto space-y-8">
+        {/* Main Content */}
+        <div className="space-y-8">
           {/* Step 1: Choose Quantity/Package */}
           <div className="bg-dark-lighter border border-white/5 rounded-[2.5rem] overflow-hidden">
             <div className="bg-white/5 px-8 py-5 border-b border-white/5 flex items-center gap-4">
@@ -145,7 +66,7 @@ export default function ProductDetail({ product, onBack, otherProducts, onSelect
               <h2 className="text-xl font-display font-black text-white uppercase tracking-widest">PILIH JUMLAH</h2>
             </div>
             <div className="p-8">
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {product.packages.map((pkg) => (
                   <button
                     key={pkg.name}
@@ -171,278 +92,20 @@ export default function ProductDetail({ product, onBack, otherProducts, onSelect
             </div>
           </div>
 
-          {/* Step 2: Choose Payment */}
+          {/* Step 2: Konfirmasi Pembelian */}
           <div className="bg-dark-lighter border border-white/5 rounded-[2.5rem] overflow-hidden">
             <div className="bg-white/5 px-8 py-5 border-b border-white/5 flex items-center gap-4">
               <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center font-black text-primary">2</div>
-              <h2 className="text-xl font-display font-black text-white uppercase tracking-widest">PILIH CHANNEL PEMBAYARAN</h2>
-            </div>
-            <div className="p-8 space-y-4">
-              {/* Payment Option: QRIS */}
-              <div className={`border rounded-2xl overflow-hidden transition-all bg-dark ${selectedMethod === 'QRIS' ? 'border-primary shadow-[0_0_15px_rgba(255,184,0,0.1)]' : 'border-white/5'}`}>
-                <button 
-                  onClick={() => setExpandedPayment(expandedPayment === 'qris' ? null : 'qris')}
-                  className="w-full p-6 flex justify-between items-center bg-white/5 hover:bg-white/10 transition-colors"
-                >
-                  <div className="flex items-center gap-4">
-                    <QrCode className="w-6 h-6 text-primary" />
-                    <span className="font-black text-white uppercase tracking-wider">QRIS</span>
-                    <span className="bg-primary text-dark text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-tighter">PROMO</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    {selectedMethod === 'QRIS' && <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />}
-                    {expandedPayment === 'qris' ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
-                  </div>
-                </button>
-                <motion.div
-                  initial={false}
-                  animate={{ height: expandedPayment === 'qris' ? 'auto' : 0 }}
-                  className="overflow-hidden"
-                >
-                  <div className="p-6 border-t border-white/5 space-y-4">
-                     <button 
-                       onClick={() => setSelectedMethod('QRIS')}
-                       className={`w-full flex gap-4 items-center p-4 rounded-xl border transition-all ${
-                         selectedMethod === 'QRIS' ? 'bg-primary/10 border-primary' : 'bg-white/5 border-transparent hover:border-white/20'
-                       }`}
-                     >
-                        <div className="p-3 bg-white rounded-lg">
-                           <img src="https://upload.wikimedia.org/wikipedia/commons/a/a2/Logo_QRIS.svg" alt="QRIS" className="h-5" />
-                        </div>
-                        <div className="text-left">
-                          <p className="text-sm font-bold text-white uppercase">QRIS (Otomatis)</p>
-                          <p className="text-[10px] text-gray-400 mt-0.5 mt-1">Gopay, OVO, Dana, LinkAja, BCA, dll</p>
-                        </div>
-                        <div className={`ml-auto w-5 h-5 rounded-full border-2 flex items-center justify-center ${selectedMethod === 'QRIS' ? 'border-primary' : 'border-white/20'}`}>
-                           {selectedMethod === 'QRIS' && <div className="w-2.5 h-2.5 rounded-full bg-primary" />}
-                        </div>
-                     </button>
-                  </div>
-                </motion.div>
-              </div>
-
-              {/* Payment Option: E-Wallet */}
-              <div className={`border rounded-2xl overflow-hidden transition-all bg-dark ${['GOPAY', 'OVO', 'DANA', 'SHOPEEPAY'].includes(selectedMethod || '') ? 'border-primary shadow-[0_0_15px_rgba(255,184,0,0.1)]' : 'border-white/5'}`}>
-                <button 
-                  onClick={() => setExpandedPayment(expandedPayment === 'ewallet' ? null : 'ewallet')}
-                  className="w-full p-6 flex justify-between items-center bg-white/5 hover:bg-white/10 transition-colors"
-                >
-                  <div className="flex items-center gap-4">
-                    <Wallet className="w-6 h-6 text-primary" />
-                    <span className="font-black text-white uppercase tracking-wider">E-WALLET</span>
-                    <span className="bg-primary text-dark text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-tighter">INSTAN</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    {['GOPAY', 'OVO', 'DANA', 'SHOPEEPAY'].includes(selectedMethod || '') && <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />}
-                    {expandedPayment === 'ewallet' ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
-                  </div>
-                </button>
-                <motion.div
-                  initial={false}
-                  animate={{ height: expandedPayment === 'ewallet' ? 'auto' : 0 }}
-                  className="overflow-hidden"
-                >
-                  <div className="p-6 border-t border-white/5 space-y-3">
-                     {[
-                       { id: 'GOPAY', name: 'GoPay', logo: 'https://upload.wikimedia.org/wikipedia/commons/8/8e/Gopay_logo.svg', desc: 'Pembayaran praktis dengan saldo GoPay' },
-                       { id: 'OVO', name: 'OVO', logo: 'https://upload.wikimedia.org/wikipedia/commons/e/eb/Logo_ovo_purple.svg', desc: 'Top up instan menggunakan aplikasi OVO' },
-                       { id: 'DANA', name: 'DANA', logo: 'https://upload.wikimedia.org/wikipedia/commons/7/72/Logo_dana_blue.svg', desc: 'Dompet digital Indonesia terpopuler' },
-                       { id: 'SHOPEEPAY', name: 'ShopeePay', logo: 'https://upload.wikimedia.org/wikipedia/commons/f/fe/ShopeePay.svg', desc: 'Gunakan saldo ShopeePay untuk transaksi cepat' }
-                     ].map(wallet => (
-                       <button 
-                         key={wallet.id} 
-                         onClick={() => setSelectedMethod(wallet.id)}
-                         className={`w-full p-4 rounded-xl flex items-center gap-4 border transition-all ${
-                           selectedMethod === wallet.id ? 'bg-primary/10 border-primary' : 'bg-white/5 border-transparent hover:border-white/20'
-                         }`}
-                       >
-                          <div className="w-14 h-8 bg-white rounded flex items-center justify-center p-1.5 shrink-0">
-                             <img src={wallet.logo} alt={wallet.name} className="max-h-full max-w-full object-contain" />
-                          </div>
-                          <div className="text-left flex-grow">
-                            <span className="text-sm font-bold text-white uppercase">{wallet.name}</span>
-                            <p className="text-[10px] text-gray-400 line-clamp-1">{wallet.desc}</p>
-                          </div>
-                          <div className={`ml-auto w-5 h-5 rounded-full border-2 flex items-center justify-center ${selectedMethod === wallet.id ? 'border-primary' : 'border-white/20'}`}>
-                             {selectedMethod === wallet.id && <div className="w-2.5 h-2.5 rounded-full bg-primary" />}
-                          </div>
-                       </button>
-                     ))}
-                  </div>
-                </motion.div>
-              </div>
-
-              {/* Payment Option: Virtual Account */}
-              <div className={`border rounded-2xl overflow-hidden transition-all bg-dark ${selectedMethod?.includes('VA') ? 'border-primary shadow-[0_0_15px_rgba(255,184,0,0.1)]' : 'border-white/5'}`}>
-                <button 
-                  onClick={() => setExpandedPayment(expandedPayment === 'va' ? null : 'va')}
-                  className="w-full p-6 flex justify-between items-center bg-white/5 hover:bg-white/10 transition-colors"
-                >
-                  <div className="flex items-center gap-4">
-                    <Landmark className="w-6 h-6 text-primary" />
-                    <span className="font-black text-white uppercase tracking-wider">VIRTUAL ACCOUNT</span>
-                    <span className="bg-primary text-dark text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-tighter">PROMO</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    {selectedMethod?.includes('VA') && <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />}
-                    {expandedPayment === 'va' ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
-                  </div>
-                </button>
-                <motion.div
-                  initial={false}
-                  animate={{ height: expandedPayment === 'va' ? 'auto' : 0 }}
-                  className="overflow-hidden"
-                >
-                  <div className="p-6 border-t border-white/5 space-y-3">
-                     {['BCA', 'BNI', 'BRI', 'Mandiri', 'Permata'].map(bank => (
-                       <button 
-                         key={bank} 
-                         onClick={() => setSelectedMethod(`${bank} VA`)}
-                         className={`w-full p-4 rounded-xl flex items-center justify-between border transition-all ${
-                           selectedMethod === `${bank} VA` ? 'bg-primary/10 border-primary' : 'bg-white/5 border-transparent hover:border-white/20'
-                         }`}
-                       >
-                          <span className="text-sm font-bold text-white uppercase">{bank} VA</span>
-                          <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${selectedMethod === `${bank} VA` ? 'border-primary' : 'border-white/20'}`}>
-                             {selectedMethod === `${bank} VA` && <div className="w-2.5 h-2.5 rounded-full bg-primary" />}
-                          </div>
-                       </button>
-                     ))}
-                  </div>
-                </motion.div>
-              </div>
-
-              {/* Payment Option: Retail */}
-              <div className={`border rounded-2xl overflow-hidden transition-all bg-dark ${selectedMethod?.includes('ALFAMART') || selectedMethod?.includes('INDOMARET') ? 'border-primary shadow-[0_0_15px_rgba(255,184,0,0.1)]' : 'border-white/5'}`}>
-                <button 
-                  onClick={() => setExpandedPayment(expandedPayment === 'retail' ? null : 'retail')}
-                  className="w-full p-6 flex justify-between items-center bg-white/5 hover:bg-white/10 transition-colors"
-                >
-                  <div className="flex items-center gap-4">
-                    <ShoppingCart className="w-6 h-6 text-primary" />
-                    <span className="font-black text-white uppercase tracking-wider">RETAIL</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    {(selectedMethod?.includes('ALFAMART') || selectedMethod?.includes('INDOMARET')) && <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />}
-                    {expandedPayment === 'retail' ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
-                  </div>
-                </button>
-                <motion.div
-                  initial={false}
-                  animate={{ height: expandedPayment === 'retail' ? 'auto' : 0 }}
-                  className="overflow-hidden"
-                >
-                  <div className="p-6 border-t border-white/5 space-y-3">
-                     {[
-                       { name: 'ALFAMART', logo: 'https://upload.wikimedia.org/wikipedia/commons/8/86/Alfamart_logo.svg' },
-                       { name: 'INDOMARET', logo: 'https://upload.wikimedia.org/wikipedia/commons/9/9d/Logo_Indomaret.svg' }
-                     ].map(retail => (
-                       <button 
-                         key={retail.name} 
-                         onClick={() => setSelectedMethod(retail.name)}
-                         className={`w-full p-4 rounded-xl flex items-center gap-4 border transition-all ${
-                           selectedMethod === retail.name ? 'bg-primary/10 border-primary' : 'bg-white/5 border-transparent hover:border-white/20'
-                         }`}
-                       >
-                          <div className="w-16 h-8 bg-white rounded flex items-center justify-center p-1 shrink-0">
-                             <img src={retail.logo} alt={retail.name} className="max-h-full max-w-full" />
-                          </div>
-                          <span className="text-sm font-bold text-white uppercase">{retail.name}</span>
-                          <div className={`ml-auto w-5 h-5 rounded-full border-2 flex items-center justify-center ${selectedMethod === retail.name ? 'border-primary' : 'border-white/20'}`}>
-                             {selectedMethod === retail.name && <div className="w-2.5 h-2.5 rounded-full bg-primary" />}
-                          </div>
-                       </button>
-                     ))}
-                  </div>
-                </motion.div>
-              </div>
-            </div>
-          </div>
-
-          {/* Step 3: Konfirmasi Pembelian */}
-          <div className="bg-dark-lighter border border-white/5 rounded-[2.5rem] overflow-hidden">
-            <div className="bg-white/5 px-8 py-5 border-b border-white/5 flex items-center gap-4">
-              <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center font-black text-primary">3</div>
               <h2 className="text-xl font-display font-black text-white uppercase tracking-widest">Konfirmasi Pembelian</h2>
             </div>
             <div className="p-8">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-                {/* Left Side: Inputs */}
-                <div className="space-y-8">
-                  <div className="flex items-center gap-2 text-sm text-yellow-500 font-bold mb-6">
-                    <ThumbsUp className="w-5 h-5" />
-                    <p>Anda boleh isi salah satu, atau isi keduanya.</p>
-                  </div>
-
-                  <div className="space-y-4">
-                    <label className="block text-lg font-bold text-white">Nomor WhatsApp</label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                        <Phone className={`h-5 w-5 ${errors.whatsapp ? 'text-red-500' : 'text-gray-500'}`} />
-                      </div>
-                      <input
-                        type="tel"
-                        value={whatsappNumber}
-                        onChange={(e) => {
-                          setWhatsappNumber(e.target.value);
-                          if (errors.whatsapp) setErrors(prev => ({ ...prev, whatsapp: undefined }));
-                        }}
-                        placeholder="0812xxx"
-                        className={`w-full bg-dark border rounded-xl py-4 pl-12 pr-4 text-white focus:ring-1 transition-all outline-none ${
-                          errors.whatsapp ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-white/10 focus:border-primary focus:ring-primary'
-                        }`}
-                      />
-                    </div>
-                    {errors.whatsapp ? (
-                      <p className="text-xs text-red-500 font-bold">{errors.whatsapp}</p>
-                    ) : (
-                      <p className="text-xs text-gray-400">Bukti pembayaran atas pembelianmu akan kami kirimkan ke WhatsApp Anda.</p>
-                    )}
-                  </div>
-
-                  <div className="relative flex items-center py-4">
-                    <div className="flex-grow border-t border-white/10"></div>
-                    <span className="flex-shrink mx-4 text-gray-500 text-sm font-bold uppercase tracking-widest">ATAU</span>
-                    <div className="flex-grow border-t border-white/10"></div>
-                  </div>
-
-                  <div className="space-y-4">
-                    <label className="block text-lg font-bold text-white">Alamat Email</label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                        <Mail className={`h-5 w-5 ${errors.email ? 'text-red-500' : 'text-gray-500'}`} />
-                      </div>
-                      <input
-                        type="email"
-                        value={email}
-                        onChange={(e) => {
-                          setEmail(e.target.value);
-                          if (errors.email) setErrors(prev => ({ ...prev, email: undefined }));
-                        }}
-                        placeholder="nama@email.com"
-                        className={`w-full bg-dark border rounded-xl py-4 pl-12 pr-4 text-white focus:ring-1 transition-all outline-none ${
-                          errors.email ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-white/10 focus:border-primary focus:ring-primary'
-                        }`}
-                      />
-                    </div>
-                    {errors.email ? (
-                      <p className="text-xs text-red-500 font-bold">{errors.email}</p>
-                    ) : (
-                      <p className="text-xs text-gray-400">Bukti pembayaran atas pembelianmu akan kami kirimkan ke Email Anda.</p>
-                    )}
-                  </div>
-                </div>
-
-                {/* Right Side: Summary */}
+              <div className="max-w-xl mx-auto space-y-8">
+                {/* Summary */}
                 <div className="space-y-8">
                   <div className="space-y-6">
                     <div className="flex justify-between items-center py-2 border-b border-white/5">
                       <span className="text-gray-400 font-bold">Item</span>
                       <span className="text-white font-black">{selectedPackage || '-'}</span>
-                    </div>
-                    <div className="flex justify-between items-center py-2 border-b border-white/5">
-                      <span className="text-gray-400 font-bold">Metode Pembayaran</span>
-                      <span className="text-white font-black uppercase">{selectedMethod || '-'}</span>
                     </div>
                     <div className="flex justify-between items-center py-2 border-b border-white/5">
                       <span className="text-gray-400 font-bold">Konfirmasi</span>
@@ -456,12 +119,7 @@ export default function ProductDetail({ product, onBack, otherProducts, onSelect
 
                   <div className="bg-white/5 rounded-2xl p-6 flex justify-between items-center border border-white/10">
                     <div className="h-10 bg-white rounded-lg px-4 flex items-center justify-center">
-                       {/* Placeholder for selected method logo */}
-                       {selectedMethod === 'QRIS' ? (
-                          <img src="https://upload.wikimedia.org/wikipedia/commons/a/a2/Logo_QRIS.svg" alt="QRIS" className="h-6" />
-                       ) : (
-                          <span className="text-dark font-black text-xs uppercase">{selectedMethod || 'PAY'}</span>
-                       )}
+                       <span className="text-dark font-black text-xs uppercase">WhatsApp</span>
                     </div>
                     <div className="text-right">
                       <div className="flex items-center gap-2 justify-end">
@@ -474,16 +132,16 @@ export default function ProductDetail({ product, onBack, otherProducts, onSelect
 
                   <div className="pt-4 space-y-6">
                     <button 
-                      disabled={!selectedPackage || !selectedMethod}
+                      disabled={!selectedPackage}
                       onClick={() => selectedPackage && handleOrder(selectedPackage)}
                       className={`w-full py-5 rounded-2xl font-black transition-all flex items-center justify-center gap-4 shadow-xl text-lg ${
-                        selectedPackage && selectedMethod
+                        selectedPackage
                           ? 'bg-primary text-dark shadow-primary/20 hover:scale-[1.02] active:scale-[0.98]' 
                           : 'bg-white/10 text-gray-500 grayscale cursor-not-allowed'
                       }`}
                     >
                        <ChevronRight className="w-6 h-6 rotate-180" />
-                       LANJUT PEMBAYARAN
+                       ORDER VIA WHATSAPP
                     </button>
                     {!selectedPackage && <p className="text-center text-xs text-red-400/60 font-bold tracking-widest uppercase italic">* Silakan pilih paket terlebih dahulu</p>}
                     
@@ -500,6 +158,44 @@ export default function ProductDetail({ product, onBack, otherProducts, onSelect
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+
+          {/* Moved: Informasi Game/Aplikasi */}
+          <div className="bg-dark-lighter border border-white/5 rounded-[2.5rem] p-8">
+            <h2 className="text-xl font-display font-black text-white mb-6 uppercase tracking-wider">Informasi Game/Aplikasi</h2>
+            <div className="flex gap-6 mb-6">
+              <div className="w-24 h-24 rounded-2xl overflow-hidden shrink-0 border border-white/10 shadow-xl">
+                 <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+              </div>
+              <div>
+                <h3 className="text-2xl font-bold text-white leading-tight">{product.name}</h3>
+                <p className="text-sm text-primary font-black uppercase tracking-widest mt-2">{product.category}</p>
+              </div>
+            </div>
+            <div className="prose prose-invert prose-lg max-w-none text-gray-400 leading-relaxed">
+              <p>
+                {product.description || `${product.name} adalah platform hiburan digital yang populer di kalangan pengguna di Asia dan khususnya di Indonesia. Nikmati berbagai konten eksklusif dan fitur interaktif terbaik.`}
+              </p>
+            </div>
+            <button className="text-primary font-bold text-sm mt-4 flex items-center gap-1 hover:translate-x-1 transition-transform">
+              Lihat Selengkapnya &gt;&gt;
+            </button>
+          </div>
+
+          {/* Moved: Top-up Voucher Lainnya */}
+          <div className="bg-dark-lighter border border-white/5 rounded-[2.5rem] p-8">
+            <h2 className="text-xl font-display font-black text-white mb-6 uppercase tracking-wider">Top-up Voucher Lainnya</h2>
+            <div className="grid grid-cols-3 sm:grid-cols-6 gap-4">
+              {otherProducts.slice(0, 6).map((other) => (
+                <button 
+                  key={other.id}
+                  onClick={() => onSelectProduct(other)}
+                  className="aspect-square bg-dark rounded-2xl overflow-hidden border border-white/5 hover:border-primary/50 transition-all p-1 group"
+                >
+                  <img src={other.image} alt={other.name} className="w-full h-full object-cover rounded-xl grayscale group-hover:grayscale-0 transition-all" />
+                </button>
+              ))}
             </div>
           </div>
 
