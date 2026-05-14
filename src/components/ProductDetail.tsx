@@ -5,6 +5,7 @@ import { Product, Order } from '../types';
 import { WHATSAPP_NUMBER } from '../constants';
 import { toast } from 'sonner';
 import { gasService } from '../services/gasService';
+import LazyImage from './ui/LazyImage';
 
 interface ProductDetailProps {
   product: Product;
@@ -182,7 +183,13 @@ export default function ProductDetail({ product, onBack, otherProducts, onSelect
           <div className="bg-dark-lighter border border-white/5 rounded-[3rem] p-8 md:p-12 shadow-xl">
             <div className="flex flex-col md:flex-row gap-10 items-start">
               <div className="w-32 h-32 md:w-48 md:h-48 rounded-[2rem] overflow-hidden shrink-0 border-4 border-white/10 shadow-2xl skew-y-2">
-                 <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+                 <LazyImage 
+                   src={product.image} 
+                   alt={product.name} 
+                   className="w-full h-full object-cover"
+                   width={400}
+                   priority="high"
+                 />
               </div>
               <div className="flex-grow space-y-6">
                 <div>
@@ -218,7 +225,12 @@ export default function ProductDetail({ product, onBack, otherProducts, onSelect
                   onClick={() => onSelectProduct(other)}
                   className="aspect-square bg-dark rounded-2xl overflow-hidden border border-white/5 hover:border-primary/50 transition-all p-1 group"
                 >
-                  <img src={other.image} alt={other.name} className="w-full h-full object-cover rounded-xl grayscale group-hover:grayscale-0 transition-all" />
+                  <LazyImage 
+                    src={other.image} 
+                    alt={other.name} 
+                    className="w-full h-full grayscale group-hover:grayscale-0 transition-all rounded-xl" 
+                    width={200}
+                  />
                 </button>
               ))}
             </div>

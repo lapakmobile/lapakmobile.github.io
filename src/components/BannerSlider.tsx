@@ -1,6 +1,7 @@
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Pagination, Navigation } from 'swiper/modules';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import LazyImage from './ui/LazyImage';
 
 // Import Swiper styles
 import 'swiper/css';
@@ -69,11 +70,12 @@ export default function BannerSlider() {
         {BANNERS.map((banner) => (
           <SwiperSlide key={banner.id}>
             <div className="relative aspect-[21/9] w-full overflow-hidden rounded-[2.5rem] group/item">
-              <img 
+              <LazyImage 
                 src={banner.image} 
                 alt={banner.title}
                 className="w-full h-full object-cover transition-transform duration-700 group-hover/item:scale-105"
-                referrerPolicy="no-referrer"
+                priority="high"
+                width={1200}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-dark/80 via-transparent to-transparent flex flex-col justify-end p-8 md:p-12">
                 <h2 className="text-2xl md:text-5xl font-display font-black text-white mb-2">{banner.title}</h2>
