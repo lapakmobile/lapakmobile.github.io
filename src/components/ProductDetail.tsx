@@ -4,6 +4,7 @@ import { ShoppingCart, CreditCard, ChevronDown, ChevronUp, Zap, ShieldCheck, Clo
 import { Product, Order } from '../types';
 import { WHATSAPP_NUMBER } from '../constants';
 import { toast } from 'sonner';
+import { gasService } from '../services/gasService';
 
 interface ProductDetailProps {
   product: Product;
@@ -70,6 +71,10 @@ export default function ProductDetail({ product, onBack, otherProducts, onSelect
 
     const existingOrders = JSON.parse(localStorage.getItem('order_history') || '[]');
     localStorage.setItem('order_history', JSON.stringify([newOrder, ...existingOrders]));
+
+    // Sync to Google Sheets via GAS
+    gasService.saveOrder(newOrder, { whatsapp: whatsappNumber, email: email })
+      .catch(err => console.error('Silent GAS sync failure:', err));
 
     toast.success(`Memulai pesanan ${product.name}...`);
     const contactInfo = `\nWA: ${whatsappNumber || '-'}\nEmail: ${email || '-'}`;

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, memo } from 'react';
-import { Menu, X, Search, Gamepad2, Trash2, History } from 'lucide-react';
+import { Menu, X, Search, Gamepad2, Trash2, History, Zap } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
 
@@ -40,15 +40,16 @@ const Navbar = memo(function Navbar({ onSearch, onHomeClick }: { onSearch?: (que
   };
 
   const navLinks = [
-    { name: 'Cek Region', href: '#products' },
-    { name: 'Cek Transaksi', href: '#history' },
-    { name: 'Daftar Reseller', href: '#' },
+    { name: 'Produk', href: '#pricing-lp' },
+    { name: 'Keunggulan', href: '#benefits' },
+    { name: 'Cara Order', href: '#timeline' },
+    { name: 'FAQ', href: '#faq-lp' },
   ];
 
   return (
     <nav 
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled ? 'bg-dark/95 shadow-lg border-b border-white/5 py-3' : 'bg-dark py-5'
+        scrolled ? 'bg-black/90 backdrop-blur-xl border-b border-white/5 py-3' : 'bg-transparent py-6'
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -56,90 +57,37 @@ const Navbar = memo(function Navbar({ onSearch, onHomeClick }: { onSearch?: (que
           {/* Logo */}
           <button 
             onClick={onHomeClick}
-            className="flex items-center gap-3 cursor-pointer group"
+            className="flex items-center gap-2 cursor-pointer group"
           >
-            <div className="w-10 h-10 bg-primary/20 rounded-xl flex items-center justify-center group-hover:bg-primary/30 transition-colors">
-              <Gamepad2 className="text-primary w-6 h-6 fill-current" />
+            <div className="w-10 h-10 bg-[#5E47FF] rounded-xl flex items-center justify-center shadow-[0_0_20px_rgba(94,71,255,0.4)]">
+              <Zap className="w-6 h-6 text-white fill-white" />
             </div>
-            <span className="text-2xl font-display font-black tracking-tighter text-white">
-              Lapak<span className="text-primary">Mobile</span>
+            <span className="text-xl font-display font-black tracking-tight text-white">
+              Lapak<span className="text-white/70"> Mobile</span>
             </span>
           </button>
 
-          {/* Desktop Links & Tools */}
-          <div className="hidden lg:flex items-center gap-8 flex-grow justify-end">
-            <div className="flex items-center gap-8 mr-8">
-              {navLinks.map((link) => (
-                <a
-                  key={link.name}
-                  href={link.href}
-                  className="text-sm font-bold text-gray-200 hover:text-primary transition-colors"
-                >
-                  {link.name}
-                </a>
-              ))}
-            </div>
-
-            {/* Search Bar */}
-            <div className="relative w-72">
-              <input 
-                type="text"
-                placeholder="Pencarian..."
-                value={localSearch}
-                onChange={handleSearchChange}
-                className="w-full bg-white/5 border border-white/10 rounded-lg py-2.5 pl-4 pr-10 text-sm placeholder:text-gray-500 text-white outline-none focus:border-primary/50 transition-all"
-              />
-              <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 w-4 h-4" />
-            </div>
-
-            {/* Menu Button */}
-            <div className="relative">
-              <button 
-                onClick={() => setMenuOpen(!menuOpen)}
-                className={`p-2.5 rounded-lg border border-white/10 transition-all ${menuOpen ? 'bg-primary text-dark border-primary' : 'bg-white/5 text-white hover:bg-white/10'}`}
+          {/* Desktop Links */}
+          <div className="hidden lg:flex items-center gap-8 flex-grow justify-center translate-x-12">
+            {navLinks.map((link) => (
+              <a
+                key={link.name}
+                href={link.href}
+                className="text-[13px] font-semibold text-gray-400 hover:text-white transition-colors tracking-wide"
               >
-                <Menu className="w-6 h-6" />
-              </button>
+                {link.name}
+              </a>
+            ))}
+          </div>
 
-              <AnimatePresence>
-                {menuOpen && (
-                  <>
-                    <div 
-                      className="fixed inset-0 z-[-1]" 
-                      onClick={() => setMenuOpen(false)}
-                    />
-                    <motion.div
-                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                      className="absolute right-0 mt-3 w-64 bg-dark-lighter border border-white/10 rounded-2xl shadow-2xl p-2 z-[60] overflow-hidden"
-                    >
-                      <div className="px-3 py-2 text-[10px] font-black text-gray-500 uppercase tracking-widest border-b border-white/5 mb-1">
-                        Menu Kontrol
-                      </div>
-                      <button
-                        onClick={clearOrderHistory}
-                        className="w-full flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-red-500/10 text-red-400 text-sm font-bold transition-all group"
-                      >
-                        <div className="w-8 h-8 rounded-lg bg-red-500/10 flex items-center justify-center group-hover:bg-red-500 group-hover:text-white transition-colors">
-                          <Trash2 className="w-4 h-4" />
-                        </div>
-                        <span>Hapus Riwayat Pesanan</span>
-                      </button>
-                      <button
-                        onClick={clearViewHistory}
-                        className="w-full flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-primary/10 text-gray-200 hover:text-primary text-sm font-bold transition-all group"
-                      >
-                        <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center group-hover:bg-primary group-hover:text-dark transition-colors">
-                          <History className="w-4 h-4" />
-                        </div>
-                        <span>Hapus Riwayat Produk</span>
-                      </button>
-                    </motion.div>
-                  </>
-                )}
-              </AnimatePresence>
-            </div>
+          {/* Right Action */}
+          <div className="hidden lg:flex items-center gap-4">
+            <a 
+              href="#pricing-lp"
+              className="px-8 py-2.5 bg-primary text-black font-bold rounded-full hover:scale-105 transition-all shadow-[0_4px_20px_rgba(255,184,0,0.3)] text-sm"
+            >
+              Beli Sekarang
+            </a>
           </div>
 
           {/* Mobile Toggle */}
@@ -164,16 +112,6 @@ const Navbar = memo(function Navbar({ onSearch, onHomeClick }: { onSearch?: (que
             className="lg:hidden bg-dark border-t border-white/5"
           >
             <div className="px-4 py-6 space-y-4">
-              <div className="relative mb-6">
-                <input 
-                  type="text"
-                  placeholder="Pencarian..."
-                  value={localSearch}
-                  onChange={handleSearchChange}
-                  className="w-full bg-white/5 border border-white/10 rounded-lg py-3 pl-4 pr-10 text-sm text-white outline-none"
-                />
-                <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 w-5 h-5" />
-              </div>
               {navLinks.map((link) => (
                 <a
                   key={link.name}

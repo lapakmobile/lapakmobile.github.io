@@ -1,28 +1,37 @@
 import { useState, useMemo, useEffect, lazy, Suspense } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Search, Filter, Star, ChevronDown, ChevronUp, CheckCircle2, Zap, Shield, FileText, X, Heart, ShoppingCart, ReceiptText, CreditCard, Clock, ThumbsUp, Percent, MessageCircle, User } from 'lucide-react';
+import { Search, Filter, Star, ChevronDown, ChevronUp, CheckCircle2, Zap, Shield, FileText, X, Heart, ShoppingCart, ReceiptText, CreditCard, Clock, ThumbsUp, Percent, MessageCircle, User, ChevronRight } from 'lucide-react';
 import { Toaster, toast } from 'sonner';
 import Navbar from './components/Navbar';
-import BannerSlider from './components/BannerSlider';
+import WarningSection from './components/WarningSection';
+import WhyChooseUs from './components/WhyChooseUs';
+import Testimonials from './components/Testimonials';
+import PurchaseNotification from './components/PurchaseNotification';
 import Hero from './components/Hero';
 import ProductCard from './components/ProductCard';
 import Footer from './components/Footer';
 import BackToTop from './components/BackToTop';
 import ProductDetail from './components/ProductDetail';
+import CountdownTimer from './components/CountdownTimer';
 
 // Lazy load non-critical components
-const OrderHistory = lazy(() => import('./components/OrderHistory'));
 const PriceList = lazy(() => import('./components/PriceList'));
-const PriceAlertManager = lazy(() => import('./components/PriceAlertManager'));
-const RecentlyViewed = lazy(() => import('./components/RecentlyViewed'));
-const ActionCenter = lazy(() => import('./components/ActionCenter'));
 
 import ProductCardSkeleton from './components/ProductCardSkeleton';
 import PriceListSkeleton from './components/PriceListSkeleton';
 import LazyImage from './components/ui/LazyImage';
-import { ALL_PRODUCTS, TESTIMONIALS, FAQS } from './constants';
+import { ALL_PRODUCTS, DIGITAL_PRODUCTS, TESTIMONIALS, FAQS } from './constants';
 import { Product, Category, PriceAlert } from './types';
 import { priceService } from './services/priceService';
+
+const BenefitItem = ({ text }: { text: string }) => (
+  <div className="flex items-center gap-3">
+    <div className="w-5 h-5 rounded-full bg-green-500/10 flex items-center justify-center shrink-0">
+      <CheckCircle2 className="w-3.5 h-3.5 text-green-500" />
+    </div>
+    <span className="text-sm text-gray-300">{text}</span>
+  </div>
+);
 
 export default function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -191,14 +200,262 @@ export default function App() {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 20 }}
             >
-              <BannerSlider />
-              
-              {/* Voucher Section */}
+              <section id="hero-lp" className="relative pt-32 pb-48 overflow-hidden bg-black">
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-blue-500/10 rounded-full blur-[120px] -z-10" />
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-purple-500/10 rounded-full blur-[100px] -z-10" />
+                
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                  <motion.div
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                    className="inline-block mb-12"
+                  >
+                    <CountdownTimer />
+                  </motion.div>
+
+                  <motion.h1
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.1 }}
+                    className="text-5xl md:text-7xl lg:text-8xl font-display font-black text-white mb-10 tracking-tight leading-[0.85]"
+                  >
+                    Mau konten viral tapi <br /> 
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">tools masih gratisan?</span>
+                  </motion.h1>
+
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.2 }}
+                    className="space-y-4 mb-16"
+                  >
+                    <p className="text-xl md:text-2xl text-gray-400 font-medium tracking-tight">Jangan heran kalau kalah saing.</p>
+                    <p className="text-xl md:text-2xl text-gray-400 font-medium tracking-tight">Pakai <span className="text-white font-bold">CapCut Pro</span> sekarang juga, aku udah siapin akunnya.</p>
+                    <p className="text-xl md:text-2xl text-gray-400 font-medium tracking-tight">Klik sebelum kehabisan!</p>
+                  </motion.div>
+
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.3 }}
+                    className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-20"
+                  >
+                    <a 
+                      href="#pricing-lp"
+                      className="w-full sm:w-auto px-12 py-5 bg-primary text-black font-black rounded-2xl hover:scale-105 transition-all shadow-[0_10px_40px_rgba(255,184,0,0.4)] flex items-center justify-center gap-3 text-lg"
+                    >
+                      Mulai Sekarang <Zap className="w-5 h-5 fill-black" />
+                    </a>
+                    <a 
+                      href="#pricing-lp"
+                      className="w-full sm:w-auto px-12 py-5 bg-white/5 border border-white/10 text-white font-bold rounded-2xl hover:bg-white/10 transition-all text-lg"
+                    >
+                      Lihat Paket
+                    </a>
+                  </motion.div>
+
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.5 }}
+                    className="flex flex-wrap justify-center items-center gap-8 md:gap-16 text-[13px] font-bold text-gray-400"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center">
+                        <User className="w-4 h-4 text-primary" />
+                      </div>
+                      <span>12,500+ Member Puas</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center">
+                        <Shield className="w-4 h-4 text-primary" />
+                      </div>
+                      <span>Aman & Terpercaya</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center">
+                        <ChevronRight className="w-4 h-4 text-primary" />
+                      </div>
+                      <span>Proses 5 Menit</span>
+                    </div>
+                  </motion.div>
+                </div>
+              </section>
+
+              <WarningSection />
+
+              {/* Product Pricing Section */}
+              <section id="pricing-lp" className="py-24 relative">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                  <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16">
+                    <div>
+                      <div className="text-primary font-black text-sm uppercase tracking-[0.3em] mb-4">Pricing Plans</div>
+                      <h2 className="text-4xl md:text-5xl font-display font-black text-white">Pilih Paket <span className="italic text-primary">Hematmu</span></h2>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    {DIGITAL_PRODUCTS.filter(p => [
+                      'canva-pro', 'capcut-pro', 'chatgpt', 'gemini-ai', 
+                      'youtube-premium', 'disney-hotstar', 'spotify', 'getcontact'
+                    ].includes(p.id)).map((product) => (
+                      <div key={product.id} className="relative group">
+                        <div className="absolute -inset-1 bg-gradient-to-b from-primary/20 to-secondary/20 rounded-3xl blur opacity-0 group-hover:opacity-100 transition duration-500" />
+                        <div className="relative glass p-8 rounded-3xl border border-white/5 h-full flex flex-col">
+                          {product.isBestSeller && (
+                            <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-primary text-dark font-black text-[10px] uppercase tracking-widest rounded-full shadow-lg shadow-primary/20">
+                              Best Seller
+                            </div>
+                          )}
+                          
+                          <div className="flex items-center gap-4 mb-8">
+                            <div className="w-14 h-14 rounded-2xl overflow-hidden bg-white/10 shrink-0">
+                              <LazyImage src={product.image} alt={product.name} className="w-full h-full object-cover" width={60} />
+                            </div>
+                            <div>
+                              <h3 className="text-xl font-bold text-white">{product.name}</h3>
+                              <span className="text-[10px] text-primary font-black uppercase tracking-widest">{product.category}</span>
+                            </div>
+                          </div>
+
+                          <div className="mb-8">
+                            <div className="text-gray-500 text-xs line-through mb-1">Mulai dari Rp 49.000</div>
+                            <div className="text-3xl font-black text-white">{product.packages[0].price} <span className="text-sm font-medium text-gray-500">/ bln</span></div>
+                          </div>
+
+                          <div className="space-y-4 mb-10 flex-grow">
+                            {product.id === 'canva-pro' && (
+                              <>
+                                <BenefitItem text="Tanpa Watermark" />
+                                <BenefitItem text="Templates Premium" />
+                                <BenefitItem text="Invite Team" />
+                              </>
+                            )}
+                            {product.id === 'capcut-pro' && (
+                              <>
+                                <BenefitItem text="Semua Font Pro" />
+                                <BenefitItem text="Efek Eksklusif" />
+                                <BenefitItem text="Cloud Storage" />
+                              </>
+                            )}
+                            {product.id === 'chatgpt' && (
+                              <>
+                                <BenefitItem text="GPT-4 Access" />
+                                <BenefitItem text="DALL-E Integration" />
+                                <BenefitItem text="Fast Response" />
+                              </>
+                            )}
+                            {product.id === 'gemini-ai' && (
+                              <>
+                                <BenefitItem text="Advanced Models" />
+                                <BenefitItem text="2TB Storage" />
+                                <BenefitItem text="Priority Access" />
+                              </>
+                            )}
+                            {product.id === 'youtube-premium' && (
+                              <>
+                                <BenefitItem text="Tanpa Iklan" />
+                                <BenefitItem text="YouTube Music" />
+                                <BenefitItem text="Background Play" />
+                              </>
+                            )}
+                            {product.id === 'disney-hotstar' && (
+                              <>
+                                <BenefitItem text="Marvel & Disney" />
+                                <BenefitItem text="Lokal & Global" />
+                                <BenefitItem text="HD Quality" />
+                              </>
+                            )}
+                            {product.id === 'spotify' && (
+                              <>
+                                <BenefitItem text="No Offline Mode" />
+                                <BenefitItem text="High Audio Quality" />
+                                <BenefitItem text="Unlimited Skips" />
+                              </>
+                            )}
+                            {product.id === 'getcontact' && (
+                              <>
+                                <BenefitItem text="Remove Spam" />
+                                <BenefitItem text="Identify Tags" />
+                                <BenefitItem text="Premium Badge" />
+                              </>
+                            )}
+                          </div>
+
+                          <button 
+                            onClick={() => {
+                              setSelectedProduct(product);
+                              window.scrollTo(0, 0);
+                            }}
+                            className="w-full py-4 bg-white/5 border border-white/10 text-white font-bold rounded-2xl group-hover:bg-primary group-hover:text-dark group-hover:border-primary transition-all flex items-center justify-center gap-2"
+                          >
+                            Order Sekarang <ChevronRight className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="mt-16 text-center">
+                    <p className="text-gray-500 text-sm mb-6">Butuh akun premium lainnya seperti Netflix, Spotify, atau YouTube?</p>
+                    <div className="flex flex-wrap justify-center gap-3">
+                      {['netflix', 'spotify', 'youtube-premium', 'iqiyi'].map(id => {
+                        const p = DIGITAL_PRODUCTS.find(p => p.id === id);
+                        return p ? (
+                          <button
+                            key={id}
+                            onClick={() => {
+                              setSelectedProduct(p);
+                              window.scrollTo(0, 0);
+                            }}
+                            className="px-6 py-3 glass rounded-xl text-xs font-bold hover:border-primary/50 transition-all flex items-center gap-2"
+                          >
+                            {p.name} <ChevronRight className="w-3 h-3 text-primary" />
+                          </button>
+                        ) : null;
+                      })}
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <WhyChooseUs />
+              <Testimonials />
+
+              {/* How It Works Section */}
+              <section id="timeline" className="py-24">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                  <div className="text-center mb-20">
+                    <h2 className="text-4xl md:text-5xl font-display font-black mb-4">Cara Kerja <span className="text-primary">Timeline</span></h2>
+                    <p className="text-gray-400">Hanya butuh 3 langkah mudah untuk aktifkan akunmu.</p>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-12 relative">
+                    <div className="absolute top-1/2 left-0 w-full h-px bg-white/5 hidden md:block" />
+                    
+                    {[
+                      { step: '01', title: 'Pilih Paket', desc: 'Pilih layanan premium yang kamu butuhkan.' },
+                      { step: '02', title: 'Lakukan Pembayaran', desc: 'Transfer sesuai nominal ke rekening admin.' },
+                      { step: '03', title: 'Akun Langsung Aktif', desc: 'Terima detail akun dan nikmati fitur premiumnya.' }
+                    ].map((item, i) => (
+                      <div key={i} className="relative z-10 flex flex-col items-center text-center">
+                        <div className="w-16 h-16 rounded-full bg-dark border-4 border-primary flex items-center justify-center font-black text-primary text-xl mb-6 shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)]">
+                          {item.step}
+                        </div>
+                        <h4 className="text-2xl font-black mb-3">{item.title}</h4>
+                        <p className="text-gray-400 max-w-[250px]">{item.desc}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </section>
+
               <section id="voucher" className="py-12">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                   <div className="flex items-center gap-3 mb-10">
                     <ShoppingCart className="text-white w-8 h-8" />
-                    <h2 className="text-3xl font-display font-black text-white">Voucher</h2>
+                    <h2 className="text-3xl font-display font-black text-white">Layanan Lainnya</h2>
                   </div>
 
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
@@ -262,23 +519,6 @@ export default function App() {
                   )}
                 </div>
               </section>
-
-        {/* Other sections below */}
-        <Suspense fallback={<div className="h-96 animate-pulse bg-white/5 rounded-3xl" />}>
-          <OrderHistory />
-        </Suspense>
-        
-        {isLoading ? (
-          <section className="py-24 bg-dark-lighter">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <PriceListSkeleton />
-            </div>
-          </section>
-        ) : (
-          <Suspense fallback={<PriceListSkeleton />}>
-            <PriceList />
-          </Suspense>
-        )}
 
         {/* Payment Methods Section */}
         <section className="py-16 bg-dark border-y border-white/5 overflow-hidden">
@@ -497,51 +737,6 @@ export default function App() {
           </div>
         </section>
 
-        {/* Articles Section */}
-        <section id="articles" className="py-24 bg-dark border-t border-white/5">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">Artikel Terbaru</h2>
-              <p className="text-gray-400">Tips, trik, dan berita terbaru seputar dunia gaming dan digital.</p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {[
-                {
-                  title: 'Tips Aman Transaksi Digital',
-                  desc: 'Cara menghindari penipuan saat melakukan jual beli akun atau top-up game online.',
-                  date: '08 Apr 2024'
-                },
-                {
-                  title: 'Update Honor of Kings 2024',
-                  desc: 'Daftar hero terbaru dan perubahan meta yang wajib kamu ketahui di season ini.',
-                  date: '05 Apr 2024'
-                },
-                {
-                  title: 'Panduan Sewa Grup Facebook',
-                  desc: 'Maksimalkan jangkauan affiliate Shopee/Tokopedia kamu dengan sewa grup yang tepat.',
-                  date: '01 Apr 2024'
-                }
-              ].map((article, i) => (
-                <div key={i} className="glass rounded-2xl overflow-hidden group cursor-pointer hover:border-primary/30 transition-all">
-                  <div className="aspect-video bg-gray-800 relative">
-                    <LazyImage 
-                      src={`https://picsum.photos/seed/article${i}/600/400`} 
-                      alt={article.title} 
-                      className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity" 
-                      width={600}
-                    />
-                  </div>
-                  <div className="p-6">
-                    <div className="text-xs text-primary font-bold mb-2 uppercase tracking-widest">{article.date}</div>
-                    <h4 className="text-xl font-bold mb-3 group-hover:text-primary transition-colors">{article.title}</h4>
-                    <p className="text-sm text-gray-400 leading-relaxed">{article.desc}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
         {/* Privacy & Terms Section */}
         <section id="privacy" className="py-24 bg-dark-lighter border-t border-white/5">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -577,59 +772,89 @@ export default function App() {
           </div>
         </section>
 
-        {/* FAQ Section */}
-        <section id="faq" className="py-20 bg-dark">
-          <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 className="text-3xl md:text-4xl font-display font-bold mb-12 text-center">Pertanyaan Umum</h2>
-            <div className="space-y-4">
-              {FAQS.map((faq, i) => (
-                <div key={i} className="glass rounded-2xl overflow-hidden">
-                  <button 
-                    onClick={() => setExpandedFaq(expandedFaq === i ? null : i)}
-                    className="w-full p-6 text-left flex justify-between items-center hover:bg-white/5 transition-colors"
-                  >
-                    <span className="font-bold">{faq.question}</span>
-                    {expandedFaq === i ? <ChevronUp className="text-primary" /> : <ChevronDown className="text-gray-500" />}
-                  </button>
-                  <AnimatePresence initial={false}>
-                    {expandedFaq === i && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: 'auto', opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.4, ease: [0.04, 0.62, 0.23, 0.98] }}
-                        className="overflow-hidden"
-                      >
-                        <div className="p-6 pt-2 text-gray-400 text-sm leading-relaxed border-t border-white/5 bg-white/[0.02]">
-                          {faq.answer}
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+              {/* FAQ Section */}
+              <section id="faq-lp" className="py-24 bg-dark border-t border-white/5">
+                <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+                  <div className="text-center mb-16">
+                    <h2 className="text-4xl md:text-5xl font-display font-black text-white mb-4">Pertanyaan Umum (FAQ)</h2>
+                    <p className="text-gray-400">Punya pertanyaan? Kami punya jawabannya.</p>
+                  </div>
+                  <div className="space-y-4">
+                    {[
+                      { q: 'Apakah akun ini legal?', a: 'Ya, semua akun kami legal dan terdaftar secara resmi menggunakan metode pembayaran yang sah.' },
+                      { q: 'Berapa lama proses aktivasinya?', a: 'Sangat cepat! Begitu pembayaran dikonfirmasi, detail akun akan langsung dikirimkan lewat WhatsApp (1-5 menit).' },
+                      { q: 'Bagaimana jika ada kendala?', a: 'Kami memberikan garansi penuh selama masa berlangganan. Cukup hubungi admin, kami bantu sampai tuntas.' },
+                      { q: 'Bisa refund?', a: 'Refund berlaku jika akun tidak dapat diaktifkan atau produk tidak sesuai deskripsi.' }
+                    ].map((item, i) => (
+                      <div key={i} className="glass rounded-2xl overflow-hidden border border-white/5">
+                        <button 
+                          onClick={() => setExpandedFaq(expandedFaq === i ? null : i)}
+                          className="w-full p-6 text-left flex justify-between items-center hover:bg-white/5 transition-colors"
+                        >
+                          <span className="font-bold text-white tracking-tight">{item.q}</span>
+                          {expandedFaq === i ? <ChevronUp className="text-primary w-5 h-5" /> : <ChevronDown className="text-gray-500 w-5 h-5" />}
+                        </button>
+                        <AnimatePresence initial={false}>
+                          {expandedFaq === i && (
+                            <motion.div
+                              initial={{ height: 0, opacity: 0 }}
+                              animate={{ height: 'auto', opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              transition={{ duration: 0.3 }}
+                              className="overflow-hidden"
+                            >
+                              <div className="p-6 pt-0 text-gray-400 text-sm leading-relaxed">
+                                {item.a}
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              ))}
-            </div>
-          </div>
-        </section>
+              </section>
 
-        {/* CTA Section */}
-        <section id="contact" className="py-20">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-secondary via-dark-lighter to-primary p-12 md:p-20 text-center border border-white/10">
-              <div className="absolute inset-0 bg-dark/40 backdrop-blur-sm -z-10" />
-              <h2 className="text-4xl md:text-5xl font-display font-extrabold mb-6">Siap Untuk Top Up?</h2>
-              <p className="text-lg text-gray-300 max-w-2xl mx-auto mb-10">
-                Jangan ragu untuk menghubungi kami jika ada pertanyaan. Tim kami siap membantu Anda 24/7.
-              </p>
-              <a 
-                href={`http://wa.me/6281290006080?text=Halo%20Admin%20LapakMobile,%20saya%20ingin%20tanya%20seputar%20produk`} // Dummy link for demo
-                className="inline-flex items-center gap-3 px-10 py-5 bg-primary text-dark font-bold rounded-2xl hover:scale-105 transition-all neon-glow"
-              >
-                Hubungi Admin Sekarang
-              </a>
-            </div>
-          </div>
-        </section>
+              {/* Final CTA Section */}
+              <section className="py-24 relative overflow-hidden">
+                <div className="absolute inset-0 bg-primary/10 blur-[150px] -z-10" />
+                <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+                  <div className="glass p-12 md:p-20 rounded-[40px] border border-primary/20 text-center relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary to-transparent" />
+                    
+                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-500/10 border border-red-500/20 mb-8">
+                      <span className="text-xs font-black text-red-500 uppercase tracking-widest animate-pulse">Promo Terbatas!</span>
+                    </div>
+                    
+                    <h2 className="text-4xl md:text-6xl font-display font-black text-white mb-8 leading-[1.1]">
+                      Siap Upgrade ke <br className="hidden md:block" /> <span className="text-primary italic">Layanan Premium?</span>
+                    </h2>
+                    
+                    <p className="text-lg text-gray-400 mb-12 max-w-2xl mx-auto leading-relaxed">
+                      Jangan biarkan kreativitasmu terhambat. Dapatkan akses ke semua tools pro sekarang juga dengan harga termurah.
+                    </p>
+                    
+                    <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
+                      <a 
+                        href="#pricing-lp"
+                        className="w-full sm:w-auto px-12 py-6 bg-primary text-dark font-black rounded-2xl hover:scale-105 transition-all shadow-[0_0_50px_rgba(var(--primary-rgb),0.4)] neon-glow text-xl"
+                      >
+                        Beli Sekarang
+                      </a>
+                      <div className="flex items-center gap-4 text-left">
+                        <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center border border-white/10">
+                          <Shield className="w-6 h-6 text-primary" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold text-white">Garansi Uang Kembali</p>
+                          <p className="text-xs text-gray-500">Jika akun tidak aktif dalam 24 jam</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
             </motion.div>
           )}
         </AnimatePresence>
@@ -640,11 +865,7 @@ export default function App() {
       
       <Toaster position="top-center" expand={false} richColors theme="dark" />
       
-      <Suspense fallback={null}>
-        <ActionCenter />
-        <PriceAlertManager />
-        <RecentlyViewed />
-      </Suspense>
+      <PurchaseNotification />
     </div>
   );
 }
