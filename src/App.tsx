@@ -9,12 +9,6 @@ import BackToTop from './components/BackToTop';
 import { Marketplace } from './components/Marketplace';
 import { AIToolsIndex } from './components/AIToolsIndex';
 import ProductDetail from './components/ProductDetail';
-import { ArticleGenerator } from './components/tools/ArticleGenerator';
-import { WALinkGenerator } from './components/tools/WALinkGenerator';
-import { ContentGenerator } from './components/tools/ContentGenerator';
-import { CaptionGenerator } from './components/tools/CaptionGenerator';
-import { Contact } from './components/Contact';
-import { About } from './components/About';
 import { PromoPopup } from './components/PromoPopup';
 
 import { FAQ } from './components/FAQ';
@@ -22,9 +16,15 @@ import { FAQ } from './components/FAQ';
 import { ALL_PRODUCTS, FAQS, TESTIMONIALS } from './constants';
 import { Product } from './types';
 
-// Lazy load non-critical sections if needed
+// Lazy load sections and tools
 const WhyChooseUs = lazy(() => import('./components/WhyChooseUs'));
 const Testimonials = lazy(() => import('./components/Testimonials'));
+const About = lazy(() => import('./components/About').then(m => ({ default: m.About })));
+const Contact = lazy(() => import('./components/Contact').then(m => ({ default: m.Contact })));
+const ArticleGenerator = lazy(() => import('./components/tools/ArticleGenerator').then(m => ({ default: m.ArticleGenerator })));
+const WALinkGenerator = lazy(() => import('./components/tools/WALinkGenerator').then(m => ({ default: m.WALinkGenerator })));
+const ContentGenerator = lazy(() => import('./components/tools/ContentGenerator').then(m => ({ default: m.ContentGenerator })));
+const CaptionGenerator = lazy(() => import('./components/tools/CaptionGenerator').then(m => ({ default: m.CaptionGenerator })));
 
 export default function App() {
   const [currentView, setCurrentView] = useState('home');
@@ -108,17 +108,53 @@ export default function App() {
           </motion.div>
         );
       case 'about':
-        return <motion.div key="about" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="pt-24"><About /></motion.div>;
+        return (
+          <Suspense fallback={<div className="h-screen flex items-center justify-center"><div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" /></div>}>
+            <motion.div key="about" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="pt-24">
+              <About />
+            </motion.div>
+          </Suspense>
+        );
       case 'contact':
-        return <motion.div key="contact" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="pt-24"><Contact /></motion.div>;
+        return (
+          <Suspense fallback={<div className="h-screen flex items-center justify-center"><div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" /></div>}>
+            <motion.div key="contact" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="pt-24">
+              <Contact />
+            </motion.div>
+          </Suspense>
+        );
       case 'tool-article':
-        return <motion.div key="tool-article" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="pt-24"><ArticleGenerator /></motion.div>;
+        return (
+          <Suspense fallback={<div className="h-screen flex items-center justify-center"><div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" /></div>}>
+            <motion.div key="tool-article" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="pt-24">
+              <ArticleGenerator />
+            </motion.div>
+          </Suspense>
+        );
       case 'tool-wa-link':
-        return <motion.div key="tool-wa-link" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="pt-24"><WALinkGenerator /></motion.div>;
+        return (
+          <Suspense fallback={<div className="h-screen flex items-center justify-center"><div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" /></div>}>
+            <motion.div key="tool-wa-link" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="pt-24">
+              <WALinkGenerator />
+            </motion.div>
+          </Suspense>
+        );
       case 'tool-content':
-        return <motion.div key="tool-content" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="pt-24"><ContentGenerator /></motion.div>;
+        return (
+          <Suspense fallback={<div className="h-screen flex items-center justify-center"><div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" /></div>}>
+            <motion.div key="tool-content" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="pt-24">
+              <ContentGenerator />
+            </motion.div>
+          </Suspense>
+        );
       case 'tool-caption':
-        return <motion.div key="tool-caption" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="pt-24"><CaptionGenerator /></motion.div>;
+        return (
+          <Suspense fallback={<div className="h-screen flex items-center justify-center"><div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" /></div>}>
+            <motion.div key="tool-caption" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="pt-24">
+              <CaptionGenerator />
+            </motion.div>
+          </Suspense>
+        );
       default:
         return (
           <div className="pt-48 pb-24 text-center">

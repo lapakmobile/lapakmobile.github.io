@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { Star, Quote } from 'lucide-react';
 import { TESTIMONIALS } from '../constants';
+import LazyImage from './ui/LazyImage';
 
 const Testimonials = () => {
   return (
@@ -37,7 +38,7 @@ const Testimonials = () => {
               </p>
 
               <div className="flex items-center gap-4">
-                <img 
+                <LazyImage 
                   src={testi.avatar} 
                   alt={testi.name} 
                   className="w-14 h-14 rounded-2xl object-cover border-2 border-white/10"

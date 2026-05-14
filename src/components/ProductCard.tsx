@@ -2,6 +2,7 @@ import React, { memo } from 'react';
 import { motion } from 'motion/react';
 import { CheckCircle2, ChevronRight } from 'lucide-react';
 import { Product } from '../types';
+import LazyImage from './ui/LazyImage';
 
 interface ProductCardProps {
   product: Product;
@@ -11,8 +12,20 @@ interface ProductCardProps {
 const ProductCard = memo(function ProductCard({ product, onClick }: ProductCardProps) {
   return (
     <motion.div
+      layout
+      variants={{
+        hidden: { opacity: 0, scale: 0.8, y: 20 },
+        visible: { opacity: 1, scale: 1, y: 0 },
+        exit: { opacity: 0, scale: 0.8, transition: { duration: 0.2 } }
+      }}
+      initial="hidden"
+      animate="visible"
+      exit="exit"
       whileHover={{ y: -10 }}
-      transition={{ duration: 0.3 }}
+      transition={{ 
+        layout: { duration: 0.4, type: "spring", stiffness: 200, damping: 25 },
+        duration: 0.3 
+      }}
       className="group relative bg-[#1a1a1a] border border-white/5 rounded-[40px] p-8 flex flex-col h-full hover:border-white/20 transition-all shadow-2xl"
       onClick={() => onClick?.(product)}
     >
@@ -28,7 +41,7 @@ const ProductCard = memo(function ProductCard({ product, onClick }: ProductCardP
       {/* Header: Icon + Info */}
       <div className="flex items-start gap-5 mb-8">
         <div className="w-20 h-20 bg-slate-800 rounded-3xl overflow-hidden flex-shrink-0 border border-white/10 shadow-lg">
-          <img 
+          <LazyImage 
             src={product.image} 
             alt={product.name}
             className="w-full h-full object-cover"

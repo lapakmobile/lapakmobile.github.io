@@ -56,25 +56,44 @@ export const Marketplace: React.FC<MarketplaceProps> = ({ onProductClick }) => {
         {/* Categories Bar */}
         <div className="flex gap-3 overflow-x-auto pb-8 no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0">
           {CATEGORIES.map(category => (
-            <button
+            <motion.button
               key={category}
               onClick={() => setActiveCategory(category)}
-              className={`px-8 py-3 rounded-full font-bold whitespace-nowrap transition-all border ${
+              className={`relative px-8 py-3 rounded-full font-bold whitespace-nowrap transition-colors z-0 ${
                 activeCategory === category 
-                ? 'bg-primary border-primary text-white shadow-lg shadow-primary/20 scale-105' 
-                : 'bg-white/5 border-white/10 text-gray-400 hover:text-white hover:border-white/30'
+                ? 'text-white' 
+                : 'text-gray-400 hover:text-white'
               }`}
             >
+              {activeCategory === category && (
+                <motion.div
+                  layoutId="activeCategory"
+                  className="absolute inset-0 bg-primary border border-primary rounded-full -z-10 shadow-lg shadow-primary/20"
+                  transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                />
+              )}
+              <div className="absolute inset-0 bg-white/5 border border-white/10 rounded-full -z-20" />
               {category}
-            </button>
+            </motion.button>
           ))}
         </div>
 
         {/* Products Grid */}
-        <AnimatePresence mode="popLayout">
+        <AnimatePresence mode="popLayout" initial={false}>
           {filteredProducts.length > 0 ? (
             <motion.div 
               layout
+              initial="hidden"
+              animate="visible"
+              variants={{
+                hidden: { opacity: 0 },
+                visible: {
+                  opacity: 1,
+                  transition: {
+                    staggerChildren: 0.1
+                  }
+                }
+              }}
               className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8"
             >
               {filteredProducts.map((product) => (
