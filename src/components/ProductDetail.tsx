@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Star, ShoppingCart, CheckCircle2, ShieldCheck, Zap, ArrowLeft, MessageSquare, Send } from 'lucide-react';
+import { X, Star, ShoppingCart, CheckCircle2, ShieldCheck, Zap, ArrowLeft, MessageSquare, Send, Share2 } from 'lucide-react';
 import { Product, Review } from '../types';
 import { WHATSAPP_NUMBER } from '../constants';
 import { toast } from 'sonner';
@@ -16,6 +16,28 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
   const [reviews, setReviews] = useState<Review[]>(product.reviews || []);
   const [newReview, setNewReview] = useState({ rating: 5, comment: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleShare = async () => {
+    const shareData = {
+      title: `Lapak Mobile - ${product.name}`,
+      text: product.description || `Cek produk ${product.name} di Lapak Mobile!`,
+      url: window.location.origin,
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+        toast.success('Produk berhasil dibagikan!');
+      } else {
+        await navigator.clipboard.writeText(window.location.href);
+        toast.success('Link disalin ke clipboard!');
+      }
+    } catch (err) {
+      if ((err as Error).name !== 'AbortError') {
+        toast.error('Gagal membagikan produk');
+      }
+    }
+  };
 
   const handlePurchase = () => {
     toast.success(`Memproses pesanan untuk ${product.name}...`);
@@ -61,12 +83,21 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
         animate={{ scale: 1, opacity: 1, y: 0 }}
         className="bg-slate-900 border border-white/10 w-full max-w-6xl rounded-[40px] shadow-2xl flex flex-col md:flex-row relative"
       >
-        <button 
-          onClick={onClose}
-          className="absolute top-6 right-6 z-20 p-2 bg-black/50 hover:bg-black text-white rounded-full transition-colors"
-        >
-          <X className="w-6 h-6" />
-        </button>
+        <div className="absolute top-6 right-6 z-20 flex gap-2">
+          <button 
+            onClick={handleShare}
+            className="p-2 bg-black/50 hover:bg-black text-white rounded-full transition-colors group"
+            title="Bagikan Produk"
+          >
+            <Share2 className="w-6 h-6 group-hover:text-primary transition-colors" />
+          </button>
+          <button 
+            onClick={onClose}
+            className="p-2 bg-black/50 hover:bg-black text-white rounded-full transition-colors"
+          >
+            <X className="w-6 h-6" />
+          </button>
+        </div>
 
         {/* Left Side: Media & Reviews */}
         <div className="w-full md:w-1/2 p-8 lg:p-12 overflow-y-auto max-h-[90vh] no-scrollbar">
