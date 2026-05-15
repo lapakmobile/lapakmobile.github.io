@@ -8,12 +8,11 @@ import Footer from './components/Footer';
 import BackToTop from './components/BackToTop';
 import { Marketplace } from './components/Marketplace';
 import { AIToolsIndex } from './components/AIToolsIndex';
-import ProductDetail from './components/ProductDetail';
 import { PromoPopup } from './components/PromoPopup';
 
 import { FAQ } from './components/FAQ';
 
-import { ALL_PRODUCTS, FAQS, TESTIMONIALS } from './constants';
+import { ALL_PRODUCTS, FAQS, TESTIMONIALS, WHATSAPP_NUMBER } from './constants';
 import { Product } from './types';
 
 // Lazy load sections and tools
@@ -28,7 +27,12 @@ const CaptionGenerator = lazy(() => import('./components/tools/CaptionGenerator'
 
 export default function App() {
   const [currentView, setCurrentView] = useState('home');
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+
+  // Direct checkout to WhatsApp
+  const handleProductClick = (product: Product) => {
+    const text = encodeURIComponent(`Halo Lapak Mobile, saya mau order:\n\nProduk: ${product.name}\nID: ${product.id}\nHarga: ${product.price}\n\nMohon dibantu instruksi pembayarannya.`);
+    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${text}`, '_blank');
+  };
 
   // Scroll to top on view change
   useEffect(() => {
@@ -69,14 +73,10 @@ export default function App() {
             exit={{ opacity: 0 }}
           >
             <Hero 
-              onExploreTools={() => {
-                document.getElementById('tools-section')?.scrollIntoView({ behavior: 'smooth' });
-              }}
-              onExploreMarketplace={() => {
-                document.getElementById('marketplace-section')?.scrollIntoView({ behavior: 'smooth' });
-              }}
+              onExploreTools={() => handleNavAction('tools')}
+              onExploreMarketplace={() => handleNavAction('marketplace')}
             />
-            <Marketplace onProductClick={setSelectedProduct} />
+            <Marketplace onProductClick={handleProductClick} />
             <div id="tools-section">
               <AIToolsIndex onSelectTool={(id) => setCurrentView(`tool-${id}`)} />
             </div>
@@ -112,7 +112,7 @@ export default function App() {
             exit={{ opacity: 0 }}
             className="pt-20"
           >
-            <Marketplace onProductClick={setSelectedProduct} />
+            <Marketplace onProductClick={handleProductClick} />
           </motion.div>
         );
       case 'about':
@@ -180,27 +180,44 @@ export default function App() {
   };
 
   const handleNavAction = (view: string) => {
-    if (view === 'home' || view === 'tools' || view === 'about') {
-      if (currentView !== 'home') {
-        setCurrentView('home');
+    if (view === 'tools' || view === 'about' || view === 'marketplace') {
+      const targetView = 'home';
+      const targetId = `${view}-section`;
+      
+      if (currentView !== targetView) {
+        setCurrentView(targetView);
         // Wait for render
         setTimeout(() => {
-          const id = view === 'home' ? 'top' : `${view}-section`;
-          const element = document.getElementById(id);
+          const element = document.getElementById(targetId);
           if (element) {
-            element.scrollIntoView({ behavior: 'smooth' });
-          } else if (view === 'home') {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            const offset = 80; // Adjust for sticky header
+            const elementPosition = element.getBoundingClientRect().top;
+            const offsetPosition = elementPosition + window.pageYOffset - offset;
+
+            window.scrollTo({
+              top: offsetPosition,
+              behavior: 'smooth'
+            });
           }
         }, 100);
       } else {
-        const id = view === 'home' ? 'top' : `${view}-section`;
-        const element = document.getElementById(id);
+        const element = document.getElementById(targetId);
         if (element) {
-          element.scrollIntoView({ behavior: 'smooth' });
-        } else if (view === 'home') {
-          window.scrollTo({ top: 0, behavior: 'smooth' });
+          const offset = 80;
+          const elementPosition = element.getBoundingClientRect().top;
+          const offsetPosition = elementPosition + window.pageYOffset - offset;
+
+          window.scrollTo({
+            top: offsetPosition,
+            behavior: 'smooth'
+          });
         }
+      }
+    } else if (view === 'home') {
+      if (currentView === 'home') {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        setCurrentView('home');
       }
     } else {
       setCurrentView(view);
@@ -222,15 +239,6 @@ export default function App() {
       <BackToTop />
       <PromoPopup />
       
-      <AnimatePresence>
-        {selectedProduct && (
-          <ProductDetail 
-            product={selectedProduct} 
-            onClose={() => setSelectedProduct(null)} 
-          />
-        )}
-      </AnimatePresence>
-
       <Toaster position="top-center" expand={false} richColors theme="dark" />
     </div>
   );

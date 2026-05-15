@@ -1,5 +1,5 @@
 import React, { useState, useEffect, memo } from 'react';
-import { Menu, X, Zap, Cpu, Info, ShoppingBag } from 'lucide-react';
+import { Menu, X, Zap, Cpu, Info } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 interface NavbarProps {
@@ -99,37 +99,9 @@ const Navbar = memo(function Navbar({ onNavClick, currentView }: NavbarProps) {
           </div>
 
           {/* Desktop CTA */}
-          <div className="hidden lg:flex items-center gap-4">
-            <button
-               onClick={() => {
-                 onNavClick('home');
-                 setTimeout(() => {
-                   document.getElementById('marketplace-section')?.scrollIntoView({ behavior: 'smooth' });
-                 }, 100);
-               }}
-               className="px-6 py-2.5 bg-primary text-white font-black rounded-xl shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all text-xs uppercase tracking-widest flex items-center gap-2"
-            >
-              <ShoppingBag className="w-4 h-4" />
-              Beli Sekarang
-            </button>
-          </div>
 
           {/* Mobile Menu Trigger */}
           <div className="lg:hidden flex items-center gap-3">
-            {!isOpen && (
-              <button
-                onClick={() => {
-                  onNavClick('home');
-                  setTimeout(() => {
-                    document.getElementById('marketplace-section')?.scrollIntoView({ behavior: 'smooth' });
-                  }, 100);
-                }}
-                className="px-4 py-2 bg-primary text-white font-black rounded-xl shadow-lg text-[10px] uppercase tracking-widest flex items-center gap-2"
-              >
-                <ShoppingBag className="w-3 h-3" />
-                Beli
-              </button>
-            )}
             <button 
               onClick={() => setIsOpen(!isOpen)}
               className="p-2.5 bg-white/5 rounded-xl border border-white/10 text-white active:scale-90 transition-transform backdrop-blur-md"

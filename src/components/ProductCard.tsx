@@ -1,6 +1,6 @@
 import React, { memo } from 'react';
 import { motion } from 'motion/react';
-import { CheckCircle2, ChevronRight, Star } from 'lucide-react';
+import { CheckCircle2, ChevronRight, Star, Zap } from 'lucide-react';
 import { Product } from '../types';
 import LazyImage from './ui/LazyImage';
 
@@ -99,10 +99,10 @@ const ProductCard = memo(function ProductCard({ product, onClick, priority = 'au
 
       {/* Action Button */}
       <button 
-        className="w-full py-5 bg-white/5 border border-white/10 rounded-3xl text-sm font-black text-white flex items-center justify-center gap-3 group-hover:bg-white/10 group-hover:border-white/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
+        className="w-full py-5 bg-primary text-white border border-primary/20 rounded-3xl text-sm font-black flex items-center justify-center gap-3 shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
       >
-        Order Sekarang
-        <ChevronRight className="w-5 h-5" />
+        Beli Sekarang
+        <Zap className="w-5 h-5 fill-current" />
       </button>
     </motion.div>
   );
