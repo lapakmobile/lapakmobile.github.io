@@ -69,18 +69,26 @@ export default function App() {
             exit={{ opacity: 0 }}
           >
             <Hero 
-              onExploreTools={() => setCurrentView('tools')}
-              onExploreMarketplace={() => setCurrentView('marketplace')}
+              onExploreTools={() => {
+                document.getElementById('tools-section')?.scrollIntoView({ behavior: 'smooth' });
+              }}
+              onExploreMarketplace={() => {
+                document.getElementById('marketplace-section')?.scrollIntoView({ behavior: 'smooth' });
+              }}
             />
             <Marketplace onProductClick={setSelectedProduct} />
-            <AIToolsIndex onSelectTool={(id) => setCurrentView(`tool-${id}`)} />
-            <FAQ />
-            <Suspense fallback={<div className="h-96" />}>
-              <WhyChooseUs />
-            </Suspense>
-            <Suspense fallback={<div className="h-96" />}>
-              <Testimonials />
-            </Suspense>
+            <div id="tools-section">
+              <AIToolsIndex onSelectTool={(id) => setCurrentView(`tool-${id}`)} />
+            </div>
+            <div id="about-section">
+              <FAQ />
+              <Suspense fallback={<div className="h-96" />}>
+                <WhyChooseUs />
+              </Suspense>
+              <Suspense fallback={<div className="h-96" />}>
+                <Testimonials />
+              </Suspense>
+            </div>
           </motion.div>
         );
       case 'tools':
@@ -171,9 +179,38 @@ export default function App() {
     }
   };
 
+  const handleNavAction = (view: string) => {
+    if (view === 'home' || view === 'tools' || view === 'about') {
+      if (currentView !== 'home') {
+        setCurrentView('home');
+        // Wait for render
+        setTimeout(() => {
+          const id = view === 'home' ? 'top' : `${view}-section`;
+          const element = document.getElementById(id);
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth' });
+          } else if (view === 'home') {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }
+        }, 100);
+      } else {
+        const id = view === 'home' ? 'top' : `${view}-section`;
+        const element = document.getElementById(id);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+        } else if (view === 'home') {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+      }
+    } else {
+      setCurrentView(view);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-950 selection:bg-primary/30 selection:text-white">
-      <Navbar onNavClick={setCurrentView} currentView={currentView} />
+      <div id="top" className="absolute top-0" />
+      <Navbar onNavClick={handleNavAction} currentView={currentView} />
       
       <main className="min-h-screen">
         <AnimatePresence mode="wait">

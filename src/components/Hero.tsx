@@ -37,20 +37,20 @@ export default function Hero({ onExploreTools, onExploreMarketplace }: { onExplo
               <motion.button
                 whileHover={{ scale: 1.02, y: -2 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={onExploreTools}
+                onClick={onExploreMarketplace}
                 className="group px-10 py-5 bg-primary text-white font-black rounded-[2rem] flex items-center justify-center gap-3 shadow-[0_20px_50px_rgba(59,130,246,0.3)] hover:shadow-primary/40 transition-all"
               >
-                Coba Tools AI
-                <Zap className="w-5 h-5 group-hover:fill-current transition-all" />
+                Beli Sekarang
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-all" />
               </motion.button>
               
               <motion.button
                 whileHover={{ scale: 1.02, y: -2 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={onExploreMarketplace}
+                onClick={onExploreTools}
                 className="px-10 py-5 bg-white/5 hover:bg-white/10 text-white font-black rounded-[2rem] border border-white/10 backdrop-blur-lg transition-all"
               >
-                Marketplace Produk
+                Coba Tools AI
               </motion.button>
             </div>
           </motion.div>
