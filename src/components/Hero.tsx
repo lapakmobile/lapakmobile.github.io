@@ -1,82 +1,138 @@
 import { motion } from 'motion/react';
-import { Sparkles, ArrowRight, Zap, Shield, Users } from 'lucide-react';
+import { ShoppingBag, ArrowRight, Zap, Shield, CheckCircle2, Star } from 'lucide-react';
 
 export default function Hero({ onExploreTools, onExploreMarketplace }: { onExploreTools: () => void, onExploreMarketplace: () => void }) {
+  const badges = [
+    { icon: Zap, text: "Fast Delivery" },
+    { icon: Shield, text: "Garansi Replace" },
+    { icon: Star, text: "Trusted Seller" },
+    { icon: CheckCircle2, text: "Support 24 Jam" }
+  ];
+
   return (
-    <section className="relative pt-32 pb-20 md:pt-48 md:pb-32 overflow-hidden">
-      {/* Dynamic Background */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] md:w-[1200px] h-[400px] md:h-[800px] bg-primary/20 rounded-full blur-[100px] md:blur-[160px] -z-10 opacity-30 animate-pulse" />
-      <div className="absolute top-1/4 -right-20 w-[300px] md:w-[600px] h-[300px] md:h-[600px] bg-secondary/10 rounded-full blur-[80px] md:blur-[140px] -z-10 opacity-20" />
+    <section className="relative min-h-screen flex items-center pt-32 pb-20 overflow-hidden">
+      {/* Background Orbs */}
+      <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-600/20 rounded-full blur-[120px] -z-10 animate-pulse-slow" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-purple-600/20 rounded-full blur-[120px] -z-10" />
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-        <div className="flex flex-col items-center text-center">
+      <div className="container-safe relative">
+        <div className="grid lg:grid-cols-2 gap-16 items-center">
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, ease: "easeOut" }}
+            initial={{ opacity: 0, x: -50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8 }}
           >
-            <div className="inline-flex items-center gap-2 py-2 px-5 rounded-full bg-white/5 border border-white/10 backdrop-blur-md mb-10 shadow-inner">
-              <Sparkles className="w-4 h-4 text-secondary animate-spin-slow" />
-              <span className="text-[10px] md:text-xs font-black text-white uppercase tracking-[0.2em]">
-                Trusted by 10,000+ Active Users
+            {/* Trust Badge */}
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-md mb-8">
+              <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+              <span className="text-xs font-bold text-white uppercase tracking-widest">
+                Trusted by 10,000+ Customers
               </span>
             </div>
 
-            <h1 className="text-4xl sm:text-6xl md:text-8xl lg:text-[100px] font-display font-black text-white mb-8 leading-[0.95] tracking-tight">
-              AI Tools & <br />
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary via-[#ffcc00] to-secondary animate-gradient-x">
-                Digital Goods
-              </span>
+            <h1 className="text-5xl md:text-7xl font-display font-black text-white mb-6 leading-[1.1] tracking-tight">
+              Akses Produk Digital <br />
+              <span className="text-gradient">Premium</span> Harga Termurah
             </h1>
 
-            <p className="text-base md:text-xl text-gray-400 max-w-2xl mx-auto mb-14 font-medium leading-relaxed px-4">
-              Platform all-in-one untuk kebutuhan konten AI gratis dan koleksi produk digital premium dengan harga paling kompetitif di pasar.
+            <p className="text-lg text-slate-400 max-w-xl mb-10 leading-relaxed">
+              Instant delivery, bergaransi, aman, dan support 24 jam. Dapatkan akses ke Canva Pro, Netflix, ChatGPT Plus, dan ribuan produk digital lainnya dengan harga terbaik.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-5 justify-center w-full px-4 sm:px-0 sm:w-auto">
+            <div className="flex flex-wrap gap-4 mb-12">
               <motion.button
-                whileHover={{ scale: 1.02, y: -2 }}
-                whileTap={{ scale: 0.98 }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={onExploreMarketplace}
-                className="group px-10 py-5 bg-primary text-white font-black rounded-[2rem] flex items-center justify-center gap-3 shadow-[0_20px_50px_rgba(59,130,246,0.3)] hover:shadow-primary/40 transition-all"
+                className="px-8 py-5 premium-gradient text-white font-black rounded-2xl flex items-center gap-3 shadow-2xl shadow-blue-500/20"
               >
-                Beli Sekarang
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-all" />
+                <ShoppingBag className="w-5 h-5" />
+                BELI SEKARANG
               </motion.button>
               
               <motion.button
-                whileHover={{ scale: 1.02, y: -2 }}
-                whileTap={{ scale: 0.98 }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={onExploreTools}
-                className="px-10 py-5 bg-white/5 hover:bg-white/10 text-white font-black rounded-[2rem] border border-white/10 backdrop-blur-lg transition-all"
+                className="px-8 py-5 bg-white/5 hover:bg-white/10 text-white font-black rounded-2xl border border-white/10 backdrop-blur-md transition-all flex items-center gap-3"
               >
-                Coba Tools AI
+                LIHAT PRODUK
+                <ArrowRight className="w-5 h-5" />
               </motion.button>
+            </div>
+
+            {/* Badges */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              {badges.map((badge, i) => (
+                <div key={i} className="flex items-center gap-2 text-slate-400">
+                  <badge.icon className="w-4 h-4 text-blue-500" />
+                  <span className="text-[10px] font-bold uppercase tracking-wider">{badge.text}</span>
+                </div>
+              ))}
             </div>
           </motion.div>
 
-          {/* Stats Section */}
+          {/* Hero Mockup/Visual */}
           <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.5, duration: 1 }}
-            className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-12 mt-24 md:mt-40 w-full max-w-6xl px-4 md:px-0"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1, delay: 0.2 }}
+            className="relative hidden lg:block"
           >
-            {[
-              { label: 'Happy Users', value: '10K+', icon: Users, color: 'text-blue-500' },
-              { label: 'Free AI Tools', value: '12+', icon: Zap, color: 'text-yellow-500' },
-              { label: 'Premium Items', value: '250+', icon: Sparkles, color: 'text-purple-500' },
-              { label: 'Support 24/7', value: '99.9%', icon: Shield, color: 'text-green-500' },
-            ].map((stat, i) => (
-              <div key={i} className="group relative p-6 md:p-8 bg-white/5 rounded-[2.5rem] border border-white/5 hover:border-primary/20 transition-all hover:bg-white/[0.07]">
-                <div className="absolute top-4 right-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                   <stat.icon className="w-12 h-12" />
+            <div className="relative z-10 animate-float">
+              {/* Main Illustration Card */}
+              <div className="glass-card p-4 relative overflow-hidden group">
+                <img 
+                  src="https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&q=80&w=800"
+                  alt="Premium Products"
+                  className="rounded-3xl w-full h-[500px] object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 to-transparent" />
+                
+                {/* Floating Elements on Card */}
+                <div className="absolute bottom-8 left-8 right-8 flex justify-between items-end">
+                  <div>
+                    <h3 className="text-2xl font-black mb-2 uppercase">Netflix UHD</h3>
+                    <p className="text-blue-400 font-black text-xl">Mulai Rp 25.000</p>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-md px-4 py-2 rounded-xl border border-white/20">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-white">Best Value</span>
+                  </div>
                 </div>
-                <div className={`text-3xl md:text-4xl font-black text-white mb-2 tracking-tighter`}>{stat.value}</div>
-                <div className="text-[10px] md:text-sm font-black text-gray-500 uppercase tracking-widest">{stat.label}</div>
               </div>
-            ))}
+
+              {/* Smaller Floating Cards */}
+              <motion.div 
+                animate={{ y: [0, -20, 0] }}
+                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                className="absolute -top-10 -right-10 glass-card p-6 w-48 shadow-2xl border-white/20 z-20"
+              >
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 bg-green-500/20 rounded-xl flex items-center justify-center">
+                    <CheckCircle2 className="w-6 h-6 text-green-500" />
+                  </div>
+                  <span className="text-xs font-black uppercase">Active</span>
+                </div>
+                <div className="text-xl font-black">Spotify Pro</div>
+              </motion.div>
+
+              <motion.div 
+                animate={{ y: [0, 20, 0] }}
+                transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+                className="absolute -bottom-10 -left-10 glass-card p-6 w-48 shadow-2xl border-white/20 z-20"
+              >
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 bg-blue-500/20 rounded-xl flex items-center justify-center">
+                    <Zap className="w-6 h-6 text-blue-500" />
+                  </div>
+                  <span className="text-xs font-black uppercase">Instant</span>
+                </div>
+                <div className="text-xl font-black">Canva Pro</div>
+              </motion.div>
+            </div>
+
+            {/* Background Glows for Image */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-blue-500/30 rounded-full blur-[100px] -z-10" />
           </motion.div>
         </div>
       </div>

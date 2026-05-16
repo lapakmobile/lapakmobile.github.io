@@ -9,6 +9,9 @@ import BackToTop from './components/BackToTop';
 import { Marketplace } from './components/Marketplace';
 import { AIToolsIndex } from './components/AIToolsIndex';
 import { PromoPopup } from './components/PromoPopup';
+import TrustSection from './components/TrustSection';
+import FlashSale from './components/FlashSale';
+import BundleSection from './components/BundleSection';
 
 import { FAQ } from './components/FAQ';
 
@@ -24,6 +27,9 @@ const ArticleGenerator = lazy(() => import('./components/tools/ArticleGenerator'
 const WALinkGenerator = lazy(() => import('./components/tools/WALinkGenerator').then(m => ({ default: m.WALinkGenerator })));
 const ContentGenerator = lazy(() => import('./components/tools/ContentGenerator').then(m => ({ default: m.ContentGenerator })));
 const CaptionGenerator = lazy(() => import('./components/tools/CaptionGenerator').then(m => ({ default: m.CaptionGenerator })));
+
+import WhatsAppButton from './components/WhatsAppButton';
+import StickyMobileCTA from './components/StickyMobileCTA';
 
 export default function App() {
   const [currentView, setCurrentView] = useState('home');
@@ -76,7 +82,12 @@ export default function App() {
               onExploreTools={() => handleNavAction('tools')}
               onExploreMarketplace={() => handleNavAction('marketplace')}
             />
-            <Marketplace onProductClick={handleProductClick} />
+            <TrustSection />
+            <FlashSale />
+            <div id="marketplace-section">
+              <Marketplace onProductClick={handleProductClick} />
+            </div>
+            <BundleSection />
             <div id="tools-section">
               <AIToolsIndex onSelectTool={(id) => setCurrentView(`tool-${id}`)} />
             </div>
@@ -240,6 +251,8 @@ export default function App() {
       <PromoPopup />
       
       <Toaster position="top-center" expand={false} richColors theme="dark" />
+      <WhatsAppButton />
+      <StickyMobileCTA onAction={() => handleNavAction('marketplace')} />
     </div>
   );
 }
