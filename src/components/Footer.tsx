@@ -1,4 +1,4 @@
-import { Zap, Instagram, Facebook, Send, Twitter, Youtube, MessageCircle, Music2 } from 'lucide-react';
+import { Zap, Instagram, Facebook, Send, Twitter, Youtube, MessageCircle, Music2, Bitcoin, CreditCard, Wallet, CircleDollarSign } from 'lucide-react';
 
 export default function Footer() {
   return (
@@ -57,18 +57,19 @@ export default function Footer() {
             <h4 className="text-white font-black mb-6 uppercase tracking-widest text-[10px]">Payment Method</h4>
             <div className="grid grid-cols-3 gap-2">
                {[
+                 { name: 'Visa', icon: CreditCard, color: 'bg-blue-600 text-white' },
+                 { name: 'Master', icon: CreditCard, color: 'bg-orange-600 text-white' },
+                 { name: 'PayPal', icon: Wallet, color: 'bg-blue-500 text-white' },
+                 { name: 'BTC', icon: Bitcoin, color: 'bg-yellow-500 text-white' },
                  { name: 'QRIS', color: 'bg-white text-slate-900' },
-                 { name: 'DANA', color: 'bg-blue-500 text-white' },
+                 { name: 'DANA', color: 'bg-blue-400 text-white' },
                  { name: 'OVO', color: 'bg-purple-700 text-white' },
-                 { name: 'GoPay', color: 'bg-sky-500 text-white' },
                  { name: 'Shopee', color: 'bg-orange-600 text-white' },
-                 { name: 'BCA', color: 'bg-blue-800 text-white' },
-                 { name: 'MANDIRI', color: 'bg-blue-900 text-yellow-400' },
-                 { name: 'BNI', color: 'bg-orange-700 text-white' },
-                 { name: 'BRI', color: 'bg-blue-600 text-white' },
+                 { name: 'GoPay', color: 'bg-sky-500 text-white' },
                ].map((pay, i) => (
-                 <div key={i} className={`aspect-[2/1] ${pay.color} rounded-lg flex items-center justify-center border border-white/5 shadow-sm overflow-hidden`}>
-                    <span className="text-[9px] font-black italic tracking-tighter uppercase">{pay.name}</span>
+                 <div key={i} className={`aspect-[2/1] ${pay.color} rounded-lg flex items-center justify-center border border-white/5 shadow-sm overflow-hidden gap-1.5`}>
+                    {pay.icon && <pay.icon className="w-3 h-3" />}
+                    <span className="text-[8px] font-black italic tracking-tighter uppercase">{pay.name}</span>
                  </div>
                ))}
             </div>
