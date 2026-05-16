@@ -12,6 +12,8 @@ import { PromoPopup } from './components/PromoPopup';
 import TrustSection from './components/TrustSection';
 import FlashSale from './components/FlashSale';
 import BundleSection from './components/BundleSection';
+import BlogSection from './components/BlogSection';
+import NotificationPopup from './components/NotificationPopup';
 
 import { FAQ } from './components/FAQ';
 
@@ -88,6 +90,7 @@ export default function App() {
               <Marketplace onProductClick={handleProductClick} />
             </div>
             <BundleSection />
+            <BlogSection />
             <div id="tools-section">
               <AIToolsIndex onSelectTool={(id) => setCurrentView(`tool-${id}`)} />
             </div>
@@ -252,6 +255,7 @@ export default function App() {
       
       <Toaster position="top-center" expand={false} richColors theme="dark" />
       <WhatsAppButton />
+      <NotificationPopup />
       <StickyMobileCTA onAction={() => handleNavAction('marketplace')} />
     </div>
   );

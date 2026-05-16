@@ -54,11 +54,21 @@ export default function Footer() {
           </div>
 
           <div className="glass-card p-6 border-white/10 h-fit">
-            <h4 className="text-white font-black mb-6 uppercase tracking-widest text-xs">Payment Method</h4>
-            <div className="grid grid-cols-4 gap-3">
-               {[1,2,3,4,5,6,7,8].map(i => (
-                 <div key={i} className="aspect-video bg-white/10 rounded-lg flex items-center justify-center border border-white/5">
-                    <span className="text-[8px] font-black text-slate-500 uppercase">Logo</span>
+            <h4 className="text-white font-black mb-6 uppercase tracking-widest text-[10px]">Payment Method</h4>
+            <div className="grid grid-cols-3 gap-2">
+               {[
+                 { name: 'QRIS', color: 'bg-white text-slate-900' },
+                 { name: 'DANA', color: 'bg-blue-500 text-white' },
+                 { name: 'OVO', color: 'bg-purple-700 text-white' },
+                 { name: 'GoPay', color: 'bg-sky-500 text-white' },
+                 { name: 'Shopee', color: 'bg-orange-600 text-white' },
+                 { name: 'BCA', color: 'bg-blue-800 text-white' },
+                 { name: 'MANDIRI', color: 'bg-blue-900 text-yellow-400' },
+                 { name: 'BNI', color: 'bg-orange-700 text-white' },
+                 { name: 'BRI', color: 'bg-blue-600 text-white' },
+               ].map((pay, i) => (
+                 <div key={i} className={`aspect-[2/1] ${pay.color} rounded-lg flex items-center justify-center border border-white/5 shadow-sm overflow-hidden`}>
+                    <span className="text-[9px] font-black italic tracking-tighter uppercase">{pay.name}</span>
                  </div>
                ))}
             </div>
