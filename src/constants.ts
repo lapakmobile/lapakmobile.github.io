@@ -423,6 +423,28 @@ export const TESTIMONIALS = [
 ];
 
 export const FAQS = [
-  { question: 'Bagaimana cara mendapatkan produknya?', answer: 'Setelah pembayaran diverifikasi, link download atau detail akun akan dikirimkan langsung ke email atau WhatsApp kamu.' },
-  { question: 'Apakah tools AI-nya gratis?', answer: 'Kami menyediakan beberapa tools AI dasar secara gratis untuk membantu kamu, namun ada juga produk premium dengan fitur lebih lengkap.' }
+  { 
+    question: 'Apakah produk di Lapak Mobile aman?', 
+    answer: 'Sangat aman! Kami hanya menjual produk original dan legal yang diperoleh melalui jalur resmi. Keamanan data dan akun Anda adalah prioritas utama kami dengan sistem transaksi yang terenkripsi.' 
+  },
+  { 
+    question: 'Apakah akunnya Shared atau Private?', 
+    answer: 'Kami menyediakan kedua opsi tersebut. Anda bisa memilih paket "Shared" untuk harga yang jauh lebih hemat (digunakan bersama user lain secara legal), atau paket "Private" untuk kontrol penuh dan privasi total atas akun Anda sendiri.' 
+  },
+  { 
+    question: 'Apakah pembelian di sini bergaransi?', 
+    answer: 'Tentu saja. Semua produk premium kami dilengkapi dengan garansi replace (ganti baru) atau Full Warranty sesuai dengan durasi paket yang Anda pilih. Kepuasan pelanggan adalah komitmen kami.' 
+  },
+  { 
+    question: 'Bagaimana cara login setelah membeli?', 
+    answer: 'Panduan login lengkap akan dikirimkan bersamaan dengan detail pesanan Anda via WhatsApp/Email. Caranya sangat simpel, cukup gunakan data yang kami berikan atau ikuti link aktivasi resmi yang tersedia.' 
+  },
+  { 
+    question: 'Berapa lama proses setelah pembayaran?', 
+    answer: 'Sistem kami bekerja secara instan! Mayoritas produk akan Anda terima dalam hitungan detik setelah pembayaran terverifikasi. Untuk produk tertentu dengan proses manual, maksimal adalah 1-24 jam.' 
+  },
+  { 
+    question: 'Apakah produk bisa digunakan di semua device?', 
+    answer: 'Ya, produk digital kami kompatibel dengan berbagai perangkat mulai dari Smartphone (Android/iOS), Tablet, Laptop, hingga PC/Smart TV sesuai dengan jenis layanan yang Anda beli.' 
+  }
 ];

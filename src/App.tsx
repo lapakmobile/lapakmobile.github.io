@@ -5,7 +5,6 @@ import { Toaster } from 'sonner';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import Footer from './components/Footer';
-import BackToTop from './components/BackToTop';
 import { Marketplace } from './components/Marketplace';
 import { AIToolsIndex } from './components/AIToolsIndex';
 import { PromoPopup } from './components/PromoPopup';
@@ -14,7 +13,6 @@ import FlashSale from './components/FlashSale';
 import BundleSection from './components/BundleSection';
 import BlogSection from './components/BlogSection';
 import NotificationPopup from './components/NotificationPopup';
-
 import { FAQ } from './components/FAQ';
 
 import { ALL_PRODUCTS, FAQS, TESTIMONIALS, WHATSAPP_NUMBER } from './constants';
@@ -32,6 +30,7 @@ const CaptionGenerator = lazy(() => import('./components/tools/CaptionGenerator'
 
 import WhatsAppButton from './components/WhatsAppButton';
 import StickyMobileCTA from './components/StickyMobileCTA';
+import ScrollToTop from './components/ScrollToTop';
 
 export default function App() {
   const [currentView, setCurrentView] = useState('home');
@@ -250,11 +249,11 @@ export default function App() {
       </main>
 
       <Footer />
-      <BackToTop />
       <PromoPopup />
       
       <Toaster position="top-center" expand={false} richColors theme="dark" />
       <WhatsAppButton />
+      <ScrollToTop />
       <NotificationPopup />
       <StickyMobileCTA onAction={() => handleNavAction('marketplace')} />
     </div>

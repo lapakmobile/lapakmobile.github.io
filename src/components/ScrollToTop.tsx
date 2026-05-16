@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ArrowUp } from 'lucide-react';
+import { ChevronUp } from 'lucide-react';
 
-export default function BackToTop() {
+export default function ScrollToTop() {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
@@ -29,14 +29,14 @@ export default function BackToTop() {
     <AnimatePresence>
       {isVisible && (
         <motion.button
-          initial={{ opacity: 0, scale: 0.5, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.5, y: 20 }}
+          initial={{ opacity: 0, scale: 0.5 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.5 }}
           onClick={scrollToTop}
-          className="fixed bottom-8 right-8 z-40 w-14 h-14 bg-primary text-white rounded-2xl flex items-center justify-center shadow-2xl shadow-primary/30 hover:scale-110 transition-all border border-white/10 backdrop-blur-md group"
-          aria-label="Back to top"
+          className="fixed bottom-[11rem] md:bottom-28 right-6 z-[100] w-12 h-12 bg-white/10 backdrop-blur-md border border-white/20 text-white rounded-xl flex items-center justify-center shadow-2xl hover:bg-white/20 transition-all"
+          aria-label="Scroll to top"
         >
-          <ArrowUp className="w-6 h-6 group-hover:-translate-y-1 transition-transform" />
+          <ChevronUp className="w-6 h-6" />
         </motion.button>
       )}
     </AnimatePresence>
